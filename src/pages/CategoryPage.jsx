@@ -15,6 +15,51 @@ import { useWishlist } from '../hooks/useWishlist.js'
 
 // Mapping of slug to readable names and descriptions
 const CATEGORY_META = {
+    'body': {
+        title: 'Body',
+        subtitle: 'Elegância e sensualidade',
+        description: 'Bodies sofisticados que modelam o corpo com rendas finas, tule e recortes pensados para destacar sua silhueta.'
+    },
+    'camisola': {
+        title: 'Camisola',
+        subtitle: 'Leveza e sensualidade para a noite',
+        description: 'Camisolas fluidas e confortáveis em tecidos nobres como cetim, seda e rendas para noites relaxantes e especiais.'
+    },
+    'baby-doll': {
+        title: 'Baby Doll',
+        subtitle: 'Delicadeza e frescor',
+        description: 'Conjuntos leves de baby doll combinando rendas macias e microfibra para noites charmosas e confortáveis.'
+    },
+    'calcinhas': {
+        title: 'Calcinhas',
+        subtitle: 'Conforto e sofisticação no dia a dia',
+        description: 'Modelagens diversas que se adaptam perfeitamente ao seu corpo, proporcionando bem-estar com rendas delicadas.'
+    },
+    'tanga': {
+        title: 'Tanga',
+        subtitle: 'Cortes sensuais e marcantes',
+        description: 'Calcinhas modelo tanga com laterais finas e caimento impecável para valorizar suas curvas com muito charme.'
+    },
+    'acessorios': {
+        title: 'Acessórios',
+        subtitle: 'Detalhes que complementam seu estilo',
+        description: 'Cintas-liga, perneiras, algemas e acessórios meraki premium para dar o toque final de poder à sua produção.'
+    },
+    'personalizaveis': {
+        title: 'Personalizáveis',
+        subtitle: 'Peças únicas com a sua essência',
+        description: 'Adicione letras, números ou emojis exclusivos em suas peças Meraki e crie algo totalmente único.'
+    },
+    'sex-shop': {
+        title: 'Sex Shop',
+        subtitle: 'Momento de bem-estar e prazer',
+        description: 'Produtos selecionados com carinho para despertar seus sentidos, explorar novas sensações e celebrar a intimidade.'
+    },
+    'fantasias': {
+        title: 'Fantasias',
+        subtitle: 'Realize seus desejos',
+        description: 'Curadoria de fantasias temáticas premium com acabamento impecável para viver momentos inesquecíveis.'
+    },
     'conjuntos': {
         title: 'Conjuntos',
         subtitle: 'Sutiãs e calcinhas combinando',
@@ -39,6 +84,16 @@ const CATEGORY_META = {
         title: 'Ofertas Especiais',
         subtitle: 'Curadoria com preços exclusivos',
         description: 'Peças icônicas da nossa marca com condições especiais por tempo limitado. Garanta a sofisticação da Meraki no seu guarda-roupa.'
+    },
+    'combos': {
+        title: 'Produtos do Combo',
+        subtitle: 'Monte seu kit promocional',
+        description: 'Selecione e adicione as peças participantes ao carrinho. O desconto correspondente (2 por R$139, 3 por R$169, etc.) será calculado e concedido automaticamente na finalização do pedido!'
+    },
+    'promo-combo': {
+        title: 'Produtos do Combo',
+        subtitle: 'Monte seu kit promocional',
+        description: 'Selecione e adicione as peças participantes ao carrinho. O desconto correspondente (2 por R$139, 3 por R$169, etc.) será calculado e concedido automaticamente na finalização do pedido!'
     }
 }
 
@@ -342,8 +397,10 @@ export default function CategoryPage() {
 
         let result = [...allProducts]
 
-        // 1. Filter by category slug or offers
-        if (slug === 'ofertas') {
+        // 1. Filter by category slug or offers or promo combo
+        if (slug === 'promo-combo' || slug === 'combos') {
+            result = result.filter(p => p.inPromoCombo === true)
+        } else if (slug === 'ofertas') {
             result = result.filter(p => p.original_price > 0 && p.original_price > p.price)
         } else {
             // Find category name mapping

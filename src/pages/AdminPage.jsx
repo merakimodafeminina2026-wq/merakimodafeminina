@@ -54,6 +54,82 @@ export default function AdminPage() {
     const [customers, setCustomers] = useState([])
     const [returns, setReturns] = useState([])
     const [selectedReturn, setSelectedReturn] = useState(null)
+    const [topbarMessages, setTopbarMessages] = useState([])
+    const [newTopbarMsg, setNewTopbarMsg] = useState('')
+    const [topbarStyle, setTopbarStyle] = useState(() => {
+        try {
+            const stored = localStorage.getItem('meraki_topbar_style')
+            return stored ? JSON.parse(stored) : { bgColor: '#C6A76A', textColor: '#FFFFFF' }
+        } catch { return { bgColor: '#C6A76A', textColor: '#FFFFFF' } }
+    })
+
+    const [categories, setCategories] = useState(() => {
+        const stored = localStorage.getItem('meraki_categories')
+        if (stored) {
+            try {
+                const parsed = JSON.parse(stored)
+                return parsed.map(c => typeof c === 'string' ? { name: c, description: 'Coleção Meraki', image: '/placeholder.jpg', group: 'Lingerie' } : c)
+            } catch (e) { console.error(e) }
+        }
+        return [
+            { name: 'Conjuntos', group: 'Lingerie', description: 'Sutiãs e calcinhas combinando com caimento perfeito.', image: 'https://images.unsplash.com/photo-1616422285623-13ff0162193c?auto=format&fit=crop&w=400&q=80' },
+            { name: 'Calcinhas', group: 'Lingerie', description: 'Modelos confortáveis em renda e microfibra.', image: 'https://images.unsplash.com/photo-1573140247632-f8fd74997d5c?auto=format&fit=crop&w=400&q=80' },
+            { name: 'Tanga', group: 'Lingerie', description: 'Sensualidade e conforto para o dia a dia.', image: 'https://images.unsplash.com/photo-1582533561751-ef6f6ab93a2e?auto=format&fit=crop&w=400&q=80' },
+            { name: 'Body', group: 'Lingerie', description: 'Peças versáteis que modelam e realçam suas curvas.', image: 'https://images.unsplash.com/photo-1508962914676-134849a727f0?auto=format&fit=crop&w=400&q=80' },
+            
+            { name: 'Camisola', group: 'Noite & Especiais', description: 'Leveza e elegância para suas noites.', image: 'https://images.unsplash.com/photo-1518622358385-8ea7d0794bf6?auto=format&fit=crop&w=400&q=80' },
+            { name: 'Baby Doll', group: 'Noite & Especiais', description: 'Frescor e estilo romântico em cetim e renda.', image: 'https://images.unsplash.com/photo-1549064482-6779ba3292fe?auto=format&fit=crop&w=400&q=80' },
+            { name: 'Linha Noite', group: 'Noite & Especiais', description: 'Pijamas e robes sofisticados de alta costura.', image: 'https://images.unsplash.com/photo-1518622358385-8ea7d0794bf6?auto=format&fit=crop&w=400&q=80' },
+            { name: 'Plus Size', group: 'Noite & Especiais', description: 'Modelagens exclusivas que valorizam sua beleza.', image: 'https://images.unsplash.com/photo-1581338834647-b0fb40704e21?auto=format&fit=crop&w=400&q=80' },
+            
+            { name: 'Personalizáveis', group: 'Destaques', description: 'Peças únicas com gravação personalizada de nomes.', image: 'https://images.unsplash.com/photo-1549439602-43ebcb23281f?auto=format&fit=crop&w=400&q=80' },
+            { name: 'Fantasias', group: 'Destaques', description: 'Momentos inesquecíveis com designs temáticos sensuais.', image: 'https://images.unsplash.com/photo-1502301197179-6522b4bce294?auto=format&fit=crop&w=400&q=80' },
+            
+            { name: 'Sex Shop', group: 'Sensual', description: 'Acessórios e cosméticos para apimentar a relação.', image: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=400&q=80' },
+            { name: 'Acessórios', group: 'Sensual', description: 'Complementos ideais para compor seu visual íntimo.', image: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=400&q=80' },
+            { name: 'Linha Sexy', group: 'Sensual', description: 'Lingerie provocante com rendas e recortes ousados.', image: 'https://images.unsplash.com/photo-1566207274740-0f8cf6b7d5a5?auto=format&fit=crop&w=400&q=80' }
+        ]
+    })
+    const [newCategoryName, setNewCategoryName] = useState('')
+    const [selectedModalCategory, setSelectedModalCategory] = useState('Conjuntos')
+    const [selectedModalSizes, setSelectedModalSizes] = useState(['P', 'M', 'G', 'GG'])
+
+    const [sections, setSections] = useState(() => {
+        const stored = localStorage.getItem('meraki_sections')
+        return stored ? JSON.parse(stored) : [
+            { id: 'best-sellers', label: 'Best Sellers' },
+            { id: 'featured', label: 'Destaques' },
+            { id: 'new-collection', label: 'Novas Coleções' }
+        ]
+    })
+
+    const [promoCombo, setPromoCombo] = useState(() => {
+        const stored = localStorage.getItem('meraki_promo_combo')
+        if (stored) {
+            try { return JSON.parse(stored) } catch (e) { console.error(e) }
+        }
+        return {
+            title: 'Combo Sutiã',
+            subtitle: 'Do P ao EG. Diversos modelos para você escolher.',
+            image: 'https://images.unsplash.com/photo-1616422285623-13ff0162193c?w=800&auto=format&fit=crop&q=80',
+            price2Items: 139,
+            price3Items: 169,
+            link: '/category/promo-combo',
+            query: 'sutiã',
+            visible: true
+        }
+    })
+
+    const [newSectionLabel, setNewSectionLabel] = useState('')
+    const [selectedModalSection, setSelectedModalSection] = useState('best-sellers')
+
+    const [selectedModalColors, setSelectedModalColors] = useState([])
+    const [isCustomizable, setIsCustomizable] = useState(false)
+    const [customPriceWith, setCustomPriceWith] = useState('')
+    const [customPriceWithout, setCustomPriceWithout] = useState('')
+    const [customFeeLetter, setCustomFeeLetter] = useState('2.50')
+    const [customFeeNumber, setCustomFeeNumber] = useState('2.50')
+    const [customFeeEmoji, setCustomFeeEmoji] = useState('3.00')
 
     // Form inputs
     const [couponForm, setCouponForm] = useState({ code: '', type: 'percentage', value: '', minPurchase: '' })
@@ -73,7 +149,7 @@ export default function AdminPage() {
             { id: 'cp-3', code: 'OFF5', type: 'percentage', value: 5, minPurchase: 50 }
         ]
         const mockUsers = [
-            { id: 'admin-id-123', email: 'admin@meraki.com', password: 'admin', full_name: 'Administradora Meraki', tipo_user: 'admin', phone: '(11) 99999-9999', cpf: '123.456.789-00' },
+            { id: 'admin-id-123', email: 'admin', password: 'admin', full_name: 'Administradora Meraki', tipo_user: 'admin', phone: '(11) 99999-9999', cpf: '123.456.789-00' },
             { id: 'us-1', full_name: 'Carla Souza', email: 'carla.souza@email.com', phone: '(11) 98888-7777', cpf: '123.456.789-01', tipo_user: 'customer' },
             { id: 'us-2', full_name: 'Marina Lima', email: 'marina.lima@email.com', phone: '(21) 97777-6666', cpf: '987.654.321-02', tipo_user: 'customer' },
             { id: 'us-3', full_name: 'Amanda Oliveira', email: 'amanda.oliveira@email.com', phone: '(31) 96666-5555', cpf: '456.789.123-03', tipo_user: 'customer' }
@@ -189,7 +265,7 @@ export default function AdminPage() {
                 { id: 'cp-3', code: 'OFF5', type: 'percentage', value: 5, minPurchase: 50 }
             ]
             const mockUsers = [
-                { id: 'admin-id-123', email: 'admin@meraki.com', password: 'admin', full_name: 'Administradora Meraki', tipo_user: 'admin', phone: '(11) 99999-9999', cpf: '123.456.789-00' },
+                { id: 'admin-id-123', email: 'admin', password: 'admin', full_name: 'Administradora Meraki', tipo_user: 'admin', phone: '(11) 99999-9999', cpf: '123.456.789-00' },
                 { id: 'us-1', full_name: 'Carla Souza', email: 'carla.souza@email.com', phone: '(11) 98888-7777', cpf: '123.456.789-01', tipo_user: 'customer' },
                 { id: 'us-2', full_name: 'Marina Lima', email: 'marina.lima@email.com', phone: '(21) 97777-6666', cpf: '987.654.321-02', tipo_user: 'customer' },
                 { id: 'us-3', full_name: 'Amanda Oliveira', email: 'amanda.oliveira@email.com', phone: '(31) 96666-5555', cpf: '456.789.123-03', tipo_user: 'customer' }
@@ -288,6 +364,14 @@ export default function AdminPage() {
         setBanners(loadedBanners)
         setCustomers(loadedCustomers)
 
+        const storedTopbar = localStorage.getItem('meraki_topbar_messages')
+        const loadedTopbar = storedTopbar ? JSON.parse(storedTopbar) : [
+            "✨ Frete Grátis acima de R$ 299 • Parcele em até 12x",
+            "Utilize o cupom BEMVIND010 em sua primeira compra!",
+            "Ganhe 5% de desconto pagando no PIX!"
+        ]
+        setTopbarMessages(loadedTopbar)
+
         const loadedReturns = []
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i)
@@ -308,11 +392,31 @@ export default function AdminPage() {
             const imgs = product?.image || []
             setExistingImages(Array.isArray(imgs) ? imgs : (imgs ? [imgs] : []))
             setImageFiles([])
+            setSelectedModalCategory(product?.category || 'Conjuntos')
+            setSelectedModalSizes(product?.sizes || [])
+            setSelectedModalSection(product?.section || 'best-sellers')
+            setSelectedModalColors(product?.colors || [])
+            setIsCustomizable(product?.isCustomizable || product?.category?.toLowerCase() === 'personalizaveis' || product?.category?.toLowerCase() === 'personalizáveis' || false)
+            setCustomPriceWith(product?.customPriceWith || '')
+            setCustomPriceWithout(product?.customPriceWithout || '')
+            setCustomFeeLetter(product?.customFeeLetter !== undefined ? String(product.customFeeLetter) : '2.50')
+            setCustomFeeNumber(product?.customFeeNumber !== undefined ? String(product.customFeeNumber) : '2.50')
+            setCustomFeeEmoji(product?.customFeeEmoji !== undefined ? String(product.customFeeEmoji) : '3.00')
         } else if (modal.open && !modal.editing) {
             setExistingImages([])
             setImageFiles([])
+            setSelectedModalCategory(categories[0] || 'Conjuntos')
+            setSelectedModalSizes(['P', 'M', 'G', 'GG'])
+            setSelectedModalSection(sections[0]?.id || 'best-sellers')
+            setSelectedModalColors([])
+            setIsCustomizable(false)
+            setCustomPriceWith('')
+            setCustomPriceWithout('')
+            setCustomFeeLetter('2.50')
+            setCustomFeeNumber('2.50')
+            setCustomFeeEmoji('3.00')
         }
-    }, [modal.open, modal.editing, products])
+    }, [modal.open, modal.editing, products, categories, sections])
 
     // ─── Auth Guards ───────────────────────────────────────────────────────────
     if (authLoading) return (
@@ -399,12 +503,18 @@ export default function AdminPage() {
             uploadedUrls = urls
         }
         const allImages = [...existingImages, ...uploadedUrls].filter(Boolean)
-        const sizesRaw = form.pSizes.value
-        const sizesArray = sizesRaw.includes(',') ? sizesRaw.split(',').map(s => s.trim()).filter(Boolean) : sizesRaw.split(/\s+/).filter(Boolean)
         const productData = {
-            name: form.pName.value, category: form.pCategory.value,
+            name: form.pName.value, category: selectedModalCategory,
             price: parseFloat(form.pPrice.value), original_price: parseFloat(form.pOriginalPrice.value) || 0,
-            badge: form.pBadge.value, section: form.pSection.value, sizes: sizesArray, image: allImages, description: form.pDescription.value,
+            badge: form.pBadge.value, section: selectedModalSection, sizes: selectedModalSizes, image: allImages, description: form.pDescription.value,
+            colors: selectedModalColors,
+            inPromoCombo: form.pInPromoCombo?.checked || false,
+            isCustomizable: isCustomizable || selectedModalCategory?.toLowerCase() === 'personalizaveis' || selectedModalCategory?.toLowerCase() === 'personalizáveis',
+            customPriceWith: parseFloat(form.pCustomPriceWith?.value || '0') || 0,
+            customPriceWithout: parseFloat(form.pCustomPriceWithout?.value || '0') || 0,
+            customFeeLetter: parseFloat(form.pCustomFeeLetter?.value || '2.50') || 2.50,
+            customFeeNumber: parseFloat(form.pCustomFeeNumber?.value || '2.50') || 2.50,
+            customFeeEmoji: parseFloat(form.pCustomFeeEmoji?.value || '3.00') || 3.00,
         }
         if (modal.editing) {
             const { data, error } = await updateProduct(modal.editing, productData)
@@ -472,15 +582,43 @@ export default function AdminPage() {
             setSelectedReturn(prev => ({ ...prev, ...updatedFields }))
     }
 
+    const handleAddTopbarMessage = (e) => {
+        e.preventDefault()
+        if (!newTopbarMsg.trim()) return
+        const updated = [...topbarMessages, newTopbarMsg.trim()]
+        setTopbarMessages(updated)
+        localStorage.setItem('meraki_topbar_messages', JSON.stringify(updated))
+        setNewTopbarMsg('')
+        window.dispatchEvent(new Event('topbarMessagesUpdated'))
+    }
+
+    const handleDeleteTopbarMessage = (index) => {
+        const updated = topbarMessages.filter((_, i) => i !== index)
+        setTopbarMessages(updated)
+        localStorage.setItem('meraki_topbar_messages', JSON.stringify(updated))
+        window.dispatchEvent(new Event('topbarMessagesUpdated'))
+    }
+
+    const handleUpdateTopbarMessage = (index, value) => {
+        const updated = [...topbarMessages]
+        updated[index] = value
+        setTopbarMessages(updated)
+        localStorage.setItem('meraki_topbar_messages', JSON.stringify(updated))
+        window.dispatchEvent(new Event('topbarMessagesUpdated'))
+    }
+
     const adminName = user?.user_metadata?.full_name || 'Admin'
     const adminInitials = adminName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
 
     const menuItems = [
         { id: 'dashboard', label: 'Painel Geral',   icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
         { id: 'products', label: 'Produtos',         icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
+        { id: 'categories', label: 'Categorias',     icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10' },
         { id: 'orders',   label: 'Pedidos',           icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2' },
         { id: 'coupons',  label: 'Cupons',            icon: 'M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z' },
         { id: 'banners',  label: 'Banners Home',      icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' },
+        { id: 'promocombo', label: 'Promoção Combo', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+        { id: 'topbar',   label: 'Faixa Promocional', icon: 'M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z' },
         { id: 'customers',label: 'Clientes',          icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z' },
         { id: 'returns',  label: 'Devoluções',        icon: 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15' },
     ]
@@ -651,15 +789,16 @@ export default function AdminPage() {
                     {activeSection === 'dashboard' && (
                         <div className="space-y-6">
                             {/* Welcome Banner */}
-                            <div className="relative overflow-hidden rounded-2xl p-6 md:p-8" style={{ background: 'linear-gradient(135deg, #7A3E4A 0%, #9A5060 60%, #C6A76A 100%)' }}>
-                                <div className="relative z-10">
-                                    <p className="text-white/70 text-xs font-semibold uppercase tracking-widest mb-1">Bem-vinda de volta 👋</p>
-                                    <h2 className="text-xl md:text-2xl font-black text-white mb-1">{adminName}</h2>
-                                    <p className="text-white/60 text-sm">Aqui está um resumo do seu negócio hoje.</p>
+                            <div className="relative overflow-hidden rounded-2xl p-6 md:p-8 bg-white border border-[#EEEEEE] shadow-sm flex items-center justify-between">
+                                <div className="relative z-10 space-y-1">
+                                    <span className="text-[10px] font-bold text-[#C6A76A] uppercase tracking-[0.2em]">Bem-vinda de volta 👋</span>
+                                    <h2 className="text-xl md:text-2xl font-black text-[#7A3E4A] tracking-tight">{adminName}</h2>
+                                    <p className="text-xs text-gray-500 font-medium">Aqui está um resumo das métricas e do desempenho do seu negócio hoje.</p>
                                 </div>
-                                <div className="absolute top-0 right-0 w-48 h-full opacity-10">
-                                    <div className="absolute top-4 right-4 w-32 h-32 rounded-full border-4 border-white" />
-                                    <div className="absolute bottom-4 right-16 w-16 h-16 rounded-full border-2 border-white" />
+                                <div className="hidden md:block shrink-0 pr-2">
+                                    <div className="w-12 h-12 rounded-xl bg-[#7A3E4A]/5 flex items-center justify-center border border-[#7A3E4A]/10">
+                                        <Icon path="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" className="w-5 h-5 text-[#7A3E4A]" />
+                                    </div>
                                 </div>
                             </div>
 
@@ -1075,10 +1214,6 @@ export default function AdminPage() {
                                                 <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Alt Text</p>
                                                 <p className="text-xs font-semibold text-gray-700 truncate">{bn.alt}</p>
                                             </div>
-                                            <div>
-                                                <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Link</p>
-                                                <p className="text-xs font-bold text-[#7A3E4A] truncate">{bn.link}</p>
-                                            </div>
                                             <button
                                                 onClick={() => handleDeleteBanner(bn.id)}
                                                 className="w-full mt-2 py-2 rounded-xl border border-red-100 text-red-400 hover:bg-red-50 hover:text-red-600 text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer"
@@ -1097,6 +1232,260 @@ export default function AdminPage() {
                                         <p className="text-xs text-gray-400">O site está usando os banners padrão.</p>
                                     </div>
                                 )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ═══════════════════════════════════════════════════════════ */}
+                    {/* SECTION 5.4: PROMO COMBO CONFIGURATION */}
+                    {/* ═══════════════════════════════════════════════════════════ */}
+                    {activeSection === 'promocombo' && (
+                        <div className="space-y-5">
+                            <div>
+                                <h2 className="text-sm font-black text-gray-900">Promoção de Combos (Home)</h2>
+                                <p className="text-[10px] text-gray-400 font-medium font-sans">Configure o banner de promoção destacado na página inicial.</p>
+                            </div>
+
+                            <div className="bg-white rounded-2xl border border-[#EEEEEE] p-5">
+                                <form 
+                                    onSubmit={async (e) => {
+                                        e.preventDefault()
+                                        const form = e.target
+                                        const title = form.promoTitle.value.trim()
+                                        const price2Items = parseFloat(form.promoPrice2Items.value) || 139
+                                        const price3Items = parseFloat(form.promoPrice3Items.value) || 169
+                                        const subtitle = form.promoSubtitle.value.trim()
+                                        const query = form.promoQuery.value.trim()
+                                        const visible = form.promoVisible.checked
+                                        const files = form.promoImage.files
+
+                                        setSaving(true)
+                                        let imageUrl = promoCombo.image
+                                        if (files?.[0]) {
+                                            const compressedFile = await compressImage(files[0])
+                                            const { urls } = await uploadMultipleImages([compressedFile])
+                                            if (urls?.[0]) imageUrl = urls[0]
+                                        }
+
+                                        const updated = {
+                                            title,
+                                            price2Items,
+                                            price3Items,
+                                            subtitle,
+                                            link: '/category/promo-combo',
+                                            query,
+                                            image: imageUrl,
+                                            visible
+                                        }
+                                        setPromoCombo(updated)
+                                        localStorage.setItem('meraki_promo_combo', JSON.stringify(updated))
+                                        window.dispatchEvent(new Event('promoComboUpdated'))
+                                        setSaving(false)
+                                        alert('Promoção atualizada com sucesso!')
+                                    }}
+                                    className="space-y-4"
+                                >
+                                    {/* Toggle visibility */}
+                                    <div className="p-4 bg-[#FAF9F5] rounded-xl border border-[#EEEEEE]">
+                                        <label className="flex items-center gap-2.5 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                name="promoVisible"
+                                                defaultChecked={promoCombo.visible !== false}
+                                                className="w-4 h-4 text-[#7A3E4A] focus:ring-[#7A3E4A] border-gray-300 rounded cursor-pointer"
+                                            />
+                                            <span className="text-xs font-bold text-[#7A3E4A] uppercase tracking-wider">Exibir Seção de Combo/Promoção na Home</span>
+                                        </label>
+                                    </div>
+
+                                    {/* Title + keyword */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Título do Combo</label>
+                                            <input type="text" name="promoTitle" defaultValue={promoCombo.title} required className="w-full px-3 py-2 border border-[#EEEEEE] rounded-xl text-xs outline-none" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Palavra-chave de Filtro (Ex: sutiã)</label>
+                                            <input type="text" name="promoQuery" defaultValue={promoCombo.query} className="w-full px-3 py-2 border border-[#EEEEEE] rounded-xl text-xs outline-none" />
+                                        </div>
+                                    </div>
+
+                                    {/* Numeric price fields */}
+                                    <div className="p-4 bg-[#FAF9F5] rounded-xl border border-[#EEEEEE] space-y-3">
+                                        <p className="text-[10px] font-bold text-[#7A3E4A] uppercase tracking-wider">Preços do Combo — Digite apenas o valor em R$</p>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Preço do Combo de 2 Peças (R$)</label>
+                                                <div className="relative">
+                                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-500">R$</span>
+                                                    <input
+                                                        type="number"
+                                                        name="promoPrice2Items"
+                                                        step="0.01"
+                                                        min="0"
+                                                        defaultValue={promoCombo.price2Items ?? promoCombo.priceLine1?.match(/\d+/)?.[0] ?? 139}
+                                                        required
+                                                        className="w-full pl-8 pr-3 py-2 border border-[#EEEEEE] focus:border-[#7A3E4A] focus:ring-2 focus:ring-[#7A3E4A]/10 rounded-xl text-sm font-bold outline-none"
+                                                    />
+                                                </div>
+                                                <p className="text-[9px] text-gray-400 mt-1">Ex: 139 → "Leve 2 por R$ 139"</p>
+                                            </div>
+                                            <div>
+                                                <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Preço do Combo de 3 Peças (R$)</label>
+                                                <div className="relative">
+                                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-500">R$</span>
+                                                    <input
+                                                        type="number"
+                                                        name="promoPrice3Items"
+                                                        step="0.01"
+                                                        min="0"
+                                                        defaultValue={promoCombo.price3Items ?? promoCombo.priceLine2?.match(/\d+/)?.[0] ?? 169}
+                                                        required
+                                                        className="w-full pl-8 pr-3 py-2 border border-[#EEEEEE] focus:border-[#7A3E4A] focus:ring-2 focus:ring-[#7A3E4A]/10 rounded-xl text-sm font-bold outline-none"
+                                                    />
+                                                </div>
+                                                <p className="text-[9px] text-gray-400 mt-1">Ex: 169 → "Leve 3 por R$ 169"</p>
+                                            </div>
+                                        </div>
+                                        {/* Live preview badge */}
+                                        <div className="mt-1 px-3 py-2 bg-white rounded-lg border border-[#EEEEEE] text-[10px] text-gray-500 font-semibold">
+                                            Selo gerado automaticamente: <span className="font-black text-[#7A3E4A]">"Leve 2 por R$ {promoCombo.price2Items ?? 139} | 3 por R$ {promoCombo.price3Items ?? 169}"</span>
+                                        </div>
+                                    </div>
+
+
+                                    {/* Subtitle + image */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Descrição / Subtítulo</label>
+                                            <input type="text" name="promoSubtitle" defaultValue={promoCombo.subtitle} required className="w-full px-3 py-2 border border-[#EEEEEE] rounded-xl text-xs outline-none" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Upload de Imagem <span className="text-[9px] text-[#C6A76A] lowercase font-normal">(Recomendado: 800x600px - Proporção 4:3)</span></label>
+                                            <input type="file" name="promoImage" accept="image/*" className="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#7A3E4A]/10 file:text-[#7A3E4A] hover:file:bg-[#7A3E4A]/20 cursor-pointer" />
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-4 pt-2">
+                                        {promoCombo.image && (
+                                            <div className="w-24 h-18 rounded-lg overflow-hidden border border-[#EEEEEE]">
+                                                <img src={getAssetUrl(promoCombo.image)} alt="Preview" className="w-full h-full object-cover" />
+                                            </div>
+                                        )}
+                                        <button type="submit" disabled={saving} className="px-5 py-3 bg-[#7A3E4A] hover:bg-[#603039] text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer disabled:opacity-50 self-end">
+                                            {saving ? 'Salvar Alterações' : 'Salvar Alterações'}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ═══════════════════════════════════════════════════════════ */}
+                    {/* SECTION 5.5: CATEGORIES MANAGEMENT */}
+                    {/* ═══════════════════════════════════════════════════════════ */}
+                    {activeSection === 'categories' && (
+                        <div className="space-y-5">
+                            <div>
+                                <h2 className="text-sm font-black text-gray-900">Categorias da Loja</h2>
+                                <p className="text-[10px] text-gray-400 font-medium">{categories.length} categoria{categories.length !== 1 ? 's' : ''} cadastrada{categories.length !== 1 ? 's' : ''}</p>
+                            </div>
+
+                            {/* Create Category Form */}
+                            <div className="bg-white rounded-2xl border border-[#EEEEEE] p-5">
+                                <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-4">Nova Categoria</h3>
+                                <form 
+                                    onSubmit={async (e) => {
+                                        e.preventDefault()
+                                        const form = e.target
+                                        const name = form.catName.value.trim()
+                                        const group = form.catGroup.value
+                                        const description = form.catDescription.value.trim()
+                                        const files = form.catImage.files
+                                        
+                                        if (!name) return
+                                        setSaving(true)
+                                        
+                                        let imageUrl = '/placeholder.jpg'
+                                        if (files?.[0]) {
+                                            const compressedFile = await compressImage(files[0])
+                                            const { urls } = await uploadMultipleImages([compressedFile])
+                                            if (urls?.[0]) imageUrl = urls[0]
+                                        }
+
+                                        const newCatObj = { name, group, description, image: imageUrl }
+                                        const updated = [...categories, newCatObj]
+                                        setCategories(updated)
+                                        localStorage.setItem('meraki_categories', JSON.stringify(updated))
+                                        window.dispatchEvent(new Event('categoriesUpdated'))
+                                        form.reset()
+                                        setSaving(false)
+                                    }}
+                                    className="space-y-4"
+                                >
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                        <div>
+                                            <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Nome da Categoria</label>
+                                            <input type="text" name="catName" required placeholder="Ex: Lingerie Luxo" className="w-full px-3 py-2 border border-[#EEEEEE] rounded-xl text-xs outline-none" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Grupo do Mega Menu</label>
+                                            <select name="catGroup" className="w-full px-3 py-2 border border-[#EEEEEE] rounded-xl text-xs outline-none bg-white">
+                                                <option value="Lingerie">Lingerie</option>
+                                                <option value="Noite & Especiais">Noite & Especiais</option>
+                                                <option value="Destaques">Destaques</option>
+                                                <option value="Sensual">Sensual</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Imagem de Capa (Home & Menu) <span className="text-[9px] text-[#C6A76A] lowercase font-normal">(Recomendado: 800x600px - Proporção 4:3)</span></label>
+                                            <input type="file" name="catImage" accept="image/*" className="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#7A3E4A]/10 file:text-[#7A3E4A] hover:file:bg-[#7A3E4A]/20 cursor-pointer" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Descrição (Exibida ao passar o mouse)</label>
+                                        <input type="text" name="catDescription" placeholder="Breve descrição da categoria..." className="w-full px-3 py-2 border border-[#EEEEEE] rounded-xl text-xs outline-none" />
+                                    </div>
+                                    <button type="submit" disabled={saving} className="px-5 py-3 bg-[#7A3E4A] hover:bg-[#603039] text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer disabled:opacity-50">
+                                        {saving ? 'Cadastrando...' : 'Cadastrar Categoria'}
+                                    </button>
+                                </form>
+                            </div>
+
+                            {/* Categories Grid List */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                                {categories.map((cat, idx) => {
+                                    const name = typeof cat === 'object' ? cat.name : cat
+                                    const image = typeof cat === 'object' ? cat.image : '/placeholder.jpg'
+                                    const desc = typeof cat === 'object' ? cat.description : 'Coleção Meraki'
+                                    const group = typeof cat === 'object' ? cat.group : 'Lingerie'
+
+                                    return (
+                                        <div key={idx} className="bg-white rounded-2xl border border-[#EEEEEE] overflow-hidden hover:border-[#7A3E4A]/20 hover:shadow-lg transition-all flex flex-col justify-between">
+                                            <div className="aspect-[4/3] bg-gray-100 relative">
+                                                <img src={getAssetUrl(image)} alt={name} className="w-full h-full object-cover" />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-between p-4">
+                                                    <span className="bg-[#C6A76A] text-white text-[8px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider self-start">{group}</span>
+                                                    <span className="text-white text-sm font-bold">{name}</span>
+                                                </div>
+                                            </div>
+                                            <div className="p-4 space-y-3">
+                                                <p className="text-xs text-gray-500 font-light line-clamp-2">{desc}</p>
+                                                <button
+                                                    onClick={() => {
+                                                        const updated = categories.filter((_, i) => i !== idx)
+                                                        setCategories(updated)
+                                                        localStorage.setItem('meraki_categories', JSON.stringify(updated))
+                                                        window.dispatchEvent(new Event('categoriesUpdated'))
+                                                    }}
+                                                    className="w-full py-2 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer"
+                                                >
+                                                    Remover Categoria
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )
+                                })}
                             </div>
                         </div>
                     )}
@@ -1266,6 +1655,138 @@ export default function AdminPage() {
                         </div>
                     )}
 
+                    {/* ═══════════════════════════════════════════════════════════ */}
+                    {/* SECTION 8: FAIXA PROMOCIONAL (TOPBAR MESSAGES) */}
+                    {/* ═══════════════════════════════════════════════════════════ */}
+                    {activeSection === 'topbar' && (
+                        <div className="space-y-6">
+                            {/* Header */}
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-[#EEEEEE]">
+                                <div>
+                                    <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider mb-1">Frases Rotativas do Topo</h3>
+                                    <p className="text-xs text-gray-400">Configure as mensagens promocionais que aparecem na barra no topo do site.</p>
+                                </div>
+                            </div>
+
+                            {/* Color Pickers */}
+                            <div className="bg-white p-6 rounded-2xl border border-[#EEEEEE] space-y-4">
+                                <h4 className="text-[10px] font-bold text-[#7A3E4A] uppercase tracking-widest">Cores da Faixa</h4>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-wider">Cor de Fundo</label>
+                                        <div className="flex items-center gap-3">
+                                            <input
+                                                type="color"
+                                                value={topbarStyle.bgColor}
+                                                onChange={(e) => {
+                                                    const updated = { ...topbarStyle, bgColor: e.target.value }
+                                                    setTopbarStyle(updated)
+                                                    localStorage.setItem('meraki_topbar_style', JSON.stringify(updated))
+                                                    window.dispatchEvent(new Event('topbarStyleUpdated'))
+                                                }}
+                                                className="w-10 h-10 rounded-lg border border-[#EEEEEE] cursor-pointer p-0.5 bg-white"
+                                            />
+                                            <span className="text-xs font-mono text-gray-500">{topbarStyle.bgColor}</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-wider">Cor das Letras</label>
+                                        <div className="flex items-center gap-3">
+                                            <input
+                                                type="color"
+                                                value={topbarStyle.textColor}
+                                                onChange={(e) => {
+                                                    const updated = { ...topbarStyle, textColor: e.target.value }
+                                                    setTopbarStyle(updated)
+                                                    localStorage.setItem('meraki_topbar_style', JSON.stringify(updated))
+                                                    window.dispatchEvent(new Event('topbarStyleUpdated'))
+                                                }}
+                                                className="w-10 h-10 rounded-lg border border-[#EEEEEE] cursor-pointer p-0.5 bg-white"
+                                            />
+                                            <span className="text-xs font-mono text-gray-500">{topbarStyle.textColor}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                {/* Live Preview */}
+                                <div
+                                    className="w-full rounded-xl py-2.5 px-4 text-center text-[11px] font-bold uppercase tracking-[0.15em] transition-all"
+                                    style={{ background: topbarStyle.bgColor, color: topbarStyle.textColor }}
+                                >
+                                    {topbarMessages[0] || 'Pré-visualização da Faixa Promocional'}
+                                </div>
+                                <div className="flex gap-2 pt-1">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const reset = { bgColor: '#C6A76A', textColor: '#FFFFFF' }
+                                            setTopbarStyle(reset)
+                                            localStorage.setItem('meraki_topbar_style', JSON.stringify(reset))
+                                            window.dispatchEvent(new Event('topbarStyleUpdated'))
+                                        }}
+                                        className="text-[10px] font-bold text-gray-400 hover:text-[#7A3E4A] px-3 py-1.5 rounded-lg hover:bg-[#FAF9F5] transition-all cursor-pointer border border-[#EEEEEE]"
+                                    >
+                                        Restaurar Padrão
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Add message form */}
+                            <form onSubmit={handleAddTopbarMessage} className="bg-white p-6 rounded-2xl border border-[#EEEEEE] space-y-4">
+                                <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Adicionar Nova Frase</h4>
+                                <div className="flex gap-3">
+                                    <input
+                                        type="text"
+                                        value={newTopbarMsg}
+                                        onChange={(e) => setNewTopbarMsg(e.target.value)}
+                                        placeholder="Ex: ✨ Desconto de 10% na primeira compra com o cupom MERAKI10!"
+                                        className={inputCls}
+                                        maxLength={100}
+                                    />
+                                    <button
+                                        type="submit"
+                                        className="px-6 bg-[#7A3E4A] hover:bg-[#5A2E34] text-white text-xs font-bold rounded-xl shrink-0 transition-colors uppercase tracking-wider cursor-pointer"
+                                    >
+                                        Adicionar
+                                    </button>
+                                </div>
+                            </form>
+
+                            {/* Messages list */}
+                            <div className="bg-white rounded-2xl border border-[#EEEEEE] overflow-hidden">
+                                <div className="p-6 border-b border-[#EEEEEE]">
+                                    <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Frases Ativas ({topbarMessages.length})</h4>
+                                </div>
+                                {topbarMessages.length > 0 ? (
+                                    <div className="divide-y divide-[#EEEEEE]">
+                                        {topbarMessages.map((msg, index) => (
+                                            <div key={index} className="p-4 flex items-center justify-between gap-4 hover:bg-[#FAF9F5] transition-colors">
+                                                <div className="flex-1">
+                                                    <input
+                                                        type="text"
+                                                        value={msg}
+                                                        onChange={(e) => handleUpdateTopbarMessage(index, e.target.value)}
+                                                        className="w-full bg-transparent border-0 border-b border-transparent focus:border-[#7A3E4A] focus:outline-none text-sm text-gray-700 font-medium py-1"
+                                                    />
+                                                </div>
+                                                <button
+                                                    onClick={() => handleDeleteTopbarMessage(index)}
+                                                    className="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 flex items-center justify-center text-red-500 hover:text-red-700 cursor-pointer transition-colors"
+                                                    title="Excluir frase"
+                                                >
+                                                    <Icon path="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="py-12 text-center text-gray-400">
+                                        Nenhuma frase cadastrada. A barra de anúncios ficará oculta no site.
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
                 </div>
             </main>
 
@@ -1389,34 +1910,288 @@ export default function AdminPage() {
                                 </button>
                             </div>
                             <form onSubmit={handleSave} className="p-6 space-y-4">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div><label className={labelCls}>Nome</label><input type="text" name="pName" required defaultValue={editingProduct?.name || ''} className={inputCls} /></div>
-                                    <div>
-                                        <label className={labelCls}>Categoria</label>
-                                        <select name="pCategory" defaultValue={editingProduct?.category || 'Conjuntos'} className={inputCls}>
-                                            <option>Conjuntos</option><option>Linha Noite</option><option>Linha Sexy</option><option>Plus Size</option><option>Fitness</option>
-                                        </select>
+                                <div>
+                                    <label className={labelCls}>Nome do Produto</label>
+                                    <input type="text" name="pName" required defaultValue={editingProduct?.name || ''} className={inputCls} />
+                                </div>
+                                
+                                <div>
+                                    <label className={labelCls}>Categoria</label>
+                                    <div className="flex flex-wrap gap-1.5 mb-2 bg-[#FAF9F5] p-3 rounded-xl border border-[#EEEEEE]">
+                                        {categories.map(cat => {
+                                            const catName = typeof cat === 'object' ? cat.name : cat
+                                            return (
+                                                <button
+                                                    key={catName}
+                                                    type="button"
+                                                    onClick={() => setSelectedModalCategory(catName)}
+                                                    className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all cursor-pointer ${
+                                                        selectedModalCategory === catName
+                                                            ? 'bg-[#7A3E4A] text-white border-[#7A3E4A] shadow-xs'
+                                                            : 'bg-white text-gray-500 border-[#EEEEEE] hover:bg-gray-150'
+                                                    }`}
+                                                >
+                                                    {catName}
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
+                                    <div className="flex gap-2 max-w-xs">
+                                        <input
+                                            type="text"
+                                            value={newCategoryName}
+                                            onChange={e => setNewCategoryName(e.target.value)}
+                                            placeholder="Nova categoria..."
+                                            className="flex-1 px-3 py-2 text-xs bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl outline-none focus:border-[#7A3E4A] font-medium"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const name = newCategoryName.trim();
+                                                if (name && !categories.some(c => (typeof c === 'object' ? c.name : c) === name)) {
+                                                    const updated = [...categories, { name, description: 'Coleção Meraki', image: '/placeholder.jpg' }];
+                                                    setCategories(updated);
+                                                    localStorage.setItem('meraki_categories', JSON.stringify(updated));
+                                                    setSelectedModalCategory(name);
+                                                    setNewCategoryName('');
+                                                }
+                                            }}
+                                            className="px-3.5 py-2 bg-[#7A3E4A] hover:bg-[#5A2E34] text-white text-[10px] font-bold uppercase rounded-xl cursor-pointer transition-colors"
+                                        >
+                                            + Criar
+                                        </button>
                                     </div>
                                 </div>
+
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div><label className={labelCls}>Preço (R$)</label><input type="number" name="pPrice" step="0.01" min="0" required defaultValue={editingProduct?.price || ''} className={inputCls} /></div>
                                     <div><label className={labelCls}>Preço Original (R$)</label><input type="number" name="pOriginalPrice" step="0.01" min="0" defaultValue={editingProduct?.original_price || '0'} className={inputCls} /></div>
                                 </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div><label className={labelCls}>Badge</label><input type="text" name="pBadge" placeholder="Ex: NOVO, 15% OFF" defaultValue={editingProduct?.badge || ''} className={inputCls} /></div>
-                                    <div>
-                                        <label className={labelCls}>Seção</label>
-                                        <select name="pSection" defaultValue={editingProduct?.section || 'best-sellers'} className={inputCls}>
-                                            <option value="best-sellers">Best Sellers</option><option value="featured">Destaques</option><option value="new-collection">Novas Coleções</option>
-                                        </select>
+
+                                <div>
+                                    <label className={labelCls}>Badge (Etiqueta)</label>
+                                    <input type="text" name="pBadge" placeholder="Ex: NOVO, 15% OFF" defaultValue={editingProduct?.badge || ''} className={inputCls} />
+                                </div>
+
+                                <div>
+                                    <label className={labelCls}>Seção da Loja</label>
+                                    <div className="flex flex-wrap gap-1.5 mb-2 bg-[#FAF9F5] p-3 rounded-xl border border-[#EEEEEE]">
+                                        {sections.map(sec => (
+                                            <button
+                                                key={sec.id}
+                                                type="button"
+                                                onClick={() => setSelectedModalSection(sec.id)}
+                                                className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all cursor-pointer ${
+                                                    selectedModalSection === sec.id
+                                                        ? 'bg-[#7A3E4A] text-white border-[#7A3E4A] shadow-xs'
+                                                        : 'bg-white text-gray-500 border-[#EEEEEE] hover:bg-gray-150'
+                                                }`}
+                                            >
+                                                {sec.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <div className="flex gap-2 max-w-xs">
+                                        <input
+                                            type="text"
+                                            value={newSectionLabel}
+                                            onChange={e => setNewSectionLabel(e.target.value)}
+                                            placeholder="Nova seção..."
+                                            className="flex-1 px-3 py-2 text-xs bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl outline-none focus:border-[#7A3E4A] font-medium"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const label = newSectionLabel.trim();
+                                                if (label) {
+                                                    const id = label.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+                                                    if (id && !sections.some(s => s.id === id)) {
+                                                        const updated = [...sections, { id, label }];
+                                                        setSections(updated);
+                                                        localStorage.setItem('meraki_sections', JSON.stringify(updated));
+                                                        setSelectedModalSection(id);
+                                                        setNewSectionLabel('');
+                                                    }
+                                                }
+                                            }}
+                                            className="px-3.5 py-2 bg-[#7A3E4A] hover:bg-[#5A2E34] text-white text-[10px] font-bold uppercase rounded-xl cursor-pointer transition-colors"
+                                        >
+                                            + Criar
+                                        </button>
                                     </div>
                                 </div>
-                                <div><label className={labelCls}>Tamanhos (separados por vírgula)</label><input type="text" name="pSizes" defaultValue={editingProduct?.sizes?.join(', ') || 'P, M, G, GG'} className={inputCls} /></div>
+
+                                <div>
+                                    <label className={labelCls}>Tamanhos Disponíveis</label>
+                                    <div className="flex flex-wrap gap-1.5 bg-[#FAF9F5] p-3 rounded-xl border border-[#EEEEEE]">
+                                        {['P', 'M', 'G', 'GG', 'EGG', 'XG', 'Único', '34', '36', '38', '40', '42', '44', '46', '48', '50'].map(size => {
+                                            const isSelected = selectedModalSizes.includes(size)
+                                            return (
+                                                <button
+                                                    key={size}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        if (isSelected) {
+                                                            setSelectedModalSizes(prev => prev.filter(s => s !== size))
+                                                        } else {
+                                                            setSelectedModalSizes(prev => [...prev, size])
+                                                        }
+                                                    }}
+                                                    className={`w-9 h-9 text-xs font-bold rounded-lg border transition-all flex items-center justify-center cursor-pointer ${
+                                                        isSelected
+                                                            ? 'bg-[#C6A76A] text-white border-[#C6A76A] shadow-xs'
+                                                            : 'bg-white text-gray-400 border-[#EEEEEE] hover:bg-gray-150'
+                                                    }`}
+                                                >
+                                                    {size}
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className={labelCls}>Cores Disponíveis</label>
+                                    <div className="flex flex-wrap gap-1.5 bg-[#FAF9F5] p-3 rounded-xl border border-[#EEEEEE]">
+                                        {['Preto', 'Branco', 'Vermelho', 'Nude', 'Rosa', 'Bordô', 'Azul', 'Verde', 'Amarelo', 'Lilás', 'Marinho', 'Pink', 'Rubi', 'Preto/Renda', 'Branco/Renda'].map(color => {
+                                            const isSelected = selectedModalColors.includes(color)
+                                            const COLOR_MAP = {
+                                                'Preto': '#000000',
+                                                'Branco': '#FFFFFF',
+                                                'Vermelho': '#DC2626',
+                                                'Nude': '#EED9C4',
+                                                'Rosa': '#F472B6',
+                                                'Bordô': '#800020',
+                                                'Azul': '#2563EB',
+                                                'Verde': '#16A34A',
+                                                'Amarelo': '#FBBF24',
+                                                'Lilás': '#C084FC',
+                                                'Marinho': '#1E3A8A',
+                                                'Pink': '#EC4899',
+                                                'Rubi': '#9B111E',
+                                                'Preto/Renda': '#1F1F1F',
+                                                'Branco/Renda': '#F5F5F5'
+                                            }
+                                            const hex = COLOR_MAP[color] || '#CCCCCC'
+                                            return (
+                                                <button
+                                                    key={color}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        if (isSelected) {
+                                                            setSelectedModalColors(prev => prev.filter(c => c !== color))
+                                                        } else {
+                                                            setSelectedModalColors(prev => [...prev, color])
+                                                        }
+                                                    }}
+                                                    className={`px-3 py-1.5 rounded-lg border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                                                        isSelected
+                                                            ? 'bg-[#C6A76A] text-white border-[#C6A76A] shadow-xs'
+                                                            : 'bg-white text-gray-400 border-[#EEEEEE] hover:bg-gray-150'
+                                                    }`}
+                                                >
+                                                    <span className="w-3 h-3 rounded-full border border-gray-300 shrink-0" style={{ backgroundColor: hex }} />
+                                                    {color}
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
+                                </div>
+
+                                <div className="p-4 bg-[#FAF9F5] rounded-xl border border-[#EEEEEE] space-y-4">
+                                    <label className="flex items-center gap-2.5 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            name="pInPromoCombo"
+                                            defaultChecked={editingProduct?.inPromoCombo || false}
+                                            className="w-4 h-4 text-[#7A3E4A] focus:ring-[#7A3E4A] border-gray-300 rounded"
+                                        />
+                                        <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Destacar no Combo da Home Page</span>
+                                    </label>
+
+                                    <label className="flex items-center gap-2.5 cursor-pointer pt-2 border-t border-[#EEEEEE] border-dashed">
+                                        <input
+                                            type="checkbox"
+                                            checked={isCustomizable}
+                                            onChange={e => setIsCustomizable(e.target.checked)}
+                                            className="w-4 h-4 text-[#7A3E4A] focus:ring-[#7A3E4A] border-gray-300 rounded"
+                                        />
+                                        <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Ativar Personalização de Nome</span>
+                                    </label>
+
+                                    {isCustomizable && (
+                                        <div className="grid grid-cols-2 gap-4 pt-2 border-t border-dashed border-gray-200 animate-[fadeIn_200ms_ease-out]">
+                                            <div>
+                                                <label className={labelCls}>Preço SEM Personalização (R$)</label>
+                                                <input 
+                                                    type="number" 
+                                                    name="pCustomPriceWithout" 
+                                                    step="0.01" 
+                                                    min="0" 
+                                                    value={customPriceWithout}
+                                                    onChange={e => setCustomPriceWithout(e.target.value)}
+                                                    className={inputCls} 
+                                                    placeholder="Ex: 18.00"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className={labelCls}>Preço COM Personalização (R$)</label>
+                                                <input 
+                                                    type="number" 
+                                                    name="pCustomPriceWith" 
+                                                    step="0.01" 
+                                                    min="0" 
+                                                    value={customPriceWith}
+                                                    onChange={e => setCustomPriceWith(e.target.value)}
+                                                    className={inputCls} 
+                                                    placeholder="Ex: 18.00"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className={labelCls}>Taxa por Letra (R$)</label>
+                                                <input 
+                                                    type="number" 
+                                                    name="pCustomFeeLetter" 
+                                                    step="0.01" 
+                                                    min="0" 
+                                                    value={customFeeLetter}
+                                                    onChange={e => setCustomFeeLetter(e.target.value)}
+                                                    className={inputCls} 
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className={labelCls}>Taxa por Número (R$)</label>
+                                                <input 
+                                                    type="number" 
+                                                    name="pCustomFeeNumber" 
+                                                    step="0.01" 
+                                                    min="0" 
+                                                    value={customFeeNumber}
+                                                    onChange={e => setCustomFeeNumber(e.target.value)}
+                                                    className={inputCls} 
+                                                />
+                                            </div>
+                                            <div className="col-span-2">
+                                                <label className={labelCls}>Taxa por Emoji/Especial (R$)</label>
+                                                <input 
+                                                    type="number" 
+                                                    name="pCustomFeeEmoji" 
+                                                    step="0.01" 
+                                                    min="0" 
+                                                    value={customFeeEmoji}
+                                                    onChange={e => setCustomFeeEmoji(e.target.value)}
+                                                    className={inputCls} 
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
                                 <div><label className={labelCls}>Descrição</label><textarea name="pDescription" rows="3" defaultValue={editingProduct?.description || ''} className={`${inputCls} resize-none`} /></div>
 
                                 {/* Image Upload */}
                                 <div>
-                                    <label className={labelCls}>Imagens do Produto</label>
+                                    <label className={labelCls}>Imagens do Produto <span className="text-[9px] text-[#C6A76A] lowercase font-normal">(Recomendado: 800x1000px - Proporção 4:5)</span></label>
                                     {existingImages.length > 0 && (
                                         <div className="flex flex-wrap gap-2 mb-3">
                                             {existingImages.map((url, i) => (
@@ -1509,7 +2284,7 @@ export default function AdminPage() {
                         </div>
                         <form onSubmit={handleCreateBanner} className="p-5 space-y-4">
                             <div>
-                                <label className={labelCls}>Upload de Imagem</label>
+                                <label className={labelCls}>Upload de Imagem <span className="text-[9px] text-[#C6A76A] lowercase font-normal">(Recomendado: 1920x800px - Proporção 16:7)</span></label>
                                 <input type="file" accept="image/*" onChange={e => {
                                     if (e.target.files?.[0]) compressImage(e.target.files[0]).then(f => setBannerImageFiles([f]))
                                 }} className="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#7A3E4A]/10 file:text-[#7A3E4A] hover:file:bg-[#7A3E4A]/20 cursor-pointer" />

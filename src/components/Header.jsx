@@ -4,16 +4,119 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../hooks/useAuth.js'
 import { smoothScrollToTop } from '../utils/scroll.js'
 
-const topBarMessages = [
+const defaultTopBarMessages = [
     "✨ Frete Grátis acima de R$ 299 • Parcele em até 12x",
     "Utilize o cupom BEMVIND010 em sua primeira compra!",
     "Ganhe 5% de desconto pagando no PIX!"
 ]
 
+const categoryImages = {
+    'conjuntos': 'https://images.unsplash.com/photo-1616422285623-13ff0162193c?auto=format&fit=crop&w=400&q=80',
+    'calcinhas': 'https://images.unsplash.com/photo-1573140247632-f8fd74997d5c?auto=format&fit=crop&w=400&q=80',
+    'tanga': 'https://images.unsplash.com/photo-1582533561751-ef6f6ab93a2e?auto=format&fit=crop&w=400&q=80',
+    'body': 'https://images.unsplash.com/photo-1508962914676-134849a727f0?auto=format&fit=crop&w=400&q=80',
+    'camisola': 'https://images.unsplash.com/photo-1518622358385-8ea7d0794bf6?auto=format&fit=crop&w=400&q=80',
+    'baby-doll': 'https://images.unsplash.com/photo-1549064482-6779ba3292fe?auto=format&fit=crop&w=400&q=80',
+    'linha-noite': 'https://images.unsplash.com/photo-1518622358385-8ea7d0794bf6?auto=format&fit=crop&w=400&q=80',
+    'plus-size': 'https://images.unsplash.com/photo-1581338834647-b0fb40704e21?auto=format&fit=crop&w=400&q=80',
+    'personalizaveis': 'https://images.unsplash.com/photo-1549439602-43ebcb23281f?auto=format&fit=crop&w=400&q=80',
+    'fantasias': 'https://images.unsplash.com/photo-1502301197179-6522b4bce294?auto=format&fit=crop&w=400&q=80',
+    'sex-shop': 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=400&q=80',
+    'acessorios': 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=400&q=80',
+    'linha-sexy': 'https://images.unsplash.com/photo-1566207274740-0f8cf6b7d5a5?auto=format&fit=crop&w=400&q=80'
+}
+
 export default function Header({ cartCount = 0, wishlistCount = 0, onSearchOpen }) {
     const { session, user, profile } = useAuth()
     const [isScrolled, setIsScrolled] = useState(false)
+    const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false)
+    const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false)
+    const [hoveredCategory, setHoveredCategory] = useState(null)
     const [currentMessageIndex, setCurrentMessageIndex] = useState(0)
+    const [messages, setMessages] = useState(() => {
+        const stored = localStorage.getItem('meraki_topbar_messages')
+        return stored ? JSON.parse(stored) : defaultTopBarMessages
+    })
+
+    const [topbarStyle, setTopbarStyle] = useState(() => {
+        try {
+            const stored = localStorage.getItem('meraki_topbar_style')
+            return stored ? JSON.parse(stored) : { bgColor: '#C6A76A', textColor: '#FFFFFF' }
+        } catch { return { bgColor: '#C6A76A', textColor: '#FFFFFF' } }
+    })
+    
+    const [categories, setCategories] = useState(() => {
+        const stored = localStorage.getItem('meraki_categories')
+        if (stored) {
+            try {
+                const parsed = JSON.parse(stored)
+                return parsed.map(c => typeof c === 'string' ? { name: c, description: 'Coleção Meraki', image: '/placeholder.jpg', group: 'Lingerie' } : c)
+            } catch (e) { console.error(e) }
+        }
+        return [
+            { name: 'Conjuntos', group: 'Lingerie', description: 'Sutiãs e calcinhas combinando com caimento perfeito.', image: 'https://images.unsplash.com/photo-1616422285623-13ff0162193c?auto=format&fit=crop&w=400&q=80' },
+            { name: 'Calcinhas', group: 'Lingerie', description: 'Modelos confortáveis em renda e microfibra.', image: 'https://images.unsplash.com/photo-1573140247632-f8fd74997d5c?auto=format&fit=crop&w=400&q=80' },
+            { name: 'Tanga', group: 'Lingerie', description: 'Sensualidade e conforto para o dia a dia.', image: 'https://images.unsplash.com/photo-1582533561751-ef6f6ab93a2e?auto=format&fit=crop&w=400&q=80' },
+            { name: 'Body', group: 'Lingerie', description: 'Peças versáteis que modelam e realçam suas curvas.', image: 'https://images.unsplash.com/photo-1508962914676-134849a727f0?auto=format&fit=crop&w=400&q=80' },
+            
+            { name: 'Camisola', group: 'Noite & Especiais', description: 'Leveza e elegância para suas noites.', image: 'https://images.unsplash.com/photo-1518622358385-8ea7d0794bf6?auto=format&fit=crop&w=400&q=80' },
+            { name: 'Baby Doll', group: 'Noite & Especiais', description: 'Frescor e estilo romântico em cetim e renda.', image: 'https://images.unsplash.com/photo-1549064482-6779ba3292fe?auto=format&fit=crop&w=400&q=80' },
+            { name: 'Linha Noite', group: 'Noite & Especiais', description: 'Pijamas e robes sofisticados de alta costura.', image: 'https://images.unsplash.com/photo-1518622358385-8ea7d0794bf6?auto=format&fit=crop&w=400&q=80' },
+            { name: 'Plus Size', group: 'Noite & Especiais', description: 'Modelagens exclusivas que valorizam sua beleza.', image: 'https://images.unsplash.com/photo-1581338834647-b0fb40704e21?auto=format&fit=crop&w=400&q=80' },
+            
+            { name: 'Personalizáveis', group: 'Destaques', description: 'Peças únicas com gravação personalizada de nomes.', image: 'https://images.unsplash.com/photo-1549439602-43ebcb23281f?auto=format&fit=crop&w=400&q=80' },
+            { name: 'Fantasias', group: 'Destaques', description: 'Momentos inesquecíveis com designs temáticos sensuais.', image: 'https://images.unsplash.com/photo-1502301197179-6522b4bce294?auto=format&fit=crop&w=400&q=80' },
+            
+            { name: 'Sex Shop', group: 'Sensual', description: 'Acessórios e cosméticos para apimentar a relação.', image: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=400&q=80' },
+            { name: 'Acessórios', group: 'Sensual', description: 'Complementos ideais para compor seu visual íntimo.', image: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=400&q=80' },
+            { name: 'Linha Sexy', group: 'Sensual', description: 'Lingerie provocante com rendas e recortes ousados.', image: 'https://images.unsplash.com/photo-1566207274740-0f8cf6b7d5a5?auto=format&fit=crop&w=400&q=80' }
+        ]
+    })
+
+    useEffect(() => {
+        const updateCats = () => {
+            const stored = localStorage.getItem('meraki_categories')
+            if (stored) {
+                try {
+                    const parsed = JSON.parse(stored)
+                    setCategories(parsed.map(c => typeof c === 'string' ? { name: c, description: 'Coleção Meraki', image: '/placeholder.jpg', group: 'Lingerie' } : c))
+                } catch (e) { console.error(e) }
+            }
+        }
+        window.addEventListener('storage', updateCats)
+        window.addEventListener('categoriesUpdated', updateCats)
+        return () => {
+            window.removeEventListener('storage', updateCats)
+            window.removeEventListener('categoriesUpdated', updateCats)
+        }
+    }, [])
+
+    const groupedCategories = {
+        'Lingerie': categories.filter(c => c.group === 'Lingerie'),
+        'Noite & Especiais': categories.filter(c => c.group === 'Noite & Especiais'),
+        'Destaques': categories.filter(c => c.group === 'Destaques'),
+        'Sensual': categories.filter(c => c.group === 'Sensual')
+    }
+
+    useEffect(() => {
+        const updateMessages = () => {
+            const stored = localStorage.getItem('meraki_topbar_messages')
+            setMessages(stored ? JSON.parse(stored) : defaultTopBarMessages)
+            setCurrentMessageIndex(0)
+        }
+        const updateStyle = () => {
+            try {
+                const stored = localStorage.getItem('meraki_topbar_style')
+                if (stored) setTopbarStyle(JSON.parse(stored))
+            } catch {}
+        }
+        window.addEventListener('topbarMessagesUpdated', updateMessages)
+        window.addEventListener('topbarStyleUpdated', updateStyle)
+        return () => {
+            window.removeEventListener('topbarMessagesUpdated', updateMessages)
+            window.removeEventListener('topbarStyleUpdated', updateStyle)
+        }
+    }, [])
 
     useEffect(() => {
         const handleScroll = () => {
@@ -29,13 +132,45 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onSearchOpen 
     }, [])
 
     useEffect(() => {
+        if (messages.length === 0) return
         const interval = setInterval(() => {
-            setCurrentMessageIndex((prev) => (prev + 1) % topBarMessages.length)
+            setCurrentMessageIndex((prev) => (prev + 1) % messages.length)
         }, 4000)
         return () => clearInterval(interval)
-    }, [])
+    }, [messages])
 
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+    const [butterflySrc, setButterflySrc] = useState('/assets/borboleta-v2.png')
+
+    useEffect(() => {
+        const img = new Image()
+        img.src = '/assets/borboleta-v2.png'
+        img.onload = () => {
+            const canvas = document.createElement('canvas')
+            canvas.width = img.width
+            canvas.height = img.height
+            const ctx = canvas.getContext('2d')
+            if (ctx) {
+                ctx.drawImage(img, 0, 0)
+                try {
+                    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+                    const data = imgData.data
+                    for (let i = 0; i < data.length; i += 4) {
+                        const r = data[i]
+                        const g = data[i+1]
+                        const b = data[i+2]
+                        if (r > 185 && g > 185 && b > 185) {
+                            data[i+3] = 0
+                        }
+                    }
+                    ctx.putImageData(imgData, 0, 0)
+                    setButterflySrc(canvas.toDataURL())
+                } catch (e) {
+                    console.error("Erro ao remover fundo:", e)
+                }
+            }
+        }
+    }, [])
 
     useEffect(() => {
         if (mobileMenuOpen) {
@@ -58,22 +193,28 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onSearchOpen 
             } ${isScrolled && !mobileMenuOpen ? 'glass shadow-premium' : 'bg-white'}`}
             style={{ borderBottom: 'none', border: 'none', outline: 'none' }}
         >
-            {/* Top Bar - Hidden on scroll for focus */}
-            <div className={`bg-[#C6A76A] text-white text-center text-[11px] uppercase tracking-[0.15em] py-2 px-4 font-bold antialiased transition-all duration-500 overflow-hidden ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-10 opacity-100'
-                }`}>
+            {/* Top Bar - Hidden on scroll or if empty */}
+            <div
+                className={`text-center text-[11px] uppercase tracking-[0.15em] py-2 px-4 font-bold antialiased transition-all duration-500 overflow-hidden ${
+                    isScrolled || messages.length === 0 ? 'max-h-0 opacity-0 py-0' : 'max-h-10 opacity-100'
+                }`}
+                style={{ background: topbarStyle.bgColor, color: topbarStyle.textColor }}
+            >
                 <div className="relative h-4 flex items-center justify-center overflow-hidden">
-                    <AnimatePresence mode="wait">
-                        <motion.span
-                            key={currentMessageIndex}
-                            initial={{ y: 15, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            exit={{ y: -15, opacity: 0 }}
-                            transition={{ duration: 0.5, ease: "easeInOut" }}
-                            className="absolute whitespace-nowrap"
-                        >
-                            {topBarMessages[currentMessageIndex]}
-                        </motion.span>
-                    </AnimatePresence>
+                    {messages.length > 0 && (
+                        <AnimatePresence mode="wait">
+                            <motion.span
+                                key={currentMessageIndex}
+                                initial={{ y: 15, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                exit={{ y: -15, opacity: 0 }}
+                                transition={{ duration: 0.5, ease: "easeInOut" }}
+                                className="absolute whitespace-nowrap"
+                            >
+                                {messages[currentMessageIndex]}
+                            </motion.span>
+                        </AnimatePresence>
+                    )}
                 </div>
             </div>
 
@@ -98,27 +239,214 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onSearchOpen 
                         <Link 
                             to="/" 
                             onClick={() => { smoothScrollToTop(1200); setMobileMenuOpen(false); }}
-                            className="font-heading text-2xl md:text-2.5xl lg:text-3xl font-bold tracking-[0.15em] text-[#1A1A1A] hover:text-[#7A3E4A] transition-all duration-500 inline-block animate-logo-breath"
+                            className="font-heading text-2xl md:text-2.5xl lg:text-3xl font-bold tracking-[0.15em] text-[#1A1A1A] hover:text-[#7A3E4A] transition-all duration-500 inline-flex items-center gap-2 animate-logo-breath"
                         >
-                            MERAKI
+                            <img 
+                                src={butterflySrc} 
+                                alt="Borboleta Meraki" 
+                                className={`w-10 h-10 md:w-12 md:h-12 object-contain animate-butterfly-flight transition-opacity duration-200 ${
+                                    butterflySrc.startsWith('data:') ? 'opacity-100' : 'opacity-0'
+                                }`}
+                            />
+                            <span>MERAKI</span>
                         </Link>
                     </div>
 
                     {/* Desktop Navigation Menu (Center on desktop, hidden on mobile) */}
                     <nav className="hidden md:block">
                         <ul className="flex items-center gap-6 lg:gap-8">
-                            {['Home', 'Conjuntos', 'Linha Noite', 'Linha Sexy', 'Plus Size', 'Ofertas'].map((item) => (
-                                <li key={item}>
-                                    <Link
-                                        to={item === 'Home' ? '/' : `/category/${item.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(' ', '-')}`}
-                                        onClick={() => smoothScrollToTop(1200)}
-                                        className="relative text-[10px] lg:text-[11px] font-semibold uppercase tracking-[0.2em] text-[#1A1A1A] hover:text-[#7A3E4A] transition-all duration-300 group inline-block"
-                                    >
-                                        {item}
-                                        <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-[1.5px] bg-[#C6A76A] transition-all duration-500 group-hover:w-full"></span>
-                                    </Link>
-                                </li>
-                            ))}
+                            <li>
+                                <Link to="/" onClick={() => smoothScrollToTop(1200)} className="relative text-[10px] lg:text-[11px] font-semibold uppercase tracking-[0.2em] text-[#1A1A1A] hover:text-[#7A3E4A] transition-all duration-300 group inline-block">
+                                    Home
+                                    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-[1.5px] bg-[#C6A76A] transition-all duration-500 group-hover:w-full"></span>
+                                </Link>
+                            </li>
+                            <li 
+                                onMouseEnter={() => setIsMegaMenuOpen(true)}
+                                onMouseLeave={() => setIsMegaMenuOpen(false)}
+                                className="relative py-2"
+                            >
+                                <button
+                                    type="button"
+                                    className="relative text-[10px] lg:text-[11px] font-semibold uppercase tracking-[0.2em] text-[#1A1A1A] hover:text-[#7A3E4A] transition-all duration-300 group inline-flex items-center gap-1 cursor-pointer"
+                                >
+                                    Categorias
+                                    <svg className={`w-3 h-3 transition-transform duration-300 ${isMegaMenuOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-[1.5px] bg-[#C6A76A] transition-all duration-500 group-hover:w-full"></span>
+                                </button>
+
+                                {/* Mega Menu Dropdown */}
+                                <AnimatePresence>
+                                    {isMegaMenuOpen && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: 10 }}
+                                            transition={{ duration: 0.2, ease: "easeOut" }}
+                                            className="absolute left-1/2 -translate-x-1/2 top-full mt-2 bg-white border border-[#E8E0D8]/65 shadow-2xl rounded-2xl p-6 z-50 flex gap-6 w-[650px] pointer-events-auto"
+                                        >
+                                            <div className="flex-1 grid grid-cols-2 gap-x-6 gap-y-5 text-left">
+                                                {/* Group 1: Lingerie */}
+                                                <div className="space-y-2">
+                                                    <div className="flex items-center gap-2 border-b border-gray-150 pb-1">
+                                                        <svg className="w-4 h-4 text-[#C6A76A]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 10c1.5 0 3 .5 3 2.5s-1.5 2.5-3 2.5-3-.5-3-2.5 1.5-2.5 3-2.5zM18 10c1.5 0 3 .5 3 2.5s-1.5 2.5-3 2.5-3-.5-3-2.5 1.5-2.5 3-2.5z" />
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 13.5h6M4.5 7.5L6 10M19.5 7.5L18 10M7 17.5h10M5.5 16l2.5 4.5h8l2.5-4.5" />
+                                                        </svg>
+                                                        <h4 className="text-[10px] font-bold text-[#7A3E4A] uppercase tracking-[0.2em]">Lingerie</h4>
+                                                    </div>
+                                                    <ul className="space-y-1.5">
+                                                        {groupedCategories['Lingerie'].map(item => (
+                                                            <li key={item.name}>
+                                                                <Link 
+                                                                    to={`/category/${item.name.toLowerCase().replace(/\s+/g, '-')}`} 
+                                                                    onClick={() => setIsMegaMenuOpen(false)} 
+                                                                    onMouseEnter={() => setHoveredCategory(item)}
+                                                                    onMouseLeave={() => setHoveredCategory(null)}
+                                                                    className="text-[11px] text-gray-500 hover:text-[#C6A76A] transition-colors font-semibold"
+                                                                >
+                                                                    {item.name}
+                                                                </Link>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+
+                                                {/* Group 2: Noite & Especiais */}
+                                                <div className="space-y-2">
+                                                    <div className="flex items-center gap-2 border-b border-gray-150 pb-1">
+                                                        <svg className="w-4 h-4 text-[#C6A76A]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M8 5l1 3h6l1-3M6 8l2 11h8l2-11H6z" />
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v11" />
+                                                        </svg>
+                                                        <h4 className="text-[10px] font-bold text-[#7A3E4A] uppercase tracking-[0.2em]">Noite & Especiais</h4>
+                                                    </div>
+                                                    <ul className="space-y-1.5">
+                                                        {groupedCategories['Noite & Especiais'].map(item => (
+                                                            <li key={item.name}>
+                                                                <Link 
+                                                                    to={`/category/${item.name.toLowerCase().replace(/\s+/g, '-')}`} 
+                                                                    onClick={() => setIsMegaMenuOpen(false)} 
+                                                                    onMouseEnter={() => setHoveredCategory(item)}
+                                                                    onMouseLeave={() => setHoveredCategory(null)}
+                                                                    className="text-[11px] text-gray-500 hover:text-[#C6A76A] transition-colors font-semibold"
+                                                                >
+                                                                    {item.name}
+                                                                </Link>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+
+                                                {/* Group 3: Destaques */}
+                                                <div className="space-y-2">
+                                                    <div className="flex items-center gap-2 border-b border-gray-150 pb-1">
+                                                        <svg className="w-4 h-4 text-[#C6A76A]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.24 11.54a3 3 0 00-4.24 0l-.5.5-.5-.5a3 3 0 10-4.24 4.24l5.24 5.24 5.24-5.24a3 3 0 000-4.24z" />
+                                                        </svg>
+                                                        <h4 className="text-[10px] font-bold text-[#7A3E4A] uppercase tracking-[0.2em]">Destaques</h4>
+                                                    </div>
+                                                    <ul className="space-y-1.5">
+                                                        {groupedCategories['Destaques'].map(item => (
+                                                            <li key={item.name}>
+                                                                <Link 
+                                                                    to={`/category/${item.name.toLowerCase().replace(/\s+/g, '-')}`} 
+                                                                    onClick={() => setIsMegaMenuOpen(false)} 
+                                                                    onMouseEnter={() => setHoveredCategory(item)}
+                                                                    onMouseLeave={() => setHoveredCategory(null)}
+                                                                    className="text-[11px] text-gray-500 hover:text-[#C6A76A] transition-colors font-semibold"
+                                                                >
+                                                                    {item.name}
+                                                                </Link>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+
+                                                {/* Group 4: Sensual */}
+                                                <div className="space-y-2">
+                                                    <div className="flex items-center gap-2 border-b border-gray-150 pb-1">
+                                                        <svg className="w-4 h-4 text-[#C6A76A]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 21l-.813-5.096L3 15l5.187-.813L9 9l.813 5.187L15 15l-5.187.813zM19.071 4.929l-.353 2.122-.354-2.122L16.242 4.5l2.122-.354.354-2.122.353 2.122 2.122.354-2.122.354z" />
+                                                        </svg>
+                                                        <h4 className="text-[10px] font-bold text-[#7A3E4A] uppercase tracking-[0.2em]">Sensual</h4>
+                                                    </div>
+                                                    <ul className="space-y-1.5">
+                                                        {groupedCategories['Sensual'].map(item => (
+                                                            <li key={item.name}>
+                                                                <Link 
+                                                                    to={`/category/${item.name.toLowerCase().replace(/\s+/g, '-')}`} 
+                                                                    onClick={() => setIsMegaMenuOpen(false)} 
+                                                                    onMouseEnter={() => setHoveredCategory(item)}
+                                                                    onMouseLeave={() => setHoveredCategory(null)}
+                                                                    className="text-[11px] text-gray-500 hover:text-[#C6A76A] transition-colors font-semibold"
+                                                                >
+                                                                    {item.name}
+                                                                </Link>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            </div>
+
+                                            {/* Promo Banner Column */}
+                                            <div className="w-48 bg-[#FAF9F5] border border-[#E8E0D8] rounded-xl p-4 flex flex-col justify-between relative overflow-hidden shrink-0 text-left min-h-[220px]">
+                                                {hoveredCategory && hoveredCategory.image ? (
+                                                    <div className="absolute inset-0 z-0 animate-[fadeIn_200ms_ease-out]">
+                                                        <img 
+                                                            src={hoveredCategory.image} 
+                                                            alt={hoveredCategory.name} 
+                                                            className="w-full h-full object-cover brightness-[0.7]" 
+                                                        />
+                                                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
+                                                    </div>
+                                                ) : (
+                                                    <div className="absolute -right-8 -bottom-8 w-20 h-20 rounded-full border border-[#C6A76A]/15 z-0" />
+                                                )}
+
+                                                <div className="relative z-10 space-y-1.5 mt-auto">
+                                                    <span className={`text-[8px] font-bold uppercase tracking-widest ${hoveredCategory ? 'text-white/80' : 'text-[#C6A76A]'}`}>
+                                                        {hoveredCategory ? hoveredCategory.group : 'Meraki'}
+                                                    </span>
+                                                    <h4 className={`text-xs font-bold leading-tight font-heading ${hoveredCategory ? 'text-white' : 'text-[#7A3E4A]'}`}>
+                                                        {hoveredCategory ? hoveredCategory.name : 'Lingerie de Luxo e Conforto'}
+                                                    </h4>
+                                                    <p className={`text-[9px] font-medium leading-relaxed ${hoveredCategory ? 'text-white/85' : 'text-gray-400'}`}>
+                                                        {hoveredCategory ? hoveredCategory.description : 'Sofisticação e sensualidade feitas para você.'}
+                                                    </p>
+                                                </div>
+                                                <Link 
+                                                    to={hoveredCategory ? `/category/${hoveredCategory.name.toLowerCase().replace(/\s+/g, '-')}` : "/category/plus-size"} 
+                                                    onClick={() => setIsMegaMenuOpen(false)}
+                                                    className={`relative z-10 w-full py-2 bg-gradient-to-r ${hoveredCategory ? 'from-[#C6A76A] to-[#A88940] hover:shadow-[#C6A76A]/20' : 'from-[#7A3E4A] to-[#9A5060] hover:shadow-[#7A3E4A]/20'} text-white text-[9px] font-bold uppercase tracking-wider text-center rounded-lg hover:shadow-md transition-all duration-300 block`}
+                                                >
+                                                    {hoveredCategory ? 'Ver Categoria' : 'Ver Destaque →'}
+                                                </Link>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </li>
+                            <li>
+                                <Link to="/category/personalizaveis" onClick={() => smoothScrollToTop(1200)} className="relative text-[10px] lg:text-[11px] font-semibold uppercase tracking-[0.2em] text-[#1A1A1A] hover:text-[#7A3E4A] transition-all duration-300 group inline-block">
+                                    Personalizáveis
+                                    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-[1.5px] bg-[#C6A76A] transition-all duration-500 group-hover:w-full"></span>
+                                </Link>
+                            </li>
+                            <li>
+                                <Link to="/category/plus-size" onClick={() => smoothScrollToTop(1200)} className="relative text-[10px] lg:text-[11px] font-semibold uppercase tracking-[0.2em] text-[#1A1A1A] hover:text-[#7A3E4A] transition-all duration-300 group inline-block">
+                                    Plus Size
+                                    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-[1.5px] bg-[#C6A76A] transition-all duration-500 group-hover:w-full"></span>
+                                </Link>
+                            </li>
+                            <li>
+                                <Link to="/category/ofertas" onClick={() => smoothScrollToTop(1200)} className="relative text-[10px] lg:text-[11px] font-semibold uppercase tracking-[0.2em] text-[#7A3E4A] hover:text-[#7A3E4A] transition-all duration-300 group inline-block">
+                                    Ofertas
+                                    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-[1.5px] bg-[#C6A76A] transition-all duration-500 group-hover:w-full"></span>
+                                </Link>
+                            </li>
                         </ul>
                     </nav>
 
@@ -208,20 +536,47 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onSearchOpen 
                                     </svg>
                                 </button>
                             </div>
-
                             {/* Menu Links */}
                             <ul className="space-y-4">
-                                {['Home', 'Conjuntos', 'Linha Noite', 'Linha Sexy', 'Plus Size', 'Ofertas'].map((item) => (
-                                    <li key={item} className="border-b border-gray-50 pb-3">
-                                        <Link
-                                            to={item === 'Home' ? '/' : `/category/${item.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(' ', '-')}`}
-                                            onClick={() => { smoothScrollToTop(1200); setMobileMenuOpen(false); }}
-                                            className="text-sm font-semibold uppercase tracking-wider text-gray-800 hover:text-[#7A3E4A] block transition-colors"
-                                        >
-                                            {item}
-                                        </Link>
-                                    </li>
-                                ))}
+                                <li className="border-b border-gray-50 pb-3">
+                                    <Link to="/" onClick={() => setMobileMenuOpen(false)} className="text-sm font-semibold uppercase tracking-wider text-gray-800 hover:text-[#7A3E4A] block transition-colors">Home</Link>
+                                </li>
+                                <li className="border-b border-gray-50 pb-3">
+                                    <button 
+                                        type="button"
+                                        onClick={() => setMobileCategoriesOpen(!mobileCategoriesOpen)} 
+                                        className="w-full text-left text-sm font-semibold uppercase tracking-wider text-gray-800 hover:text-[#7A3E4A] flex items-center justify-between transition-colors cursor-pointer"
+                                    >
+                                        Categorias
+                                        <svg className={`w-4 h-4 transition-transform duration-300 ${mobileCategoriesOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </button>
+                                    {mobileCategoriesOpen && (
+                                        <ul className="mt-3 pl-4 space-y-2.5 border-l border-gray-100 animate-[fadeIn_200ms_ease-out]">
+                                            {categories.map(sub => (
+                                                <li key={sub.name}>
+                                                    <Link 
+                                                        to={`/category/${sub.name.toLowerCase().replace(/\s+/g, '-')}`} 
+                                                        onClick={() => { smoothScrollToTop(1200); setMobileMenuOpen(false); }}
+                                                        className="text-xs font-medium text-gray-500 hover:text-[#7A3E4A] block transition-colors py-1"
+                                                    >
+                                                        {sub.name}
+                                                    </Link>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </li>
+                                <li className="border-b border-gray-50 pb-3">
+                                    <Link to="/category/personalizaveis" onClick={() => { smoothScrollToTop(1200); setMobileMenuOpen(false); }} className="text-sm font-semibold uppercase tracking-wider text-gray-800 hover:text-[#7A3E4A] block transition-colors">Personalizáveis</Link>
+                                </li>
+                                <li className="border-b border-gray-50 pb-3">
+                                    <Link to="/category/plus-size" onClick={() => { smoothScrollToTop(1200); setMobileMenuOpen(false); }} className="text-sm font-semibold uppercase tracking-wider text-gray-800 hover:text-[#7A3E4A] block transition-colors">Plus Size</Link>
+                                </li>
+                                <li className="border-b border-gray-50 pb-3">
+                                    <Link to="/category/ofertas" onClick={() => { smoothScrollToTop(1200); setMobileMenuOpen(false); }} className="text-sm font-semibold uppercase tracking-wider text-[#7A3E4A] hover:text-[#7A3E4A] block transition-colors">Ofertas</Link>
+                                </li>
                             </ul>
                         </div>
 

@@ -18,19 +18,65 @@ import { useProducts } from '../hooks/useProducts.js'
 import { useCart } from '../hooks/useCart.js'
 import { useWishlist } from '../hooks/useWishlist.js'
 
-const categories = [
-    { name: 'Conjuntos', description: 'Sutiãs e calcinhas combinando', gradient: 'from-primary-light to-[#D4A69A]', image: '/assets/categories/cat-conjuntos.jpg' },
-    { name: 'Linha Noite', description: 'Camisolas e pijamas elegantes', gradient: 'from-success to-[#5A6B52]', image: '/assets/categories/cat-noite.jpg' },
-    { name: 'Linha Sexy', description: 'Peças sensuais e sofisticadas', gradient: 'from-primary to-primary-dark', image: '/assets/categories/cat-sexy.jpg' },
-    { name: 'Plus Size', description: 'Elegância em todos os tamanhos', gradient: 'from-accent to-[#A88940]', image: '/assets/categories/cat-plus.jpg' },
-]
-
-
 export default function HomePage() {
     const navigate = useNavigate()
     const [searchOpen, setSearchOpen] = useState(false)
     const [quickViewProduct, setQuickViewProduct] = useState(null)
     const [notification, setNotification] = useState({ message: '', visible: false })
+    const [categories, setCategories] = useState(() => {
+        const stored = localStorage.getItem('meraki_categories')
+        if (stored) {
+            try {
+                const parsed = JSON.parse(stored)
+                return parsed.map(c => typeof c === 'string' ? { name: c, description: 'Coleção Meraki', image: '/placeholder.jpg' } : c)
+            } catch (e) { console.error(e) }
+        }
+        return [
+            { name: 'Conjuntos', description: 'Sutiãs e calcinhas combinando', image: '/assets/categories/cat-conjuntos.jpg' },
+            { name: 'Linha Noite', description: 'Camisolas e pijamas elegantes', image: '/assets/categories/cat-noite.jpg' },
+            { name: 'Linha Sexy', description: 'Peças sensuais e sofisticadas', image: '/assets/categories/cat-sexy.jpg' },
+            { name: 'Plus Size', description: 'Elegância em todos os tamanhos', image: '/assets/categories/cat-plus.jpg' },
+        ]
+    })
+
+    const [promoCombo, setPromoCombo] = useState(() => {
+        const stored = localStorage.getItem('meraki_promo_combo')
+        if (stored) {
+            try { return JSON.parse(stored) } catch (e) { console.error(e) }
+        }
+        return {
+            title: 'Combo Sutiã',
+            subtitle: 'Do P ao EG. Diversos modelos para você escolher.',
+            image: 'https://images.unsplash.com/photo-1616422285623-13ff0162193c?w=800&auto=format&fit=crop&q=80',
+            price2Items: 139,
+            price3Items: 169,
+            link: '/category/promo-combo',
+            query: 'sutiã',
+            visible: true
+        }
+    })
+
+    // Auto-generate display texts from numeric price fields
+    const promoPrice2 = Number(promoCombo.price2Items) || 139
+    const promoPrice3 = Number(promoCombo.price3Items) || 169
+    const promoPriceLine1 = `Leve 2 por R$ ${promoPrice2.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`
+    const promoPriceLine2 = `Leve 3 por R$ ${promoPrice3.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`
+    const promoBadgeText = `Leve 2 por R$ ${promoPrice2} | 3 por R$ ${promoPrice3}`
+
+    useEffect(() => {
+        const updatePromo = () => {
+            const stored = localStorage.getItem('meraki_promo_combo')
+            if (stored) {
+                try { setPromoCombo(JSON.parse(stored)) } catch (e) { console.error(e) }
+            }
+        }
+        window.addEventListener('storage', updatePromo)
+        window.addEventListener('promoComboUpdated', updatePromo)
+        return () => {
+            window.removeEventListener('storage', updatePromo)
+            window.removeEventListener('promoComboUpdated', updatePromo)
+        }
+    }, [])
 
     useEffect(() => {
         const handleHashScroll = () => {
@@ -177,94 +223,102 @@ export default function HomePage() {
             </FadeInSection>
 
             {/* Combo Section (First Image style) */}
-            <FadeInSection>
-                <section className="py-16 px-4 max-w-7xl mx-auto" id="best-sellers">
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                        {/* Promo Banner Left Side */}
-                        <div className="lg:col-span-6 bg-[#FAF6F3] rounded-3xl p-8 md:p-12 flex flex-col justify-between items-center text-center relative overflow-hidden min-h-[500px]">
-                            {/* Product Image top */}
-                            <div className="w-full max-w-[340px] aspect-[4/3] mx-auto overflow-hidden rounded-2xl mb-6">
-                                <img 
-                                    src="https://images.unsplash.com/photo-1616422285623-13ff0162193c?w=800&auto=format&fit=crop&q=80" 
-                                    alt="Combo Sutiã" 
-                                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                                />
+            {promoCombo.visible !== false && (
+                <FadeInSection>
+                    <section className="py-16 px-4 max-w-7xl mx-auto" id="best-sellers">
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                            {/* Promo Banner Left Side */}
+                            <div className="lg:col-span-6 bg-[#FAF6F3] rounded-3xl p-8 md:p-12 flex flex-col justify-between items-center text-center relative overflow-hidden min-h-[500px]">
+                                {/* Product Image top */}
+                                <div className="w-full max-w-[340px] aspect-[4/3] mx-auto overflow-hidden rounded-2xl mb-6">
+                                    <img 
+                                        src={getAssetUrl(promoCombo.image)} 
+                                        alt={promoCombo.title} 
+                                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                                    />
+                                </div>
+                                <div className="space-y-4 max-w-md z-10">
+                                    <span className="text-[#7A3E4A] text-xs font-bold uppercase tracking-[0.3em] block">{promoCombo.title}</span>
+                                    <h3 className="font-heading text-4xl md:text-5xl text-[#7A3E4A] font-light leading-tight">
+                                        {promoPriceLine1}<br />
+                                        {promoPriceLine2}
+                                    </h3>
+                                    <p className="text-gray-600 text-sm font-medium pt-2">{promoCombo.subtitle}</p>
+                                </div>
+                                <Link 
+                                    to="/category/promo-combo" 
+                                    className="mt-8 px-8 py-4 bg-[#7A3E4A] text-white text-xs font-bold uppercase tracking-[0.2em] rounded-xl hover:bg-[#63303a] transition-all z-10"
+                                >
+                                    Comprar Agora &gt;
+                                </Link>
                             </div>
-                            <div className="space-y-4 max-w-md z-10">
-                                <span className="text-[#7A3E4A] text-xs font-bold uppercase tracking-[0.3em] block">Combo Sutiã</span>
-                                <h3 className="font-heading text-5xl md:text-6xl text-[#7A3E4A] font-light leading-tight">
-                                    2 por <span className="font-bold">R$139</span><br />
-                                    3 por <span className="font-bold">R$169</span>
-                                </h3>
-                                <p className="text-gray-600 text-sm font-medium pt-2">Do P ao EG. Diversos modelos para você escolher.</p>
-                            </div>
-                            <Link 
-                                to="/shop" 
-                                className="mt-8 px-8 py-4 bg-[#7A3E4A] text-white text-xs font-bold uppercase tracking-[0.2em] rounded-xl hover:bg-[#63303a] transition-all z-10"
-                            >
-                                Comprar Agora &gt;
-                            </Link>
-                        </div>
 
-                        {/* Product Grid Right Side */}
-                        <div className="lg:col-span-6 grid grid-cols-2 gap-4 sm:gap-6">
-                            {allProducts.filter(p => p.name.toLowerCase().includes('sutiã')).slice(0, 2).map(product => {
-                                const isWish = isWishlisted(product.id)
-                                return (
-                                    <div 
-                                        key={product.id} 
-                                        onClick={() => navigate(`/product/${product.id}`)}
-                                        className="group bg-white border border-gray-100 rounded-2xl p-3 flex flex-col shadow-xs hover:shadow-md transition-all cursor-pointer relative"
-                                    >
-                                        <div className="relative w-full h-[220px] sm:h-[260px] lg:h-[350px] rounded-xl overflow-hidden bg-[#F9F9F9] mb-4">
-                                            <img 
-                                                src={getAssetUrl(product.image)} 
-                                                alt={product.name} 
-                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
-                                            />
-                                        </div>
-                                            {/* Heart Button */}
-                                            <button 
-                                                onClick={(e) => { e.stopPropagation(); toggleWishlist(product.id); }} 
-                                                className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-xs"
+                            {/* Product Grid Right Side */}
+                            <div className="lg:col-span-6 grid grid-cols-2 gap-4 sm:gap-6">
+                                {(() => {
+                                    const promoProducts = allProducts.filter(p => p.inPromoCombo === true)
+                                    const displayProducts = promoProducts.length >= 2 
+                                        ? promoProducts.slice(0, 2) 
+                                        : allProducts.filter(p => p.name.toLowerCase().includes((promoCombo.query || 'sutiã').toLowerCase())).slice(0, 2)
+                                    return displayProducts.map(product => {
+                                        const isWish = isWishlisted(product.id)
+                                        return (
+                                            <div 
+                                                key={product.id} 
+                                                onClick={() => navigate(`/product/${product.id}`)}
+                                                className="group bg-white border border-gray-100 rounded-2xl p-3 flex flex-col shadow-xs hover:shadow-md transition-all cursor-pointer relative"
                                             >
-                                                <svg className={`w-4 h-4 ${isWish ? 'text-primary fill-primary' : 'text-gray-500 hover:text-primary'}`} fill={isWish ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                                </svg>
-                                            </button>
-                                        <div className="space-y-3 mt-1">
-                                            <div>
-                                                <span className="inline-block bg-[#FDF0F6] text-[#D11A6E] text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-sm mb-1.5">
-                                                    Leve 2 por R$ 139 | 3 por R$ 169
-                                                </span>
-                                                <div className="flex gap-1 mb-1">
-                                                    <span className="w-2.5 h-2.5 rounded-full bg-[#E8DCC4] border border-gray-300"></span>
-                                                    <span className="w-2.5 h-2.5 rounded-full bg-[#EAA2A2] border border-gray-300"></span>
-                                                    <span className="w-2.5 h-2.5 rounded-full bg-black border border-gray-300"></span>
+                                                <div className="relative w-full h-[220px] sm:h-[260px] lg:h-[350px] rounded-xl overflow-hidden bg-[#F9F9F9] mb-4">
+                                                    <img 
+                                                        src={getAssetUrl(product.image)} 
+                                                        alt={product.name} 
+                                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                                                    />
                                                 </div>
-                                                <h4 className="font-sans text-xs sm:text-sm font-semibold text-gray-800 line-clamp-2 leading-snug">{product.name}</h4>
+                                                    {/* Heart Button */}
+                                                    <button 
+                                                        onClick={(e) => { e.stopPropagation(); toggleWishlist(product.id); }} 
+                                                        className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-xs"
+                                                    >
+                                                        <svg className={`w-4 h-4 ${isWish ? 'text-primary fill-primary' : 'text-gray-500 hover:text-primary'}`} fill={isWish ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                                        </svg>
+                                                    </button>
+                                                <div className="space-y-3 mt-1">
+                                                    <div>
+                                                        <span className="inline-block bg-[#FDF0F6] text-[#D11A6E] text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-sm mb-1.5">
+                                                            {promoBadgeText}
+                                                        </span>
+                                                        <div className="flex gap-1 mb-1">
+                                                            <span className="w-2.5 h-2.5 rounded-full bg-[#E8DCC4] border border-gray-300"></span>
+                                                            <span className="w-2.5 h-2.5 rounded-full bg-[#EAA2A2] border border-gray-300"></span>
+                                                            <span className="w-2.5 h-2.5 rounded-full bg-black border border-gray-300"></span>
+                                                        </div>
+                                                        <h4 className="font-sans text-xs sm:text-sm font-semibold text-gray-800 line-clamp-2 leading-snug">{product.name}</h4>
+                                                    </div>
+                                                    <div className="pt-2">
+                                                        <p className="text-xs sm:text-sm font-bold text-[#7A3E4A]">R$ {product.price.toFixed(2).replace('.', ',')}</p>
+                                                        <p className="text-[10px] text-gray-400">Em até 1x R$ {product.price.toFixed(2).replace('.', ',')} sem juros</p>
+                                                        <button 
+                                                            onClick={(e) => { e.stopPropagation(); handleAddToCart(product, 'M'); }}
+                                                            className="w-full mt-3 py-2.5 bg-[#7A3E4A] hover:bg-[#63303a] text-white text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
+                                                        >
+                                                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                                            </svg>
+                                                            Comprar
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div className="pt-2">
-                                                <p className="text-xs sm:text-sm font-bold text-[#7A3E4A]">R$ {product.price.toFixed(2).replace('.', ',')}</p>
-                                                <p className="text-[10px] text-gray-400">Em até 1x R$ {product.price.toFixed(2).replace('.', ',')} sem juros</p>
-                                                <button 
-                                                    onClick={(e) => { e.stopPropagation(); handleAddToCart(product, 'M'); }}
-                                                    className="w-full mt-3 bg-[#7A3E4A] hover:bg-[#63303a] text-white text-[10px] uppercase tracking-wider font-bold py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer"
-                                                >
-                                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                                                    </svg>
-                                                    Comprar
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )
-                            })}
+                                        )
+                                    })
+                                })()}
+                            </div>
                         </div>
-                    </div>
-                </section>
-            </FadeInSection>
+                    </section>
+                </FadeInSection>
+            )}
 
             {/* Split Banner / Editorial Section */}
             <FadeInSection>

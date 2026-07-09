@@ -5,7 +5,7 @@ import { getAssetUrl } from '../utils/assets.js'
 
 export default function CartDrawer() {
     const [isOpen, setIsOpen] = useState(false)
-    const { cart, removeFromCart, updateQuantity, cartCount } = useCart()
+    const { cart, removeFromCart, updateQuantity, cartCount, subtotal, comboDiscount, total } = useCart()
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -15,8 +15,6 @@ export default function CartDrawer() {
         window.addEventListener('toggle-cart', handleToggle)
         return () => window.removeEventListener('toggle-cart', handleToggle)
     }, [isOpen])
-
-    const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0)
 
     const formatCurrency = (val) => {
         return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -55,11 +53,11 @@ export default function CartDrawer() {
                 <div className="flex-1 overflow-y-auto p-6 space-y-6">
                     {cart.length > 0 ? (
                         cart.map((item) => (
-                            <div key={`${item.id}-${item.size}`} className="flex gap-4 pb-6 border-b border-gray-50 last:border-0">
+                            <div key={`${item.id}-${item.size}-${item.color || ''}-${item.customText || ''}`} className="flex gap-4 pb-6 border-b border-gray-50 last:border-0">
                                 {/* Thumbnail */}
                                 <div className="w-20 h-24 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0 border border-gray-100">
                                     <img 
-                                        src={item.image ? getAssetUrl(item.image) : getAssetUrl('/assets/placeholder.jpg')} 
+                                        src={item.image ? getAssetUrl(Array.isArray(item.image) ? item.image[0] : item.image) : getAssetUrl('/assets/placeholder.jpg')} 
                                         alt={item.name} 
                                         className="w-full h-full object-cover"
                                         onError={(e) => { e.target.src = getAssetUrl('/assets/placeholder.jpg') }}
@@ -74,8 +72,8 @@ export default function CartDrawer() {
                                                 {item.name}
                                             </h3>
                                             <button 
-                                                onClick={() => removeFromCart(item.id, item.size)}
-                                                className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                                                onClick={() => removeFromCart(item.id, item.size, item.color, item.customText)}
+                                                className="text-gray-400 hover:text-red-500 transition-colors p-1 cursor-pointer"
                                                 aria-label="Remover item"
                                             >
                                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -83,22 +81,32 @@ export default function CartDrawer() {
                                                 </svg>
                                             </button>
                                         </div>
-                                        <p className="text-xs text-gray-400 mt-0.5">Tamanho: <span className="font-bold text-[#1A1A1A] uppercase">{item.size}</span></p>
+                                        <div className="flex flex-wrap gap-x-3 gap-y-1 mt-0.5">
+                                            <p className="text-xs text-gray-400">Tamanho: <span className="font-bold text-[#1A1A1A] uppercase">{item.size}</span></p>
+                                            {item.color && (
+                                                <p className="text-xs text-gray-400">Cor: <span className="font-bold text-[#1A1A1A]">{item.color}</span></p>
+                                            )}
+                                        </div>
+                                        {item.customText && (
+                                            <div className="mt-1 bg-[#7A3E4A]/5 border border-[#7A3E4A]/10 px-2.5 py-1 rounded-lg text-[10px] text-[#7A3E4A] font-bold">
+                                                Personalização: <span className="text-gray-800 font-semibold">"{item.customText}"</span>
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="flex items-center justify-between mt-2">
                                         {/* Quantity Controls */}
                                         <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden bg-gray-50/50">
                                             <button 
-                                                onClick={() => updateQuantity(item.id, item.size, item.quantity - 1)}
-                                                className="px-2.5 py-1 text-gray-500 hover:bg-gray-100 transition-colors text-sm"
+                                                onClick={() => updateQuantity(item.id, item.size, item.quantity - 1, item.color, item.customText)}
+                                                className="px-2.5 py-1 text-gray-500 hover:bg-gray-100 transition-colors text-sm cursor-pointer"
                                             >
                                                 -
                                             </button>
                                             <span className="px-3 text-xs font-semibold text-gray-700">{item.quantity}</span>
                                             <button 
-                                                onClick={() => updateQuantity(item.id, item.size, item.quantity + 1)}
-                                                className="px-2.5 py-1 text-gray-500 hover:bg-gray-100 transition-colors text-sm"
+                                                onClick={() => updateQuantity(item.id, item.size, item.quantity + 1, item.color, item.customText)}
+                                                className="px-2.5 py-1 text-gray-500 hover:bg-gray-100 transition-colors text-sm cursor-pointer"
                                             >
                                                 +
                                             </button>
@@ -106,7 +114,7 @@ export default function CartDrawer() {
                                         
                                         {/* Price */}
                                         <span className="text-sm font-bold text-[#1A1A1A]">
-                                            {formatCurrency(item.price * item.quantity)}
+                                            {formatCurrency((item.price + (item.customPrice || 0)) * item.quantity)}
                                         </span>
                                     </div>
                                 </div>
@@ -126,9 +134,21 @@ export default function CartDrawer() {
                 {/* Footer Section */}
                 {cart.length > 0 && (
                     <div className="p-6 border-t border-gray-100 bg-gray-50/50 space-y-4">
-                        <div className="flex items-center justify-between text-sm">
-                            <span className="text-gray-500 font-medium">Subtotal</span>
-                            <span className="text-base font-extrabold text-[#1A1A1A]">{formatCurrency(subtotal)}</span>
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between text-xs">
+                                <span className="text-gray-500 font-medium">Subtotal</span>
+                                <span className="text-gray-900 font-semibold">{formatCurrency(subtotal)}</span>
+                            </div>
+                            {comboDiscount > 0 && (
+                                <div className="flex items-center justify-between text-xs text-[#D11A6E] font-medium">
+                                    <span>Desconto do Combo</span>
+                                    <span>-{formatCurrency(comboDiscount)}</span>
+                                </div>
+                            )}
+                            <div className="flex items-center justify-between text-sm pt-2 border-t border-gray-200/60">
+                                <span className="text-[#1A1A1A] font-bold">Total</span>
+                                <span className="text-base font-extrabold text-[#7A3E4A]">{formatCurrency(total)}</span>
+                            </div>
                         </div>
                         <p className="text-[11px] text-gray-400 font-light leading-relaxed">Fretamento e descontos aplicados diretamente na etapa de finalização da compra.</p>
                         

@@ -46,10 +46,13 @@ export function useCart() {
         window.dispatchEvent(new Event('cart-updated'))
     }
 
-    function addToCart(product, size) {
+    function addToCart(product, size, color = '', customText = '', customPrice = 0) {
         const currentCart = loadFromStorage()
         const existingIndex = currentCart.findIndex(
-            item => item.id === product.id && item.size === size
+            item => item.id === product.id && 
+                    item.size === size && 
+                    (item.color || '') === (color || '') && 
+                    (item.customText || '') === (customText || '')
         )
         let updated
         if (existingIndex >= 0) {
@@ -59,14 +62,19 @@ export function useCart() {
                 quantity: updated[existingIndex].quantity + 1,
             }
         } else {
-            updated = [...currentCart, { ...product, size, quantity: 1 }]
+            updated = [...currentCart, { ...product, size, color, customText, customPrice, quantity: 1 }]
         }
         updateCartState(updated)
     }
 
-    function removeFromCart(productId, size) {
+    function removeFromCart(productId, size, color = '', customText = '') {
         const currentCart = loadFromStorage()
-        const updated = currentCart.filter(item => !(item.id === productId && item.size === size))
+        const updated = currentCart.filter(item => !(
+            item.id === productId && 
+            item.size === size && 
+            (item.color || '') === (color || '') && 
+            (item.customText || '') === (customText || '')
+        ))
         updateCartState(updated)
     }
 
@@ -74,21 +82,78 @@ export function useCart() {
         updateCartState([])
     }
 
-    function updateQuantity(productId, size, quantity) {
+    function updateQuantity(productId, size, quantity, color = '', customText = '') {
         if (quantity <= 0) {
-            removeFromCart(productId, size)
+            removeFromCart(productId, size, color, customText)
             return
         }
         const currentCart = loadFromStorage()
         const updated = currentCart.map(item => 
-            (item.id === productId && item.size === size)
+            (item.id === productId && 
+             item.size === size && 
+             (item.color || '') === (color || '') && 
+             (item.customText || '') === (customText || ''))
                 ? { ...item, quantity }
                 : item
         )
         updateCartState(updated)
     }
 
+    const subtotal = cart.reduce((acc, item) => acc + (item.price + (item.customPrice || 0)) * item.quantity, 0)
+
+    // Helper to calculate promotional combo discounts
+    const comboDiscount = (() => {
+        const promoCombo = (() => {
+            try {
+                const stored = localStorage.getItem('meraki_promo_combo')
+                return stored ? JSON.parse(stored) : null
+            } catch { return null }
+        })()
+
+        if (!promoCombo || promoCombo.visible === false) return 0
+
+        // Use direct numeric values configured in the Admin Panel
+        const price2 = Number(promoCombo.price2Items) || 139
+        const price3 = Number(promoCombo.price3Items) || 169
+
+        const promoItems = []
+        cart.forEach(item => {
+            if (item.inPromoCombo) {
+                for (let i = 0; i < item.quantity; i++) {
+                    promoItems.push(item.price)
+                }
+            }
+        })
+
+        if (promoItems.length < 2) return 0
+
+        // Sort descending to bundle higher-priced items first
+        promoItems.sort((a, b) => b - a)
+
+        const originalPromoTotal = promoItems.reduce((acc, p) => acc + p, 0)
+        let discountedPromoTotal = 0
+        const tempItems = [...promoItems]
+
+        // Apply 3-item bundles first, then 2-item bundles, then any remaining at full price
+        while (tempItems.length >= 3) {
+            tempItems.splice(0, 3)
+            discountedPromoTotal += price3
+        }
+
+        if (tempItems.length === 2) {
+            tempItems.splice(0, 2)
+            discountedPromoTotal += price2
+        }
+
+        if (tempItems.length === 1) {
+            discountedPromoTotal += tempItems[0]
+        }
+
+        return Math.max(0, originalPromoTotal - discountedPromoTotal)
+    })()
+
+    const total = Math.max(0, subtotal - comboDiscount)
     const cartCount = cart.reduce((total, item) => total + item.quantity, 0)
 
-    return { cart, addToCart, removeFromCart, updateQuantity, clearCart, cartCount }
+    return { cart, addToCart, removeFromCart, updateQuantity, clearCart, cartCount, subtotal, comboDiscount, total }
 }

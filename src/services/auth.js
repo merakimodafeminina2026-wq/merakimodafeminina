@@ -4,7 +4,7 @@
 const DEFAULT_USERS = [
     {
         id: 'admin-id-123',
-        email: 'admin@meraki.com',
+        email: 'admin',
         password: 'admin',
         full_name: 'Administradora Meraki',
         tipo_user: 'admin',
@@ -29,7 +29,7 @@ function getLocalUsers() {
         return DEFAULT_USERS
     }
     const users = JSON.parse(data)
-    if (!users.some(u => u.email === 'admin@meraki.com')) {
+    if (!users.some(u => u.email === 'admin')) {
         users.push(DEFAULT_USERS[0])
         localStorage.setItem('meraki_users', JSON.stringify(users))
     }

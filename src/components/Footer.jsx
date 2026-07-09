@@ -1,12 +1,56 @@
+import { useState, useEffect } from 'react'
+
 export default function Footer() {
+    const [butterflySrc, setButterflySrc] = useState('/assets/borboleta-v2.png')
+
+    useEffect(() => {
+        const img = new Image()
+        img.src = '/assets/borboleta-v2.png'
+        img.onload = () => {
+            const canvas = document.createElement('canvas')
+            canvas.width = img.width
+            canvas.height = img.height
+            const ctx = canvas.getContext('2d')
+            if (ctx) {
+                ctx.drawImage(img, 0, 0)
+                try {
+                    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+                    const data = imgData.data
+                    for (let i = 0; i < data.length; i += 4) {
+                        const r = data[i]
+                        const g = data[i+1]
+                        const b = data[i+2]
+                        if (r > 185 && g > 185 && b > 185) {
+                            data[i+3] = 0
+                        }
+                    }
+                    ctx.putImageData(imgData, 0, 0)
+                    setButterflySrc(canvas.toDataURL())
+                } catch (e) {
+                    console.error("Erro ao remover fundo:", e)
+                }
+            }
+        }
+    }, [])
+
     return (
         <footer className="bg-[#FAF9F5] pt-16 pb-12 text-gray-600 font-sans">
             <div className="max-w-7xl mx-auto px-4 sm:px-6">
                 
                 {/* Center Brand Text Logo */}
                 <div className="flex justify-center mb-10">
-                    <a href="#/" className="font-heading text-2xl md:text-3xl font-bold tracking-[0.22em] text-[#1A1A1A] hover:text-[#7A3E4A] transition-colors">
-                        MERAKI
+                    <a 
+                        href="#/" 
+                        className="font-heading text-2xl md:text-3xl font-bold tracking-[0.22em] text-[#1A1A1A] hover:text-[#7A3E4A] transition-colors inline-flex items-center gap-2"
+                    >
+                        <img 
+                            src={butterflySrc} 
+                            alt="Borboleta Meraki" 
+                            className={`w-10 h-10 md:w-12 md:h-12 object-contain animate-butterfly-flight transition-opacity duration-200 ${
+                                butterflySrc.startsWith('data:') ? 'opacity-100' : 'opacity-0'
+                            }`}
+                        />
+                        <span>MERAKI</span>
                     </a>
                 </div>
 

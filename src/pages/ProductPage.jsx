@@ -28,6 +28,12 @@ export default function ProductPage() {
     const [newReview, setNewReview] = useState({ name: '', rating: 5, comment: '' })
     const [reviewSuccess, setReviewSuccess] = useState(false)
 
+    const [selectedColor, setSelectedColor] = useState(null)
+    const [wantsCustomization, setWantsCustomization] = useState(false)
+    const [customText, setCustomText] = useState('')
+    const [activeImageIndex, setActiveImageIndex] = useState(0)
+    const [lightboxOpen, setLightboxOpen] = useState(false)
+
     // Synchronize and load reviews from localStorage
     useEffect(() => {
         const stored = localStorage.getItem(`meraki_reviews_${id}`)
@@ -52,11 +58,50 @@ export default function ProductPage() {
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' })
         setSelectedSize(null)
+        setSelectedColor(null)
         setQuantity(1)
         setErrorMsg('')
+        setWantsCustomization(false)
+        setCustomText('')
+        setActiveImageIndex(0)
+        setLightboxOpen(false)
     }, [id])
 
     const [errorMsg, setErrorMsg] = useState('')
+
+    const isCustomizableProduct = useMemo(() => {
+        if (!product) return false
+        return product.category?.toLowerCase() === 'personalizaveis' || product.category?.toLowerCase() === 'personalizáveis' || product.isCustomizable
+    }, [product])
+
+    const customPrice = useMemo(() => {
+        if (!wantsCustomization || !customText) return 0
+        const feeLetter = product.customFeeLetter !== undefined ? parseFloat(product.customFeeLetter) : 2.50
+        const feeNumber = product.customFeeNumber !== undefined ? parseFloat(product.customFeeNumber) : 2.50
+        const feeEmoji = product.customFeeEmoji !== undefined ? parseFloat(product.customFeeEmoji) : 3.00
+        
+        let total = 0
+        for (const char of customText) {
+            if (/[a-zA-Z\s]/i.test(char)) {
+                total += feeLetter
+            } else if (/[0-9]/.test(char)) {
+                total += feeNumber
+            } else {
+                total += feeEmoji
+            }
+        }
+        return total
+    }, [wantsCustomization, customText, product])
+
+    const displayedPrice = useMemo(() => {
+        if (!product) return 0
+        if (wantsCustomization) {
+            const basePrice = product.customPriceWith ? parseFloat(product.customPriceWith) : product.price
+            return basePrice + customPrice
+        } else {
+            return product.customPriceWithout ? parseFloat(product.customPriceWithout) : product.price
+        }
+    }, [wantsCustomization, customPrice, product])
 
     // Fallback/related products
     const relatedProducts = useMemo(() => {
@@ -65,6 +110,12 @@ export default function ProductPage() {
             .filter(p => p.category === product.category && p.id !== product.id)
             .slice(0, 4)
     }, [products, product])
+
+    const productImages = useMemo(() => {
+        if (!product) return []
+        const imgs = product.image
+        return Array.isArray(imgs) ? imgs : (imgs ? [imgs] : [])
+    }, [product])
 
     if (loading) {
         return (
@@ -99,10 +150,24 @@ export default function ProductPage() {
             setErrorMsg('Por favor, selecione um tamanho.')
             return
         }
+        if (colors.length > 0 && !selectedColor) {
+            setErrorMsg('Por favor, selecione uma cor.')
+            return
+        }
         setErrorMsg('')
+
+        const basePrice = wantsCustomization
+            ? (product.customPriceWith ? parseFloat(product.customPriceWith) : product.price)
+            : (product.customPriceWithout ? parseFloat(product.customPriceWithout) : product.price)
+
+        const productWithPricing = {
+            ...product,
+            price: basePrice
+        }
+
         // Add multiple quantity
         for (let i = 0; i < quantity; i++) {
-            addToCart(product, selectedSize)
+            addToCart(productWithPricing, selectedSize, selectedColor || '', wantsCustomization ? customText : '', wantsCustomization ? customPrice : 0)
         }
         setNotification({ message: `${quantity}x ${product.name} adicionado ao carrinho!`, visible: true })
     }
@@ -126,9 +191,9 @@ export default function ProductPage() {
         setTimeout(() => setReviewSuccess(false), 4000)
     }
 
-    const imageSrc = getAssetUrl(Array.isArray(product.image) ? (product.image[0] || '/placeholder.jpg') : (product.image || '/placeholder.jpg'))
-    const altImageSrc = getAssetUrl(Array.isArray(product.image) && product.image[1] ? product.image[1] : imageSrc)
+    const imageSrc = getAssetUrl(productImages[activeImageIndex] || '/placeholder.jpg')
     const sizes = product.sizes ? (typeof product.sizes === 'string' ? product.sizes.split(',').map(s => s.trim()) : product.sizes) : []
+    const colors = product.colors ? (Array.isArray(product.colors) ? product.colors : (typeof product.colors === 'string' ? product.colors.split(',').map(c => c.trim()) : [])) : []
 
     return (
         <div className="bg-[#FCFAFA] min-h-screen flex flex-col font-sans">
@@ -149,14 +214,38 @@ export default function ProductPage() {
             <main className="max-w-7xl mx-auto px-4 py-6 w-full flex-grow">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
                     
-                    {/* Left Column: Side-by-side images resembling the references */}
-                    <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="aspect-[3/4] overflow-hidden rounded-2xl bg-gray-50 border border-gray-100/50 shadow-xs">
-                            <img src={imageSrc} alt={product.name} className="w-full h-full object-cover hover:scale-102 transition-transform duration-500" />
+                    {/* Left Column: Premium Gallery with Thumbnails & Zoom */}
+                    <div className="lg:col-span-7 flex flex-col gap-4">
+                        <div 
+                            onClick={() => setLightboxOpen(true)}
+                            className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-gray-50 border border-gray-100/50 shadow-sm cursor-zoom-in group"
+                        >
+                            <img src={imageSrc} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                            <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <span className="bg-white/95 text-gray-800 text-[11px] font-bold uppercase tracking-wider px-4 py-2.5 rounded-full shadow-md flex items-center gap-1.5 transform translate-y-2 group-hover:translate-y-0 transition-transform">
+                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" /></svg>
+                                    Clique para Ampliar
+                                </span>
+                            </div>
                         </div>
-                        <div className="aspect-[3/4] overflow-hidden rounded-2xl bg-gray-50 border border-gray-100/50 shadow-xs hidden sm:block">
-                            <img src={altImageSrc} alt={`${product.name} modelo`} className="w-full h-full object-cover hover:scale-102 transition-transform duration-500" />
-                        </div>
+
+                        {productImages.length > 1 && (
+                            <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-thin">
+                                {productImages.map((img, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => setActiveImageIndex(idx)}
+                                        className={`w-20 h-24 rounded-xl overflow-hidden border shrink-0 transition-all p-0.5 cursor-pointer ${
+                                            activeImageIndex === idx 
+                                                ? 'border-[#7A3E4A] ring-2 ring-[#7A3E4A]/10 scale-[1.02]' 
+                                                : 'border-gray-200 hover:border-gray-450 bg-white'
+                                        }`}
+                                    >
+                                        <img src={getAssetUrl(img)} alt="" className="w-full h-full object-cover rounded-lg" />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* Right Column: Order Form */}
@@ -184,27 +273,65 @@ export default function ProductPage() {
                                 {product.original_price > 0 && product.original_price > product.price && (
                                     <span className="text-base sm:text-lg text-gray-400 line-through font-light">{formatPrice(product.original_price)}</span>
                                 )}
-                                <span className="text-3xl font-extrabold text-[#7A3E4A]">{formatPrice(product.price)}</span>
+                                <span className="text-3xl font-extrabold text-[#7A3E4A]">{formatPrice(displayedPrice)}</span>
                             </div>
                             <p className="text-xs text-gray-500 font-medium">
-                                <span className="text-[#D11A6E] font-bold">{formatPrice(product.price * 0.95)}</span> à vista no PIX ou 6x de {formatPrice(product.price / 6)} sem juros no cartão.
+                                <span className="text-[#D11A6E] font-bold">{formatPrice(displayedPrice * 0.95)}</span> à vista no PIX ou 6x de {formatPrice(displayedPrice / 6)} sem juros no cartão.
                             </p>
                         </div>
 
-                        {/* Mais cores */}
-                        <div className="mb-6">
-                            <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-2.5">Mais Cores:</h4>
-                            <div className="flex gap-3">
-                                <button className="w-12 h-16 rounded-md border-2 border-[#7A3E4A] overflow-hidden focus:outline-none p-0.5">
-                                    <img src={imageSrc} className="w-full h-full object-cover rounded-sm" />
-                                </button>
-                                {altImageSrc !== imageSrc && (
-                                    <button className="w-12 h-16 rounded-md border border-gray-250 hover:border-gray-450 overflow-hidden focus:outline-none p-0.5">
-                                        <img src={altImageSrc} className="w-full h-full object-cover rounded-sm opacity-90 hover:opacity-100 transition-opacity" />
-                                    </button>
-                                )}
+                        {/* Seletor de Cores Dinâmico */}
+                        {colors.length > 0 && (
+                            <div className="mb-6">
+                                <div className="flex items-center justify-between mb-2.5">
+                                    <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider">Selecione a Cor</h4>
+                                    {errorMsg && !selectedColor && <span className="text-red-500 text-xs font-bold animate-[pulse_1.5s_infinite]">{errorMsg}</span>}
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    {colors.map(color => {
+                                        const COLOR_MAP = {
+                                            'Preto': '#000000',
+                                            'Branco': '#FFFFFF',
+                                            'Vermelho': '#DC2626',
+                                            'Nude': '#EED9C4',
+                                            'Rosa': '#F472B6',
+                                            'Bordô': '#800020',
+                                            'Azul': '#2563EB',
+                                            'Verde': '#16A34A',
+                                            'Amarelo': '#FBBF24',
+                                            'Lilás': '#C084FC',
+                                            'Marinho': '#1E3A8A',
+                                            'Pink': '#EC4899',
+                                            'Rubi': '#9B111E',
+                                            'Preto/Renda': '#1F1F1F',
+                                            'Branco/Renda': '#F5F5F5'
+                                        }
+                                        const hex = COLOR_MAP[color] || '#CCCCCC'
+                                        return (
+                                            <button
+                                                key={color}
+                                                type="button"
+                                                onClick={() => {
+                                                    setSelectedColor(color)
+                                                    setErrorMsg('')
+                                                }}
+                                                className={`px-3 py-2 rounded-xl border text-xs font-bold flex items-center gap-2 transition-all cursor-pointer ${
+                                                    selectedColor === color
+                                                        ? 'border-[#7A3E4A] text-[#7A3E4A] ring-2 ring-[#7A3E4A]/10 bg-white scale-[1.02] shadow-xs'
+                                                        : 'border-gray-200 text-gray-500 hover:border-gray-400 bg-white'
+                                                }`}
+                                            >
+                                                <span 
+                                                    className="w-3.5 h-3.5 rounded-full border border-gray-300 shrink-0" 
+                                                    style={{ backgroundColor: hex }} 
+                                                />
+                                                {color}
+                                            </button>
+                                        )
+                                    })}
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         {/* Stock Banner */}
                         <div className="bg-[#7A3E4A]/10 text-[#4A2028] text-xs px-4 py-3 flex items-center justify-center gap-2 mb-6 w-full text-center rounded-none font-sans">
@@ -253,6 +380,88 @@ export default function ProductPage() {
                                 ))}
                             </div>
                         </div>
+
+                        {/* Personalization Section */}
+                        {isCustomizableProduct && (
+                            <div className="mb-6 bg-[#FAF9F5] p-5 rounded-2xl border border-[#EEEEEE] space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider">Personalização</h4>
+                                    <span className="bg-[#C6A76A]/10 text-[#C6A76A] px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider">Opcional</span>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setWantsCustomization(false)
+                                            setCustomText('')
+                                        }}
+                                        className={`py-3 px-4 rounded-xl border text-xs font-bold transition-all cursor-pointer text-center ${
+                                            !wantsCustomization
+                                                ? 'border-[#7A3E4A] text-[#7A3E4A] bg-white ring-2 ring-[#7A3E4A]/5 scale-[1.01] shadow-xs'
+                                                : 'border-gray-200 text-gray-400 bg-white hover:text-gray-655'
+                                        }`}
+                                    >
+                                        Sem Personalização
+                                        <span className="block text-[10px] text-gray-400 font-medium mt-0.5">
+                                            {product.customPriceWithout ? formatPrice(product.customPriceWithout) : formatPrice(product.price)}
+                                        </span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setWantsCustomization(true)}
+                                        className={`py-3 px-4 rounded-xl border text-xs font-bold transition-all cursor-pointer text-center ${
+                                            wantsCustomization
+                                                ? 'border-[#7A3E4A] text-[#7A3E4A] bg-white ring-2 ring-[#7A3E4A]/5 scale-[1.01] shadow-xs'
+                                                : 'border-gray-200 text-gray-400 bg-white hover:text-gray-655'
+                                        }`}
+                                    >
+                                        Com Personalização
+                                        <span className="block text-[10px] text-gray-400 font-medium mt-0.5">
+                                            {product.customPriceWith ? formatPrice(product.customPriceWith) : formatPrice(product.price)}
+                                        </span>
+                                    </button>
+                                </div>
+
+                                {wantsCustomization && (
+                                    <div className="space-y-3 animate-[fadeIn_200ms_ease-out]">
+                                        <div>
+                                            <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Escreva seu texto:</label>
+                                            <input
+                                                type="text"
+                                                maxLength={20}
+                                                value={customText}
+                                                onChange={e => setCustomText(e.target.value.toUpperCase())}
+                                                placeholder="Ex: LOVE"
+                                                className="w-full bg-white border border-[#EEEEEE] rounded-xl px-4 py-3 text-sm font-bold text-[#1A1A1A] outline-none focus:border-[#7A3E4A]"
+                                            />
+                                        </div>
+
+                                        {/* Fees breakdown */}
+                                        <div className="bg-white p-3.5 rounded-xl border border-[#EEEEEE] space-y-1.5 text-[11px] text-gray-500 font-medium">
+                                            <div className="flex justify-between">
+                                                <span>Custo por Letra:</span>
+                                                <span className="font-bold text-gray-700">{formatPrice(product.customFeeLetter !== undefined ? parseFloat(product.customFeeLetter) : 2.50)}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span>Custo por Número:</span>
+                                                <span className="font-bold text-gray-700">{formatPrice(product.customFeeNumber !== undefined ? parseFloat(product.customFeeNumber) : 2.50)}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span>Custo por Emoji:</span>
+                                                <span className="font-bold text-gray-700">{formatPrice(product.customFeeEmoji !== undefined ? parseFloat(product.customFeeEmoji) : 3.00)}</span>
+                                            </div>
+                                            {customText.length > 0 && (
+                                                <div className="border-t border-dashed border-[#EEEEEE] pt-2 mt-2 flex justify-between text-[#7A3E4A] font-bold">
+                                                    <span>Adicional da Palavra:</span>
+                                                    <span>+{formatPrice(customPrice)}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
 
                         {/* Quantity and Checkout Actions */}
                         <div className="flex flex-col sm:flex-row gap-4 items-stretch mb-6">
@@ -475,6 +684,80 @@ export default function ProductPage() {
                 visible={notification.visible}
                 onClose={() => setNotification({ ...notification, visible: false })}
             />
+
+            {/* LIGHTBOX MODAL (ZOOM) */}
+            {lightboxOpen && productImages.length > 0 && (
+                <div className="fixed inset-0 z-[200] bg-black/95 flex flex-col justify-between items-center p-4 md:p-8 animate-[fadeIn_200ms_ease-out]">
+                    {/* Header */}
+                    <div className="w-full flex justify-between items-center text-white z-10">
+                        <span className="text-xs font-bold tracking-widest text-gray-400">
+                            {activeImageIndex + 1} / {productImages.length}
+                        </span>
+                        <button 
+                            type="button"
+                            onClick={() => setLightboxOpen(false)}
+                            className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 transition-all flex items-center justify-center cursor-pointer text-white"
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    {/* Main Image Slider */}
+                    <div className="relative flex-1 w-full flex items-center justify-center max-h-[80vh]">
+                        {productImages.length > 1 && (
+                            <button
+                                type="button"
+                                onClick={() => setActiveImageIndex(prev => (prev - 1 + productImages.length) % productImages.length)}
+                                className="absolute left-2 md:left-4 z-10 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center cursor-pointer transition-colors"
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+                        )}
+
+                        <img 
+                            src={getAssetUrl(productImages[activeImageIndex])} 
+                            alt="" 
+                            className="max-w-full max-h-full object-contain rounded-lg shadow-2xl transition-all duration-300"
+                        />
+
+                        {productImages.length > 1 && (
+                            <button
+                                type="button"
+                                onClick={() => setActiveImageIndex(prev => (prev + 1) % productImages.length)}
+                                className="absolute right-2 md:right-4 z-10 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center cursor-pointer transition-colors"
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Footer Slider Thumbnails */}
+                    {productImages.length > 1 && (
+                        <div className="flex gap-2 overflow-x-auto py-4 max-w-full z-10">
+                            {productImages.map((img, idx) => (
+                                <button
+                                    key={idx}
+                                    type="button"
+                                    onClick={() => setActiveImageIndex(idx)}
+                                    className={`w-14 h-16 rounded-lg overflow-hidden border shrink-0 transition-all p-0.5 cursor-pointer ${
+                                        activeImageIndex === idx 
+                                            ? 'border-white ring-2 ring-white/20 scale-105' 
+                                            : 'border-transparent opacity-50 hover:opacity-100'
+                                    }`}
+                                >
+                                    <img src={getAssetUrl(img)} alt="" className="w-full h-full object-cover rounded" />
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     )
 }

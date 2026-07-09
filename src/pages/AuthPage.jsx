@@ -932,7 +932,7 @@ export default function AuthPage() {
                             <form onSubmit={handleLogin} className="animate-[fadeIn_300ms_ease-out] space-y-6">
                                 <div>
                                     <label className="block font-heading text-xs font-semibold text-gray-700 tracking-wider mb-2">E-mail</label>
-                                    <input type="email" name="loginEmail" placeholder="seu@email.com" required
+                                    <input type="text" name="loginEmail" placeholder="seu@email.com ou usuário" required
                                         className="w-full bg-transparent px-0 py-2.5 border-b border-gray-200 focus:border-[#C6A76A] outline-none font-heading text-sm font-medium text-gray-900 transition-all placeholder:text-gray-400" />
                                 </div>
                                 <div>

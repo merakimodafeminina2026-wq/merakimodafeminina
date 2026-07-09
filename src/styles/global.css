@@ -159,3 +159,26 @@ img {
 .animate-logo-breath {
     animation: logoBreath 5s ease-in-out infinite;
 }
+
+@keyframes butterflyFlight {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg) scaleX(1);
+    }
+    20% {
+        transform: translateY(-4px) rotate(5deg) scaleX(0.85);
+    }
+    40% {
+        transform: translateY(-1px) rotate(-3deg) scaleX(1.05);
+    }
+    60% {
+        transform: translateY(-5px) rotate(3deg) scaleX(0.8);
+    }
+    80% {
+        transform: translateY(-2px) rotate(-1deg) scaleX(1.1);
+    }
+}
+
+.animate-butterfly-flight {
+    animation: butterflyFlight 4s ease-in-out infinite;
+    transform-origin: center;
+}

@@ -104,6 +104,7 @@ const DEFAULT_PRODUCTS = [
         ],
         badge: 'Conforto',
         section: 'best-sellers',
+        inPromoCombo: true,
         sizes: ['G', 'GG', 'XG'],
         description: 'Sutiã reforçado com alças largas acolchoadas e renda macia de alta durabilidade.'
     },
@@ -259,6 +260,7 @@ const DEFAULT_PRODUCTS = [
         ],
         badge: 'Push Up',
         section: 'best-sellers',
+        inPromoCombo: true,
         sizes: ['P', 'M', 'G'],
         description: 'Sutiã com bojo push-up que realça o busto naturalmente, revestido em renda acetinada.'
     },

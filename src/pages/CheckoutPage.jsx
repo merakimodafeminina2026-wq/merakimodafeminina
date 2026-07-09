@@ -9,7 +9,7 @@ import Notification from '../components/Notification.jsx'
 import { getAssetUrl } from '../utils/assets.js'
 
 export default function CheckoutPage() {
-    const { cart, clearCart, cartCount } = useCart()
+    const { cart, clearCart, cartCount, subtotal: rawSubtotal, comboDiscount } = useCart()
     const { user } = useAuth()
     const navigate = useNavigate()
     const [notification, setNotification] = useState({ message: '', visible: false })
@@ -117,7 +117,7 @@ export default function CheckoutPage() {
     const [appliedCoupon, setAppliedCoupon] = useState(null)
     const [couponError, setCouponError] = useState('')
 
-    const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0)
+    const subtotal = Math.max(0, rawSubtotal - comboDiscount)
     const shipping = subtotal >= 299 ? 0 : 19.90
     
     // Pix discount is 5% off subtotal
@@ -729,10 +729,27 @@ export default function CheckoutPage() {
 
                             {/* Summary Values */}
                             <div className="border-t border-gray-100 pt-4 space-y-2.5 text-sm">
-                                <div className="flex justify-between text-gray-500">
-                                    <span>Subtotal</span>
-                                    <span className="font-bold text-gray-700">{formatCurrency(subtotal)}</span>
-                                </div>
+                                {comboDiscount > 0 ? (
+                                    <>
+                                        <div className="flex justify-between text-gray-500">
+                                            <span>Subtotal original</span>
+                                            <span className="font-semibold text-gray-700">{formatCurrency(rawSubtotal)}</span>
+                                        </div>
+                                        <div className="flex justify-between text-[#D11A6E] font-medium">
+                                            <span>Desconto do Combo</span>
+                                            <span>-{formatCurrency(comboDiscount)}</span>
+                                        </div>
+                                        <div className="flex justify-between text-gray-500 font-bold">
+                                            <span>Subtotal</span>
+                                            <span className="text-gray-700">{formatCurrency(subtotal)}</span>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="flex justify-between text-gray-500">
+                                        <span>Subtotal</span>
+                                        <span className="font-bold text-gray-700">{formatCurrency(subtotal)}</span>
+                                    </div>
+                                )}
                                 <div className="flex justify-between text-gray-500">
                                     <span>Entrega / Frete</span>
                                     <span className="font-bold text-gray-700">
