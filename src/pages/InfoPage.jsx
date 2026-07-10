@@ -209,7 +209,7 @@ export default function InfoPage({ tab: propTab }) {
                         </p>
                         <h3 className="text-sm font-bold text-[#7A3E4A] uppercase tracking-wider mt-4">Condições Especiais</h3>
                         <ul className="list-disc pl-5 text-xs text-gray-650 space-y-2">
-                            <li><strong>Frete Grátis:</strong> Disponível nas compras acima de <strong>R$ 299,90</strong> para estados do Sudeste.</li>
+                            <li><strong>Frete Grátis:</strong> Disponível nas compras acima de <strong>R$ 299,90</strong> para estados do Centro-Oeste.</li>
                             <li><strong>Prazo de Expedição:</strong> Pedidos aprovados são separados, revisados e postados em até 24 horas úteis.</li>
                             <li><strong>Opções de Envio:</strong> Modalidades Sedex (Expressa) e PAC (Normal), cotadas no fechamento do carrinho.</li>
                         </ul>

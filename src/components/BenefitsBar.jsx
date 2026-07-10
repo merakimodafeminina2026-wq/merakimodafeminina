@@ -31,7 +31,7 @@ export default function BenefitsBar() {
                     <svg className="w-3.5 h-3.5 text-gray-550 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.129-1.125v-3.026a2.999 2.999 0 0 0-.828-2.122L17.5 7.5h-3V18.75m3 0H14.25m3-11.25h.008v-.008h-.008v.008zm-3 0h-3v11.25m0-11.25H9.75M9.75 7.5H5.25v11.25m4.5 0H5.25" />
                     </svg>
-                    <span>Frete grátis para a região Sudeste nas compras acima de R$ 299,90.</span>
+                    <span>Frete grátis para a região Centro-Oeste nas compras acima de R$ 299,90.</span>
                 </div>
 
                 {/* Vertical Divider */}
