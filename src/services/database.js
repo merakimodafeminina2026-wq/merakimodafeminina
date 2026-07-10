@@ -124,8 +124,15 @@ export async function initSupabaseSync() {
 
         // 5. Sync Categories
         const { data: dbCategories } = await supabase.from('categories').select('*')
-        if (dbCategories) {
+        if (dbCategories && dbCategories.length > 0) {
             localStorage.setItem('meraki_categories', JSON.stringify(dbCategories))
+        } else {
+            // Push any locally stored categories to Supabase, adding group default
+            const localCats = JSON.parse(localStorage.getItem('meraki_categories') || '[]')
+            if (localCats.length > 0) {
+                const withDefaults = localCats.map(cat => ({ group: 'Geral', ...cat }))
+                await syncTableToSupabase('categories', withDefaults)
+            }
         }
 
         // 6. Sync Returns
@@ -179,7 +186,11 @@ localStorage.setItem = function(key, value) {
         } else if (key === 'meraki_banners') {
             syncTableToSupabase('banners', parsed)
         } else if (key === 'meraki_categories') {
-            syncTableToSupabase('categories', parsed)
+            const categoriesWithDefaults = parsed.map(cat => ({
+                group: 'Geral',
+                ...cat,
+            }))
+            syncTableToSupabase('categories', categoriesWithDefaults)
         } else if (key.startsWith('meraki_returns_')) {
             const email = key.replace('meraki_returns_', '')
             const returnsWithEmail = parsed.map(ret => ({ ...ret, customerEmail: email }))
