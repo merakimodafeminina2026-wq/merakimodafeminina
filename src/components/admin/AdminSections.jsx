@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { supabase } from '../../services/supabase.js'
 
 function Icon({ path, className = 'w-5 h-5' }) {
     return (
@@ -932,6 +933,42 @@ export function SettingsSection({ saving, setSaving }) {
     })
     const [message, setMessage] = useState('')
 
+    // Password states
+    const [newPassword, setNewPassword] = useState('')
+    const [confirmPassword, setConfirmPassword] = useState('')
+    const [pwdMessage, setPwdMessage] = useState('')
+    const [pwdError, setPwdError] = useState(false)
+
+    const handlePasswordChange = async (e) => {
+        e.preventDefault()
+        setSaving(true)
+        setPwdMessage('')
+        setPwdError(false)
+        if (newPassword !== confirmPassword) {
+            setPwdMessage('As senhas não coincidem.')
+            setPwdError(true)
+            setSaving(false)
+            return
+        }
+        if (newPassword.length < 6) {
+            setPwdMessage('A senha deve ter no mínimo 6 caracteres.')
+            setPwdError(true)
+            setSaving(false)
+            return
+        }
+        const { error } = await supabase.auth.updateUser({ password: newPassword })
+        if (error) {
+            setPwdMessage('Erro ao alterar senha: ' + error.message)
+            setPwdError(true)
+        } else {
+            setPwdMessage('Senha de administrador atualizada com sucesso!')
+            setNewPassword('')
+            setConfirmPassword('')
+            setTimeout(() => setPwdMessage(''), 3000)
+        }
+        setSaving(false)
+    }
+
     const handleSave = async (e) => {
         e.preventDefault()
         setSaving(true)
@@ -1027,6 +1064,53 @@ export function SettingsSection({ saving, setSaving }) {
                         className="px-6 py-3 bg-gradient-to-r from-[#7A3E4A] to-[#9A5060] text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:shadow-lg hover:shadow-[#7A3E4A]/30 transition-all cursor-pointer disabled:opacity-50"
                     >
                         {saving ? 'Salvando...' : 'Salvar Alterações'}
+                    </button>
+                </div>
+            </form>
+
+            {/* Alteração de Senha */}
+            <form onSubmit={handlePasswordChange} className="bg-white p-6 rounded-2xl border border-[#EEEEEE] space-y-4">
+                <div>
+                    <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider mb-1">Alterar Minha Senha de Administrador</h3>
+                    <p className="text-xs text-gray-400">Insira a nova senha para atualizar seu login administrativo do site.</p>
+                </div>
+
+                {pwdMessage && (
+                    <div className={`p-4 text-xs font-bold rounded-xl border ${pwdError ? 'bg-red-50 border-red-200 text-red-800' : 'bg-emerald-50 border-emerald-200 text-emerald-800'}`}>
+                        {pwdMessage}
+                    </div>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-wider">Nova Senha (Mínimo 6 caracteres)</label>
+                        <input
+                            type="password"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            className="w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-sm outline-none focus:border-[#7A3E4A] focus:ring-2 focus:ring-[#7A3E4A]/10 transition-all font-medium"
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-wider">Confirmar Nova Senha</label>
+                        <input
+                            type="password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            className="w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-sm outline-none focus:border-[#7A3E4A] focus:ring-2 focus:ring-[#7A3E4A]/10 transition-all font-medium"
+                            required
+                        />
+                    </div>
+                </div>
+
+                <div className="flex gap-2 justify-end pt-2">
+                    <button
+                        type="submit"
+                        disabled={saving}
+                        className="px-6 py-3 bg-gradient-to-r from-[#7A3E4A] to-[#9A5060] text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:shadow-lg hover:shadow-[#7A3E4A]/30 transition-all cursor-pointer disabled:opacity-50"
+                    >
+                        {saving ? 'Alterando...' : 'Alterar Senha'}
                     </button>
                 </div>
             </form>
