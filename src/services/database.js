@@ -64,43 +64,36 @@ export async function initSupabaseSync() {
             localStorage.setItem('meraki_products', JSON.stringify(dbProducts || []))
         }
 
-        // 2. Sync Orders
-        const { data: dbOrders } = await supabase.from('orders').select('*')
-        if (dbOrders) {
-            const mappedOrders = dbOrders.map(o => mapDbToFrontend('orders', o))
+        // 2. Sync Orders — always overwrite to clear stale cache
+        const { data: dbOrders, error: oError } = await supabase.from('orders').select('*')
+        if (!oError) {
+            const mappedOrders = (dbOrders || []).map(o => mapDbToFrontend('orders', o))
             localStorage.setItem('meraki_orders', JSON.stringify(mappedOrders))
         }
 
-        // 3. Sync Coupons
-        const { data: dbCoupons } = await supabase.from('coupons').select('*')
-        if (dbCoupons) {
-            const mappedCoupons = dbCoupons.map(c => mapDbToFrontend('coupons', c))
+        // 3. Sync Coupons — always overwrite to clear stale cache
+        const { data: dbCoupons, error: cError } = await supabase.from('coupons').select('*')
+        if (!cError) {
+            const mappedCoupons = (dbCoupons || []).map(c => mapDbToFrontend('coupons', c))
             localStorage.setItem('meraki_coupons', JSON.stringify(mappedCoupons))
         }
 
         // 4. Sync Banners
-        const { data: dbBanners } = await supabase.from('banners').select('*')
-        if (dbBanners) {
-            localStorage.setItem('meraki_banners', JSON.stringify(dbBanners))
+        const { data: dbBanners, error: bError } = await supabase.from('banners').select('*')
+        if (!bError) {
+            localStorage.setItem('meraki_banners', JSON.stringify(dbBanners || []))
         }
 
-        // 5. Sync Categories
-        const { data: dbCategories } = await supabase.from('categories').select('*')
-        if (dbCategories && dbCategories.length > 0) {
-            localStorage.setItem('meraki_categories', JSON.stringify(dbCategories))
-        } else {
-            // Push any locally stored categories to Supabase, adding group default
-            const localCats = JSON.parse(localStorage.getItem('meraki_categories') || '[]')
-            if (localCats.length > 0) {
-                const withDefaults = localCats.map(cat => ({ group: 'Geral', ...cat }))
-                await syncTableToSupabase('categories', withDefaults)
-            }
+        // 5. Sync Categories — always overwrite to clear stale cache
+        const { data: dbCategories, error: catError } = await supabase.from('categories').select('*')
+        if (!catError) {
+            localStorage.setItem('meraki_categories', JSON.stringify(dbCategories || []))
         }
 
-        // 6. Sync Returns
-        const { data: dbReturns } = await supabase.from('returns').select('*')
-        if (dbReturns) {
-            const mappedReturns = dbReturns.map(r => mapDbToFrontend('returns', r))
+        // 6. Sync Returns — always overwrite to clear stale cache
+        const { data: dbReturns, error: rError } = await supabase.from('returns').select('*')
+        if (!rError) {
+            const mappedReturns = (dbReturns || []).map(r => mapDbToFrontend('returns', r))
             localStorage.setItem('meraki_all_returns', JSON.stringify(mappedReturns))
         }
 
