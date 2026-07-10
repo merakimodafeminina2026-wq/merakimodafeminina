@@ -342,3 +342,20 @@ export async function deleteImage(url) {
         return { error: e }
     }
 }
+
+export async function createCategory(category) {
+    try {
+        const payload = filterPayloadForTable('categories', category)
+        const { data, error } = await supabase.from('categories').insert([payload]).select().single()
+        if (error) throw error
+
+        // Update local cache
+        const current = JSON.parse(localStorage.getItem('meraki_categories') || '[]')
+        current.push(data)
+        originalSetItem('meraki_categories', JSON.stringify(current))
+
+        return { data, error: null }
+    } catch (e) {
+        return { data: null, error: e }
+    }
+}
