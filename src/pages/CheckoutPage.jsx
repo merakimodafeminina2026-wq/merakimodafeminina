@@ -8,6 +8,7 @@ import Footer from '../components/Footer.jsx'
 import WhatsAppButton from '../components/WhatsAppButton.jsx'
 import Notification from '../components/Notification.jsx'
 import { getAssetUrl } from '../utils/assets.js'
+import { createPaymentSession } from '../services/payment.js'
 
 export default function CheckoutPage() {
     const { cart, clearCart, cartCount, subtotal: rawSubtotal, comboDiscount } = useCart()
@@ -355,8 +356,14 @@ export default function CheckoutPage() {
         // Clear cart
         clearCart()
 
-        // Redirect to success
-        navigate(`/order-success/${orderId}`)
+        // Create InfinitePay payment session and redirect
+        const { paymentUrl } = await createPaymentSession(newOrder)
+        if (paymentUrl) {
+            window.location.href = paymentUrl
+        } else {
+            // Redirect to success fallback
+            navigate(`/order-success/${orderId}`)
+        }
     }
 
     if (cart.length === 0) {
