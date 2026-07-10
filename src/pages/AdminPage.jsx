@@ -1308,7 +1308,7 @@ export default function AdminPage() {
                                             onClick={() => {
                                                 const name = newCategoryName.trim();
                                                 if (name && !categories.some(c => (typeof c === 'object' ? c.name : c) === name)) {
-                                                    const updated = [...categories, { name, description: 'Coleção Meraki', image: '/placeholder.jpg' }];
+                                                    const updated = [...categories, { name, description: 'Coleção Meraki', image: '/placeholder.jpg', group: 'Geral' }];
                                                     setCategories(updated);
                                                     localStorage.setItem('meraki_categories', JSON.stringify(updated));
                                                     setSelectedModalCategory(name);

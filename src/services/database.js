@@ -194,30 +194,31 @@ localStorage.setItem = function(key, value) {
     }
 }
 
+function filterPayloadForTable(table, item) {
+    const allowedCols = TABLE_COLUMNS[table]
+    if (!allowedCols) return item
+    const payload = {}
+    for (const col of allowedCols) {
+        const possibleKeys = FIELD_MAPPING[col] || [col]
+        let val = undefined
+        for (const key of possibleKeys) {
+            if (item[key] !== undefined) {
+                val = item[key]
+                break
+            }
+        }
+        if (val !== undefined) {
+            payload[col] = val
+        }
+    }
+    return payload
+}
+
 async function syncTableToSupabase(table, items) {
     if (!Array.isArray(items)) return
     try {
-        const allowedCols = TABLE_COLUMNS[table]
         for (const item of items) {
-            const payload = {}
-            
-            if (allowedCols) {
-                for (const col of allowedCols) {
-                    const possibleKeys = FIELD_MAPPING[col] || [col]
-                    let val = undefined
-                    for (const key of possibleKeys) {
-                        if (item[key] !== undefined) {
-                            val = item[key]
-                            break
-                        }
-                    }
-                    if (val !== undefined) {
-                        payload[col] = val
-                    }
-                }
-            } else {
-                Object.assign(payload, item)
-            }
+            const payload = filterPayloadForTable(table, item)
 
             // If the item has a temporary numeric ID (like mock products/orders), Supabase will auto-generate a UUID if omitted
             if (payload.id && (payload.id.length < 10 || !isNaN(payload.id))) {
@@ -267,7 +268,8 @@ export async function getProductsBySection(section) {
 
 export async function createProduct(product) {
     try {
-        const { data, error } = await supabase.from('products').insert([product]).select().single()
+        const payload = filterPayloadForTable('products', product)
+        const { data, error } = await supabase.from('products').insert([payload]).select().single()
         if (error) throw error
         
         // Update local cache
@@ -283,7 +285,8 @@ export async function createProduct(product) {
 
 export async function updateProduct(id, updates) {
     try {
-        const { data, error } = await supabase.from('products').update(updates).eq('id', id).select().single()
+        const payload = filterPayloadForTable('products', updates)
+        const { data, error } = await supabase.from('products').update(payload).eq('id', id).select().single()
         if (error) throw error
 
         // Update local cache
