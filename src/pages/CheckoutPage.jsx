@@ -639,124 +639,39 @@ export default function CheckoutPage() {
                                 <span className="w-5.5 h-5.5 rounded-full bg-[#7A3E4A] text-white flex items-center justify-center text-[11px] font-bold font-sans antialiased">3</span>
                                 Método de Pagamento
                             </h2>
-                            
-                            {/* Payment Tabs */}
-                            <div className="grid grid-cols-3 gap-3">
-                                {[
-                                    { id: 'pix', title: 'Pix', subtitle: '5% OFF' },
-                                    { id: 'card', title: 'Cartão', subtitle: 'Até 12x' },
-                                    { id: 'boleto', title: 'Boleto', subtitle: 'À vista' }
-                                ].map(method => (
-                                    <button
-                                        key={method.id}
-                                        type="button"
-                                        onClick={() => setPaymentMethod(method.id)}
-                                        className={`p-4 border rounded-2xl flex flex-col items-center justify-center gap-1 transition-all ${
-                                            paymentMethod === method.id 
-                                                ? 'border-[#7A3E4A] bg-[#FDF8F6] text-[#7A3E4A]' 
-                                                : 'border-gray-200 bg-white hover:border-gray-300 text-gray-600'
-                                        }`}
-                                    >
-                                        <span className="text-sm font-bold">{method.title}</span>
-                                        <span className="text-[9px] uppercase tracking-wider font-extrabold text-[#C6A76A]">
-                                            {method.subtitle}
-                                        </span>
-                                    </button>
-                                ))}
+
+                            <div className="p-5 bg-gradient-to-br from-[#7A3E4A]/5 to-[#9A5060]/5 border border-[#7A3E4A]/10 rounded-2xl space-y-4">
+                                <div className="flex gap-3 items-start">
+                                    <div className="p-3 bg-[#7A3E4A] rounded-xl text-white mt-1">
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-sm text-[#1A1A1A]">Checkout Seguro InfinitePay</h3>
+                                        <p className="text-xs text-gray-500 font-light mt-1">
+                                            Você será redirecionada para a página oficial e criptografada da **InfinitePay** para concluir o pagamento de forma 100% segura.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="border-t border-[#7A3E4A]/10 pt-4 flex flex-wrap gap-4 justify-around text-center">
+                                    <div className="flex flex-col items-center">
+                                        <span className="text-xs font-bold text-gray-800">Pix</span>
+                                        <span className="text-[10px] text-emerald-600 font-bold">Aprovado na hora</span>
+                                    </div>
+                                    <div className="w-[1px] bg-gray-200"></div>
+                                    <div className="flex flex-col items-center">
+                                        <span className="text-xs font-bold text-gray-800">Cartão de Crédito</span>
+                                        <span className="text-[10px] text-gray-500 font-medium">Até 12x sem juros</span>
+                                    </div>
+                                    <div className="w-[1px] bg-gray-200"></div>
+                                    <div className="flex flex-col items-center">
+                                        <span className="text-xs font-bold text-gray-800">Cartão de Débito</span>
+                                        <span className="text-[10px] text-gray-500 font-medium">À vista</span>
+                                    </div>
+                                </div>
                             </div>
-
-                            {/* Card fields */}
-                            {paymentMethod === 'card' && (
-                                <div className="space-y-4 pt-2 animate-[fadeIn_200ms_ease-out]">
-                                    <div className="flex flex-col">
-                                        <label className="text-xs text-gray-500 font-semibold mb-1">Número do Cartão</label>
-                                        <input 
-                                            type="text" 
-                                            placeholder="0000 0000 0000 0000"
-                                            required={paymentMethod === 'card'} 
-                                            value={cardNumber} 
-                                            onChange={(e) => setCardNumber(e.target.value)}
-                                            className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:bg-white focus:border-[#7A3E4A] transition-all" 
-                                        />
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <label className="text-xs text-gray-500 font-semibold mb-1">Nome Impresso no Cartão</label>
-                                        <input 
-                                            type="text" 
-                                            required={paymentMethod === 'card'} 
-                                            value={cardName} 
-                                            onChange={(e) => setCardName(e.target.value)}
-                                            className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:bg-white focus:border-[#7A3E4A] transition-all" 
-                                        />
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="flex flex-col">
-                                            <label className="text-xs text-gray-500 font-semibold mb-1">Validade</label>
-                                            <input 
-                                                type="text" 
-                                                placeholder="MM/AA"
-                                                required={paymentMethod === 'card'} 
-                                                value={cardExpiry} 
-                                                onChange={(e) => setCardExpiry(e.target.value)}
-                                                className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:bg-white focus:border-[#7A3E4A] transition-all" 
-                                            />
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <label className="text-xs text-gray-500 font-semibold mb-1">CVV</label>
-                                            <input 
-                                                type="text" 
-                                                placeholder="000"
-                                                required={paymentMethod === 'card'} 
-                                                value={cardCvv} 
-                                                onChange={(e) => setCardCvv(e.target.value)}
-                                                className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:bg-white focus:border-[#7A3E4A] transition-all" 
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <label className="text-xs text-gray-500 font-semibold mb-1">Opções de Parcelamento</label>
-                                        <select
-                                            value={installments}
-                                            onChange={(e) => setInstallments(e.target.value)}
-                                            className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:bg-white focus:border-[#7A3E4A] transition-all text-gray-700"
-                                        >
-                                            {[...Array(12)].map((_, i) => {
-                                                const factor = i + 1
-                                                const monthly = total / factor
-                                                return (
-                                                    <option key={factor} value={factor}>
-                                                        {factor}x de {formatCurrency(monthly)} {factor <= 3 ? 'sem juros' : ''}
-                                                    </option>
-                                                )
-                                            })}
-                                        </select>
-                                    </div>
-                                </div>
-                            )}
-
-                            {paymentMethod === 'pix' && (
-                                <div className="p-4 bg-green-50/50 border border-green-100 rounded-2xl flex gap-3 text-xs text-green-800">
-                                    <svg className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <div>
-                                        <span className="font-bold block mb-1">Aprovado na hora!</span>
-                                        Pague via Pix e ganhe <span className="font-bold">5% de desconto especial</span>. A chave Pix copia-e-cola será gerada logo após clicar no botão de finalizar.
-                                    </div>
-                                </div>
-                            )}
-
-                            {paymentMethod === 'boleto' && (
-                                <div className="p-4 bg-gray-50 border border-gray-200 rounded-2xl flex gap-3 text-xs text-gray-600">
-                                    <svg className="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <div>
-                                        <span className="font-bold block mb-1">Confirmação em até 3 dias úteis</span>
-                                        Boleto bancário gerado ao finalizar o pedido. Pode ser pago em qualquer lotérica ou aplicativo de banco.
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     </div>
 
