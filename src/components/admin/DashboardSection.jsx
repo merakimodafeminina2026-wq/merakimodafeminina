@@ -171,7 +171,7 @@ export default function DashboardSection({
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <p className="text-xs font-bold text-gray-800 truncate">{p.name}</p>
-                                            <p className="text-[10px] text-gray-400 font-medium">{p.category}</p>
+                                            <p className="text-[10px] text-gray-400 font-medium">{typeof p.category === 'object' && p.category !== null ? p.category.name : p.category}</p>
                                         </div>
                                         <span className="text-xs font-black text-[#7A3E4A] shrink-0">R$ {p.price?.toFixed(2)}</span>
                                     </div>

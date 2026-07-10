@@ -90,7 +90,7 @@ export function ProductsSection({
                                                     <span className="text-sm font-bold text-gray-900">{p.name}</span>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-3 text-xs text-gray-500 font-semibold">{p.category}</td>
+                                            <td className="px-6 py-3 text-xs text-gray-500 font-semibold">{typeof p.category === 'object' && p.category !== null ? p.category.name : p.category}</td>
                                             <td className="px-6 py-3">
                                                 <span className="text-sm font-black text-[#7A3E4A]">R$ {p.price?.toFixed(2)}</span>
                                             </td>
@@ -122,7 +122,7 @@ export function ProductsSection({
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm font-bold text-gray-900 truncate">{p.name}</p>
-                                    <p className="text-[10px] text-gray-400 font-medium mb-1">{p.category} • Est: {p.stock !== undefined ? p.stock : 10} un • {sectionLabel(p.section)}</p>
+                                    <p className="text-[10px] text-gray-400 font-medium mb-1">{typeof p.category === 'object' && p.category !== null ? p.category.name : p.category} • Est: {p.stock !== undefined ? p.stock : 10} un • {sectionLabel(p.section)}</p>
                                     <p className="text-base font-black text-[#7A3E4A]">R$ {p.price?.toFixed(2)}</p>
                                 </div>
                                 <div className="flex flex-col gap-2 shrink-0">

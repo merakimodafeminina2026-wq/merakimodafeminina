@@ -67,6 +67,17 @@ const FIELD_MAPPING = {
     postagecode: ['postageCode', 'postagecode']
 }
 
+// Normalize a category value (object or string) to its name string
+function normalizeCategoryName(cat) {
+    if (!cat) return cat
+    if (typeof cat === 'object') return cat.name || ''
+    try {
+        const parsed = JSON.parse(cat)
+        if (parsed && typeof parsed === 'object') return parsed.name || cat
+    } catch (_) { /* not JSON */ }
+    return cat
+}
+
 // Translate database properties back to camelCase for frontend pages
 function mapDbToFrontend(table, item) {
     if (!item) return item
@@ -81,6 +92,8 @@ function mapDbToFrontend(table, item) {
         if (item.postagecode !== undefined) mapped.postageCode = item.postagecode
     } else if (table === 'coupons') {
         if (item.minpurchase !== undefined) mapped.minPurchase = item.minpurchase
+    } else if (table === 'products') {
+        mapped.category = normalizeCategoryName(item.category)
     }
     return mapped
 }
