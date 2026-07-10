@@ -47,6 +47,44 @@ const DEFAULT_PRODUCTS = [
 ]
 
 // Initialize database schema sync
+// Define expected columns for each database table
+const TABLE_COLUMNS = {
+    orders: ['id', 'customername', 'customeremail', 'total', 'status', 'items', 'created_at'],
+    coupons: ['id', 'code', 'value', 'type', 'minpurchase', 'created_at'],
+    banners: ['id', 'image', 'alt', 'created_at'],
+    returns: ['id', 'orderid', 'itemid', 'customeremail', 'type', 'postagecode', 'status', 'created_at'],
+    categories: ['id', 'name', 'group', 'description', 'image', 'created_at'],
+    products: ['id', 'name', 'category', 'price', 'original_price', 'image', 'badge', 'section', 'sizes', 'description', 'created_at']
+}
+
+// Maps database columns to alternative frontend keys
+const FIELD_MAPPING = {
+    customername: ['customerName', 'customername'],
+    customeremail: ['customerEmail', 'customeremail'],
+    minpurchase: ['minPurchase', 'minpurchase'],
+    orderid: ['orderId', 'orderid'],
+    itemid: ['itemId', 'itemid'],
+    postagecode: ['postageCode', 'postagecode']
+}
+
+// Translate database properties back to camelCase for frontend pages
+function mapDbToFrontend(table, item) {
+    if (!item) return item
+    const mapped = { ...item }
+    if (table === 'orders') {
+        if (item.customername !== undefined) mapped.customerName = item.customername
+        if (item.customeremail !== undefined) mapped.customerEmail = item.customeremail
+    } else if (table === 'returns') {
+        if (item.orderid !== undefined) mapped.orderId = item.orderid
+        if (item.itemid !== undefined) mapped.itemId = item.itemid
+        if (item.customeremail !== undefined) mapped.customerEmail = item.customeremail
+        if (item.postagecode !== undefined) mapped.postageCode = item.postagecode
+    } else if (table === 'coupons') {
+        if (item.minpurchase !== undefined) mapped.minPurchase = item.minpurchase
+    }
+    return mapped
+}
+
 export async function initSupabaseSync() {
     try {
         console.log('🔄 Sincronizando tabelas com o Supabase...')
@@ -67,13 +105,15 @@ export async function initSupabaseSync() {
         // 2. Sync Orders
         const { data: dbOrders } = await supabase.from('orders').select('*')
         if (dbOrders) {
-            localStorage.setItem('meraki_orders', JSON.stringify(dbOrders))
+            const mappedOrders = dbOrders.map(o => mapDbToFrontend('orders', o))
+            localStorage.setItem('meraki_orders', JSON.stringify(mappedOrders))
         }
 
         // 3. Sync Coupons
         const { data: dbCoupons } = await supabase.from('coupons').select('*')
         if (dbCoupons) {
-            localStorage.setItem('meraki_coupons', JSON.stringify(dbCoupons))
+            const mappedCoupons = dbCoupons.map(c => mapDbToFrontend('coupons', c))
+            localStorage.setItem('meraki_coupons', JSON.stringify(mappedCoupons))
         }
 
         // 4. Sync Banners
@@ -91,7 +131,8 @@ export async function initSupabaseSync() {
         // 6. Sync Returns
         const { data: dbReturns } = await supabase.from('returns').select('*')
         if (dbReturns) {
-            localStorage.setItem('meraki_all_returns', JSON.stringify(dbReturns))
+            const mappedReturns = dbReturns.map(r => mapDbToFrontend('returns', r))
+            localStorage.setItem('meraki_all_returns', JSON.stringify(mappedReturns))
         }
 
         // 7. Sync Store Config
@@ -154,13 +195,37 @@ localStorage.setItem = function(key, value) {
 async function syncTableToSupabase(table, items) {
     if (!Array.isArray(items)) return
     try {
+        const allowedCols = TABLE_COLUMNS[table]
         for (const item of items) {
-            const payload = { ...item }
+            const payload = {}
+            
+            if (allowedCols) {
+                for (const col of allowedCols) {
+                    const possibleKeys = FIELD_MAPPING[col] || [col]
+                    let val = undefined
+                    for (const key of possibleKeys) {
+                        if (item[key] !== undefined) {
+                            val = item[key]
+                            break
+                        }
+                    }
+                    if (val !== undefined) {
+                        payload[col] = val
+                    }
+                }
+            } else {
+                Object.assign(payload, item)
+            }
+
             // If the item has a temporary numeric ID (like mock products/orders), Supabase will auto-generate a UUID if omitted
             if (payload.id && (payload.id.length < 10 || !isNaN(payload.id))) {
                 delete payload.id // Let Supabase generate a proper UUID
             }
-            await supabase.from(table).upsert(payload, { onConflict: 'id' })
+
+            const { error } = await supabase.from(table).upsert(payload, { onConflict: 'id' })
+            if (error) {
+                console.error(`Erro ao upsertar item na tabela ${table}:`, error.message, payload)
+            }
         }
     } catch (e) {
         console.error(`Erro ao sincronizar tabela ${table} para o Supabase:`, e)
