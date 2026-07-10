@@ -1083,35 +1083,6 @@ export default function AdminPage() {
                                             )
                                         })}
                                     </div>
-                                    <div className="flex gap-2 max-w-xs">
-                                        <input
-                                            type="text"
-                                            value={newCategoryName}
-                                            onChange={e => setNewCategoryName(e.target.value)}
-                                            placeholder="Nova categoria..."
-                                            className="flex-1 px-3 py-2 text-xs bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl outline-none focus:border-[#7A3E4A] font-medium"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={async () => {
-                                                const name = newCategoryName.trim();
-                                                if (name && !categories.some(c => (typeof c === 'object' ? c.name : c) === name)) {
-                                                    const newCat = { name, description: 'Coleção Meraki', image: '/placeholder.jpg', group: 'Geral' }
-                                                    const { data, error } = await createCategory(newCat)
-                                                    if (!error && data) {
-                                                        setCategories(prev => [...prev, data]);
-                                                        setSelectedModalCategory(name);
-                                                        setNewCategoryName('');
-                                                    } else {
-                                                        alert('Erro ao criar categoria no banco de dados: ' + (error?.message || 'Erro desconhecido'))
-                                                    }
-                                                }
-                                            }}
-                                            className="px-3.5 py-2 bg-[#7A3E4A] hover:bg-[#5A2E34] text-white text-[10px] font-bold uppercase rounded-xl cursor-pointer transition-colors"
-                                        >
-                                            + Criar
-                                        </button>
-                                    </div>
                                 </div>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
