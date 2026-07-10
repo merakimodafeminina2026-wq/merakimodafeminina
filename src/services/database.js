@@ -13,6 +13,10 @@ const TABLE_COLUMNS = {
     products: [
         'id', 'name', 'category', 'price', 'original_price', 'image', 'badge', 'section', 'sizes', 'description', 'stock', 'created_at',
         'colors', 'inPromoCombo', 'isCustomizable', 'customPriceWith', 'customPriceWithout', 'customFeeLetter', 'customFeeNumber', 'customFeeEmoji'
+    ],
+    store_config: [
+        'id', 'whatsapp', 'sac_phone', 'address', 'cnpj', 'infinitepay_handle',
+        'topbarMessages', 'topbarStyle', 'promoCombo', 'editorial'
     ]
 }
 
@@ -30,7 +34,11 @@ const FIELD_MAPPING = {
     custompricewithout: ['customPriceWithout', 'custompricewithout'],
     customfeeletter: ['customFeeLetter', 'customfeeletter'],
     customfeenumber: ['customFeeNumber', 'customfeenumber'],
-    customfeeemoji: ['customFeeEmoji', 'customfeeemoji']
+    customfeeemoji: ['customFeeEmoji', 'customfeeemoji'],
+    topbarmessages: ['topbarMessages', 'topbarmessages'],
+    topbarstyle: ['topbarStyle', 'topbarstyle'],
+    promocombo: ['promoCombo', 'promocombo'],
+    editorial: ['editorial', 'editorial']
 }
 
 // Normalize a category value (object or string) to its name string
@@ -67,6 +75,11 @@ function mapDbToFrontend(table, item) {
         if (item.customfeeletter !== undefined) mapped.customFeeLetter = item.customfeeletter
         if (item.customfeenumber !== undefined) mapped.customFeeNumber = item.customfeenumber
         if (item.customfeeemoji !== undefined) mapped.customFeeEmoji = item.customfeeemoji
+    } else if (table === 'store_config') {
+        if (item.topbarmessages !== undefined) mapped.topbarMessages = item.topbarmessages
+        if (item.topbarstyle !== undefined) mapped.topbarStyle = item.topbarstyle
+        if (item.promocombo !== undefined) mapped.promoCombo = item.promocombo
+        if (item.editorial !== undefined) mapped.editorial = item.editorial
     }
     return mapped
 }
@@ -115,9 +128,16 @@ export async function initSupabaseSync() {
         }
 
         // 7. Sync Store Config
-        const { data: dbConfig } = await supabase.from('store_config').select('*').eq('id', 'default').maybeSingle()
+        const { data: dbConfigRaw } = await supabase.from('store_config').select('*').eq('id', 'default').maybeSingle()
+        const dbConfig = dbConfigRaw ? mapDbToFrontend('store_config', dbConfigRaw) : null
+        
         if (dbConfig) {
             localStorage.setItem('meraki_store_config', JSON.stringify(dbConfig))
+            // Extract and sync visual keys to individual localStorage items
+            if (dbConfig.topbarMessages) localStorage.setItem('meraki_topbar_messages', JSON.stringify(dbConfig.topbarMessages))
+            if (dbConfig.topbarStyle) localStorage.setItem('meraki_topbar_style', JSON.stringify(dbConfig.topbarStyle))
+            if (dbConfig.promoCombo) localStorage.setItem('meraki_promo_combo', JSON.stringify(dbConfig.promoCombo))
+            if (dbConfig.editorial) localStorage.setItem('meraki_editorial', JSON.stringify(dbConfig.editorial))
         } else {
             const defaultConfig = {
                 id: 'default',
@@ -125,10 +145,39 @@ export async function initSupabaseSync() {
                 sac_phone: '(11) 2388-0403',
                 address: 'Rua Alpont, 428 - Bairro Capuava - Mauá - São Paulo. CEP: 09380-115',
                 cnpj: '57.484.768/0064-89',
-                infinitepay_handle: 'nicolly_gomes'
+                infinitepay_handle: 'nicolly_gomes',
+                topbarMessages: [
+                    "✨ Frete Grátis acima de R$ 299 • Parcele em até 12x",
+                    "Utilize o cupom BEMVIND010 em sua primeira compra!",
+                    "Ganhe 5% de desconto pagando no PIX!"
+                ],
+                topbarStyle: { backgroundColor: '#7A3E4A', textColor: '#FFFFFF', speed: 15 },
+                promoCombo: {
+                    title: 'Combo Sutiã',
+                    subtitle: 'Do P ao EG. Diversos modelos para você escolher.',
+                    image: 'https://images.unsplash.com/photo-1616422285623-13ff0162193c?w=800&auto=format&fit=crop&q=80',
+                    price2Items: 139,
+                    price3Items: 169,
+                    link: '/category/promo-combo',
+                    query: 'sutiã',
+                    visible: true
+                },
+                editorial: {
+                    label: 'Artesanal & Premium',
+                    title: 'A arte de se sentir extraordinária.',
+                    description: 'Cada costura, cada detalhe em renda foi pensado para elevar sua confiança e celebrar sua beleza única em todos os momentos.',
+                    buttonText: 'Ver Manifesto',
+                    buttonLink: '/story',
+                    image: '/assets/banners/banner-2.jpg'
+                }
             }
-            await supabase.from('store_config').upsert(defaultConfig)
+            const payload = filterPayloadForTable('store_config', defaultConfig)
+            await supabase.from('store_config').upsert(payload)
             localStorage.setItem('meraki_store_config', JSON.stringify(defaultConfig))
+            localStorage.setItem('meraki_topbar_messages', JSON.stringify(defaultConfig.topbarMessages))
+            localStorage.setItem('meraki_topbar_style', JSON.stringify(defaultConfig.topbarStyle))
+            localStorage.setItem('meraki_promo_combo', JSON.stringify(defaultConfig.promoCombo))
+            localStorage.setItem('meraki_editorial', JSON.stringify(defaultConfig.editorial))
         }
 
         console.log('✅ Sincronização concluída com sucesso.')
@@ -168,7 +217,28 @@ localStorage.setItem = function(key, value) {
             const returnsWithEmail = parsed.map(ret => ({ ...ret, customerEmail: email }))
             syncTableToSupabase('returns', returnsWithEmail)
         } else if (key === 'meraki_store_config') {
-            supabase.from('store_config').upsert(parsed).then(() => {
+            const payload = filterPayloadForTable('store_config', parsed)
+            supabase.from('store_config').upsert(payload).then(() => {
+                window.dispatchEvent(new Event('storeConfigUpdated'))
+            })
+        } else if (
+            key === 'meraki_topbar_messages' ||
+            key === 'meraki_topbar_style' ||
+            key === 'meraki_promo_combo' ||
+            key === 'meraki_editorial'
+        ) {
+            // Helper to sync subcomponents configs directly inside store_config record
+            const currentConfig = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+            const mapping = {
+                'meraki_topbar_messages': 'topbarMessages',
+                'meraki_topbar_style': 'topbarStyle',
+                'meraki_promo_combo': 'promoCombo',
+                'meraki_editorial': 'editorial'
+            }
+            currentConfig[mapping[key]] = parsed
+            originalSetItem('meraki_store_config', JSON.stringify(currentConfig))
+            const payload = filterPayloadForTable('store_config', currentConfig)
+            supabase.from('store_config').upsert(payload).then(() => {
                 window.dispatchEvent(new Event('storeConfigUpdated'))
             })
         }
