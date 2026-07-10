@@ -54,7 +54,7 @@ const TABLE_COLUMNS = {
     banners: ['id', 'image', 'alt', 'created_at'],
     returns: ['id', 'orderid', 'itemid', 'customeremail', 'type', 'postagecode', 'status', 'created_at'],
     categories: ['id', 'name', 'group', 'description', 'image', 'created_at'],
-    products: ['id', 'name', 'category', 'price', 'original_price', 'image', 'badge', 'section', 'sizes', 'description', 'created_at']
+    products: ['id', 'name', 'category', 'price', 'original_price', 'image', 'badge', 'section', 'sizes', 'description', 'stock', 'created_at']
 }
 
 // Maps database columns to alternative frontend keys

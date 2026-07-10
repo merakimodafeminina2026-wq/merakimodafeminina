@@ -352,12 +352,27 @@ export default function ProductPage() {
                         )}
 
                         {/* Stock Banner */}
-                        <div className="bg-[#7A3E4A]/10 text-[#4A2028] text-xs px-4 py-3 flex items-center justify-center gap-2 mb-6 w-full text-center rounded-none font-sans">
-                            <svg className="w-4 h-4 text-[#7A3E4A] fill-[#7A3E4A] shrink-0" viewBox="0 0 24 24">
-                                <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
-                            </svg>
-                            <span>Aproveite! Restam menos de <strong className="font-bold text-[#7A3E4A]">10 unidades</strong></span>
-                        </div>
+                        {product.stock !== undefined && (
+                            <div className={`text-xs px-4 py-3 flex items-center justify-center gap-2 mb-6 w-full text-center rounded-xl font-sans ${
+                                product.stock === 0 
+                                    ? 'bg-red-50 text-red-700 border border-red-100' 
+                                    : product.stock <= 5 
+                                        ? 'bg-amber-50 text-amber-800 border border-amber-200 animate-pulse'
+                                        : 'bg-[#7A3E4A]/10 text-[#4A2028]'
+                            }`}>
+                                <svg className={`w-4 h-4 shrink-0 ${product.stock === 0 ? 'text-red-500 fill-red-500' : 'text-[#7A3E4A] fill-[#7A3E4A]'}`} viewBox="0 0 24 24">
+                                    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+                                </svg>
+                                <span>
+                                    {product.stock === 0 
+                                        ? 'Sem estoque no momento' 
+                                        : product.stock <= 5 
+                                            ? `Aproveite! Restam apenas ${product.stock} unidades em estoque!`
+                                            : `Produto disponível (${product.stock} un. em estoque)`
+                                    }
+                                </span>
+                            </div>
+                        )}
 
                         {/* Size Selection */}
                         {sizes.length > 0 && (
@@ -488,13 +503,18 @@ export default function ProductPage() {
                                 <button 
                                     onClick={() => setQuantity(q => Math.max(1, q - 1))}
                                     className="text-gray-500 hover:text-gray-900 font-bold px-2 text-lg focus:outline-none"
+                                    disabled={product.stock === 0}
                                 >
                                     -
                                 </button>
-                                <span className="font-extrabold text-gray-900 w-8 text-center text-sm">{quantity}</span>
+                                <span className="font-extrabold text-gray-900 w-8 text-center text-sm">{product.stock === 0 ? 0 : quantity}</span>
                                 <button 
-                                    onClick={() => setQuantity(q => q + 1)}
+                                    onClick={() => setQuantity(q => {
+                                        const maxStock = product.stock !== undefined ? product.stock : 99
+                                        return Math.min(maxStock, q + 1)
+                                    })}
                                     className="text-gray-500 hover:text-gray-900 font-bold px-2 text-lg focus:outline-none"
+                                    disabled={product.stock === 0}
                                 >
                                     +
                                 </button>
@@ -503,12 +523,17 @@ export default function ProductPage() {
                             {/* Cart Action Button */}
                             <button
                                 onClick={handleAddToCart}
-                                className="flex-grow bg-[#7A3E4A] hover:bg-[#63303a] text-white py-4 px-8 rounded-xl text-xs font-bold uppercase tracking-[0.2em] transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                                disabled={product.stock === 0}
+                                className={`flex-grow py-4 px-8 rounded-xl text-xs font-bold uppercase tracking-[0.2em] transition-all duration-300 flex items-center justify-center gap-2 ${
+                                    product.stock === 0 
+                                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed border border-gray-300' 
+                                        : 'bg-[#7A3E4A] hover:bg-[#63303a] text-white shadow-md hover:shadow-lg'
+                                }`}
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                                 </svg>
-                                Adicionar à Sacola
+                                {product.stock === 0 ? 'Sem Estoque' : 'Adicionar à Sacola'}
                             </button>
                         </div>
 

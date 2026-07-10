@@ -629,6 +629,7 @@ export default function AdminPage() {
         const productData = {
             name: form.pName.value, category: selectedModalCategory,
             price: parseFloat(form.pPrice.value), original_price: parseFloat(form.pOriginalPrice.value) || 0,
+            stock: parseInt(form.pStock.value) || 0,
             badge: form.pBadge.value, section: selectedModalSection, sizes: selectedModalSizes, image: allImages, description: form.pDescription.value,
             colors: selectedModalColors,
             inPromoCombo: form.pInPromoCombo?.checked || false,
@@ -1321,9 +1322,10 @@ export default function AdminPage() {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                     <div><label className={labelCls}>Preço (R$)</label><input type="number" name="pPrice" step="0.01" min="0" required defaultValue={editingProduct?.price || ''} className={inputCls} /></div>
                                     <div><label className={labelCls}>Preço Original (R$)</label><input type="number" name="pOriginalPrice" step="0.01" min="0" defaultValue={editingProduct?.original_price || '0'} className={inputCls} /></div>
+                                    <div><label className={labelCls}>Estoque</label><input type="number" name="pStock" min="0" required defaultValue={editingProduct?.stock !== undefined ? editingProduct.stock : 10} className={inputCls} /></div>
                                 </div>
 
                                 <div>

@@ -74,8 +74,8 @@ export function ProductsSection({
                             <table className="w-full text-left">
                                 <thead>
                                     <tr className="border-b border-[#F5F5F5]">
-                                        {['Produto', 'Categoria', 'Preço', 'Seção', ''].map((h, i) => (
-                                            <th key={i} className={`px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest ${i === 4 ? 'text-right' : ''}`}>{h}</th>
+                                        {['Produto', 'Categoria', 'Preço', 'Estoque', 'Seção', ''].map((h, i) => (
+                                            <th key={i} className={`px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest ${i === 5 ? 'text-right' : ''}`}>{h}</th>
                                         ))}
                                     </tr>
                                 </thead>
@@ -94,6 +94,7 @@ export function ProductsSection({
                                             <td className="px-6 py-3">
                                                 <span className="text-sm font-black text-[#7A3E4A]">R$ {p.price?.toFixed(2)}</span>
                                             </td>
+                                            <td className="px-6 py-3 text-xs text-gray-500 font-bold">{p.stock !== undefined ? p.stock : 10} un</td>
                                             <td className="px-6 py-3">
                                                 <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#7A3E4A]/10 text-[#7A3E4A]">
                                                     {sectionLabel(p.section)}
@@ -121,7 +122,7 @@ export function ProductsSection({
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm font-bold text-gray-900 truncate">{p.name}</p>
-                                    <p className="text-[10px] text-gray-400 font-medium mb-1">{p.category} • {sectionLabel(p.section)}</p>
+                                    <p className="text-[10px] text-gray-400 font-medium mb-1">{p.category} • Est: {p.stock !== undefined ? p.stock : 10} un • {sectionLabel(p.section)}</p>
                                     <p className="text-base font-black text-[#7A3E4A]">R$ {p.price?.toFixed(2)}</p>
                                 </div>
                                 <div className="flex flex-col gap-2 shrink-0">
