@@ -236,7 +236,8 @@ async function syncTableToSupabase(table, items) {
                 delete payload.id // Let Supabase generate a proper UUID
             }
 
-            const { error } = await supabase.from(table).upsert(payload, { onConflict: 'id' })
+            const conflictKey = table === 'categories' ? 'name' : 'id'
+            const { error } = await supabase.from(table).upsert(payload, { onConflict: conflictKey })
             if (error) {
                 console.error(`Erro ao upsertar item na tabela ${table}:`, error.message, payload)
             }
