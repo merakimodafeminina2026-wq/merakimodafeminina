@@ -10,6 +10,7 @@ import ProductCard from '../components/ProductCard.jsx'
 import SearchOverlay from '../components/SearchOverlay.jsx'
 import QuickViewModal from '../components/QuickViewModal.jsx'
 import Notification from '../components/Notification.jsx'
+import WhatsAppButton from '../components/WhatsAppButton.jsx'
 
 export default function ProductPage() {
     const { id } = useParams()
@@ -40,13 +41,28 @@ export default function ProductPage() {
         if (stored) {
             setReviews(JSON.parse(stored))
         } else {
-            setReviews([
+            const defaults = [
                 { id: 1, name: 'Mariana Silva', rating: 5, date: '04/05/2026', comment: 'Renda impecável e caimento perfeito. Muito confortável!', verified: true },
                 { id: 2, name: 'Carolina Souza', rating: 5, date: '28/04/2026', comment: 'Lindo demais! Veste super bem e o suporte do bojo é ótimo.', verified: true },
                 { id: 3, name: 'Beatriz Costa', rating: 4, date: '15/04/2026', comment: 'Amei a cor e o material. A entrega foi super rápida.', verified: true }
-            ])
+            ]
+            setReviews(defaults)
+            localStorage.setItem(`meraki_reviews_${id}`, JSON.stringify(defaults))
         }
     }, [id])
+
+    // Save reviews on change
+    useEffect(() => {
+        if (reviews.length > 0) {
+            localStorage.setItem(`meraki_reviews_${id}`, JSON.stringify(reviews))
+        }
+    }, [reviews, id])
+
+    const averageRating = useMemo(() => {
+        if (reviews.length === 0) return 5
+        const sum = reviews.reduce((acc, r) => acc + r.rating, 0)
+        return (sum / reviews.length).toFixed(1)
+    }, [reviews])
 
     // Find target product
     const product = useMemo(() => {
@@ -252,14 +268,16 @@ export default function ProductPage() {
                     <div className="lg:col-span-5 flex flex-col">
                         {/* Rating Header */}
                         <div className="flex items-center gap-2 text-xs text-gray-400 mb-3">
-                            <div className="flex text-amber-400">
+                            <div className="flex">
                                 {Array.from({ length: 5 }).map((_, i) => (
-                                    <svg key={i} className="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                                    <svg key={i} className={`w-4 h-4 ${i < Math.round(averageRating) ? 'text-amber-400 fill-current' : 'text-gray-200 fill-current'}`} viewBox="0 0 20 20">
                                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                     </svg>
                                 ))}
                             </div>
-                            <span>({reviews.length}) Clique e veja</span>
+                            <span className="cursor-pointer hover:underline text-gray-500 font-semibold" onClick={() => document.getElementById('reviews-section')?.scrollIntoView({ behavior: 'smooth' })}>
+                                {averageRating} ({reviews.length} avaliações)
+                            </span>
                             <span className="text-gray-300">|</span>
                             <span>SKU: {1000000 + product.id}</span>
                         </div>
@@ -545,16 +563,16 @@ export default function ProductPage() {
                 </div>
 
                 {/* Reviews Section */}
-                <section className="py-16 mt-16 border-t border-gray-100">
+                <section id="reviews-section" className="py-16 mt-16 border-t border-gray-100">
                     <h3 className="font-heading text-2xl text-gray-900 mb-8 text-center">Opiniões de Quem Já Comprou</h3>
 
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                         {/* Rating Summary */}
                         <div className="lg:col-span-4 bg-white rounded-2xl p-6 border border-gray-100 shadow-2xs text-center flex flex-col justify-center items-center h-fit">
-                            <span className="text-5xl font-extrabold text-gray-900">4.9</span>
-                            <div className="flex text-amber-400 my-2">
+                            <span className="text-5xl font-extrabold text-gray-900">{averageRating}</span>
+                            <div className="flex my-2">
                                 {Array.from({ length: 5 }).map((_, i) => (
-                                    <svg key={i} className="w-5 h-5 fill-current" viewBox="0 0 20 20">
+                                    <svg key={i} className={`w-5 h-5 ${i < Math.round(averageRating) ? 'text-amber-400 fill-current' : 'text-gray-200 fill-current'}`} viewBox="0 0 20 20">
                                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                     </svg>
                                 ))}
@@ -758,6 +776,9 @@ export default function ProductPage() {
                     )}
                 </div>
             )}
+
+            {/* WhatsApp Floating Button */}
+            <WhatsAppButton />
         </div>
     )
 }

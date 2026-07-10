@@ -1,9 +1,8 @@
-// Mock Database Service using LocalStorage
-// Resolves all promises locally without calling Supabase
+import { supabase } from './supabase.js'
 
+// Cache default products for auto-seeding if Supabase is empty
 const DEFAULT_PRODUCTS = [
     {
-        id: '1',
         name: 'Conjunto de Renda Sophie Noir',
         category: 'Conjuntos',
         price: 189.90,
@@ -18,7 +17,6 @@ const DEFAULT_PRODUCTS = [
         description: 'Conjunto delicado em renda premium francesa com sutiã com aro e calcinha fio regulável.'
     },
     {
-        id: '2',
         name: 'Robe Satin Royale',
         category: 'Linha Noite',
         price: 219.90,
@@ -33,7 +31,6 @@ const DEFAULT_PRODUCTS = [
         description: 'Robe em cetim de seda pura com acabamento em renda chantilly nas mangas.'
     },
     {
-        id: '3',
         name: 'Body Red Velvet Sexy',
         category: 'Linha Sexy',
         price: 159.90,
@@ -46,347 +43,126 @@ const DEFAULT_PRODUCTS = [
         section: 'new-collection',
         sizes: ['P', 'M', 'G'],
         description: 'Body cavado em veludo molhado vermelho e detalhes em tule transparente.'
-    },
-    {
-        id: '4',
-        name: 'Corset Classic Ethereal',
-        category: 'Plus Size',
-        price: 259.90,
-        original_price: 320.00,
-        image: [
-            'https://images.unsplash.com/photo-1608748010899-18f300247112?w=600&auto=format&fit=crop&q=80',
-            'https://images.unsplash.com/photo-1616422285623-13ff0162193c?w=600&auto=format&fit=crop&q=80'
-        ],
-        badge: 'Destaque',
-        section: 'featured',
-        sizes: ['G', 'GG', 'XG'],
-        description: 'Corset estruturado com barbatanas flexíveis para modelagem perfeita e conforto incomparável.'
-    },
-    {
-        id: '5',
-        name: 'Baby Doll de Seda Romance',
-        category: 'Linha Noite',
-        price: 149.90,
-        original_price: 179.90,
-        image: [
-            'https://images.unsplash.com/photo-1610398000003-1600c35928bb?w=600&auto=format&fit=crop&q=80',
-            'https://images.unsplash.com/photo-1582533561751-ef6f6ab93a2e?w=600&auto=format&fit=crop&q=80'
-        ],
-        badge: '15% OFF',
-        section: 'best-sellers',
-        sizes: ['P', 'M', 'G'],
-        description: 'Baby doll leve em malha fria e renda antialérgica, ideal para noites tranquilas.'
-    },
-    {
-        id: '6',
-        name: 'Conjunto Strappy Noir',
-        category: 'Linha Sexy',
-        price: 199.90,
-        original_price: 0,
-        image: [
-            'https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=600&auto=format&fit=crop&q=80',
-            'https://images.unsplash.com/photo-1616422285623-13ff0162193c?w=600&auto=format&fit=crop&q=80'
-        ],
-        badge: 'Novidade',
-        section: 'new-collection',
-        sizes: ['P', 'M', 'G'],
-        description: 'Conjunto sexy com tiras reguláveis, renda floral e bojo estruturado.'
-    },
-    {
-        id: '7',
-        name: 'Sutiã Rendado Comfort',
-        category: 'Plus Size',
-        price: 129.90,
-        original_price: 159.90,
-        image: [
-            'https://images.unsplash.com/photo-1626294336060-cc989c894565?w=600&auto=format&fit=crop&q=80',
-            'https://images.unsplash.com/photo-1616422285623-13ff0162193c?w=600&auto=format&fit=crop&q=80'
-        ],
-        badge: 'Conforto',
-        section: 'best-sellers',
-        inPromoCombo: true,
-        sizes: ['G', 'GG', 'XG'],
-        description: 'Sutiã reforçado com alças largas acolchoadas e renda macia de alta durabilidade.'
-    },
-    {
-        id: '8',
-        name: 'Conjunto All White Bride',
-        category: 'Conjuntos',
-        price: 229.90,
-        original_price: 299.90,
-        image: [
-            'https://images.unsplash.com/photo-1626294336060-cc989c894565?w=600&auto=format&fit=crop&q=80',
-            'https://images.unsplash.com/photo-1610398000003-1600c35928bb?w=600&auto=format&fit=crop&q=80'
-        ],
-        badge: 'Noivas',
-        section: 'featured',
-        sizes: ['P', 'M', 'G'],
-        description: 'Conjunto especial noiva em renda branca floral com detalhes em pérola sintética.'
-    },
-    {
-        id: '9',
-        name: 'Calcinha Fio Regulável Amore',
-        category: 'Ofertas',
-        price: 39.90,
-        original_price: 59.90,
-        image: [
-            'https://images.unsplash.com/photo-1612817288484-6f916006741a?w=600&auto=format&fit=crop&q=80'
-        ],
-        badge: 'Popular',
-        section: 'best-sellers',
-        sizes: ['P', 'M', 'G'],
-        description: 'Calcinha modelo fio dental com regulagem lateral em metal dourado e renda antialérgica.'
-    },
-    {
-        id: '10',
-        name: 'Calcinha Hot Pant Modeladora',
-        category: 'Plus Size',
-        price: 49.90,
-        original_price: 69.90,
-        image: [
-            'https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=600&auto=format&fit=crop&q=80'
-        ],
-        badge: 'Cós Alto',
-        section: 'featured',
-        sizes: ['M', 'G', 'GG', 'XG'],
-        description: 'Calcinha hot pant em microfibra tecnológica de média compressão e recortes rendados nas laterais.'
-    },
-    {
-        id: '11',
-        name: 'Kit 3 Calcinhas Cotton Conforto',
-        category: 'Ofertas',
-        price: 89.90,
-        original_price: 119.90,
-        image: [
-            'https://images.unsplash.com/photo-1612817288484-6f916006741a?w=600&auto=format&fit=crop&q=80'
-        ],
-        badge: 'Melhor Valor',
-        section: 'best-sellers',
-        sizes: ['P', 'M', 'G', 'GG'],
-        description: 'Kit contendo 3 calcinhas de algodão egípcio extremamente macias, ideais para o dia a dia.'
-    },
-    {
-        id: '12',
-        name: 'Calcinha Renda e Tule Sedução',
-        category: 'Linha Sexy',
-        price: 45.90,
-        original_price: 0,
-        image: [
-            'https://images.unsplash.com/photo-1612817288484-6f916006741a?w=600&auto=format&fit=crop&q=80'
-        ],
-        badge: 'Sexy',
-        section: 'new-collection',
-        sizes: ['P', 'M', 'G'],
-        description: 'Calcinha sem costura com frente rendada e costas em tule transparente invisível.'
-    },
-    {
-        id: '13',
-        name: 'Conjunto Bralette Cozy Sem Aro',
-        category: 'Conjuntos',
-        price: 139.90,
-        original_price: 169.90,
-        image: [
-            'https://images.unsplash.com/photo-1626294336060-cc989c894565?w=600&auto=format&fit=crop&q=80'
-        ],
-        badge: 'Super Conforto',
-        section: 'new-collection',
-        sizes: ['P', 'M', 'G'],
-        description: 'Bralette confortável sem aro em microfibra macia de toque gelado com calcinha boxer curta.'
-    },
-    {
-        id: '14',
-        name: 'Camisola de Cetim Elegance',
-        category: 'Linha Noite',
-        price: 179.90,
-        original_price: 219.00,
-        image: [
-            'https://images.unsplash.com/photo-1618220179428-22790b461013?w=600&auto=format&fit=crop&q=80'
-        ],
-        badge: 'Sofisticado',
-        section: 'featured',
-        sizes: ['P', 'M', 'G', 'GG'],
-        description: 'Camisola curta com alças reguláveis em cetim brilhante e decote em renda no busto.'
-    },
-    {
-        id: '15',
-        name: 'Body Cavado de Renda Imperial',
-        category: 'Linha Sexy',
-        price: 189.90,
-        original_price: 249.90,
-        image: [
-            'https://images.unsplash.com/photo-1608748010899-18f300247112?w=600&auto=format&fit=crop&q=80'
-        ],
-        badge: 'Destaque',
-        section: 'featured',
-        sizes: ['P', 'M', 'G'],
-        description: 'Body de renda de manga longa bufante removível e forro de tule invisível no busto.'
-    },
-    {
-        id: '16',
-        name: 'Conjunto Plus Size Amour Renda',
-        category: 'Plus Size',
-        price: 209.90,
-        original_price: 0,
-        image: [
-            'https://images.unsplash.com/photo-1616422285623-13ff0162193c?w=600&auto=format&fit=crop&q=80'
-        ],
-        badge: 'Modelagem Perfeita',
-        section: 'best-sellers',
-        sizes: ['G', 'GG', 'XG'],
-        description: 'Conjunto com sutiã reforçado com arco largo e base confortável com calcinha caleçon de renda.'
-    },
-    {
-        id: '17',
-        name: 'Calcinha Fio Regulável Lavanda',
-        category: 'Ofertas',
-        price: 35.90,
-        original_price: 49.90,
-        image: [
-            'https://images.unsplash.com/photo-1612817288484-6f916006741a?w=600&auto=format&fit=crop&q=80'
-        ],
-        badge: 'Novidade',
-        section: 'new-collection',
-        sizes: ['P', 'M', 'G'],
-        description: 'Calcinha fio dental regulável com detalhes em renda lilás suave e toque sedoso.'
-    },
-    {
-        id: '18',
-        name: 'Sutiã Push-Up Rendez-vous',
-        category: 'Ofertas',
-        price: 79.90,
-        original_price: 119.90,
-        image: [
-            'https://images.unsplash.com/photo-1616422285623-13ff0162193c?w=600&auto=format&fit=crop&q=80'
-        ],
-        badge: 'Push Up',
-        section: 'best-sellers',
-        inPromoCombo: true,
-        sizes: ['P', 'M', 'G'],
-        description: 'Sutiã com bojo push-up que realça o busto naturalmente, revestido em renda acetinada.'
-    },
-    {
-        id: '19',
-        name: 'Conjunto de Renda Ruby Red',
-        category: 'Conjuntos',
-        price: 199.90,
-        original_price: 259.90,
-        image: [
-            'https://images.unsplash.com/photo-1616422285623-13ff0162193c?w=600&auto=format&fit=crop&q=80',
-            'https://images.unsplash.com/photo-1608748010899-18f300247112?w=600&auto=format&fit=crop&q=80'
-        ],
-        badge: 'Premium',
-        section: 'new-collection',
-        sizes: ['P', 'M', 'G'],
-        description: 'Conjunto rendado na cor vermelha rubi com aro estruturado de sustentação.'
-    },
-    {
-        id: '20',
-        name: 'Camisola Satin Longa Noir',
-        category: 'Linha Noite',
-        price: 199.90,
-        original_price: 249.90,
-        image: [
-            'https://images.unsplash.com/photo-1582533561751-ef6f6ab93a2e?w=600&auto=format&fit=crop&q=80'
-        ],
-        badge: 'Elegante',
-        section: 'featured',
-        sizes: ['M', 'G', 'GG'],
-        description: 'Camisola longa de cetim com abertura lateral e costas nuas transpassadas.'
-    },
-    {
-        id: '21',
-        name: 'Conjunto Corset Satin e Renda',
-        category: 'Conjuntos',
-        price: 249.90,
-        original_price: 319.90,
-        image: [
-            'https://images.unsplash.com/photo-1608748010899-18f300247112?w=600&auto=format&fit=crop&q=80'
-        ],
-        badge: 'Luxo',
-        section: 'featured',
-        sizes: ['P', 'M', 'G'],
-        description: 'Corset rendado com fecho traseiro por colchetes e calcinha fio dental dupla.'
-    },
-    {
-        id: '22',
-        name: 'Sutiã Meia Taça Classic Lace',
-        category: 'Ofertas',
-        price: 89.95,
-        original_price: 129.90,
-        image: [
-            'https://images.unsplash.com/photo-1626294336060-cc989c894565?w=600&auto=format&fit=crop&q=80'
-        ],
-        badge: 'Clássico',
-        section: 'best-sellers',
-        sizes: ['P', 'M', 'G'],
-        description: 'Sutiã modelo meia taça clássico, ideal para decotes quadrados, confeccionado em renda antialérgica.'
-    },
-    {
-        id: '23',
-        name: 'Calcinha Boxer Algodão Premium',
-        category: 'Ofertas',
-        price: 34.90,
-        original_price: 49.90,
-        image: [
-            'https://images.unsplash.com/photo-1612817288484-6f916006741a?w=600&auto=format&fit=crop&q=80'
-        ],
-        badge: 'Básico Chic',
-        section: 'best-sellers',
-        sizes: ['M', 'G', 'GG'],
-        description: 'Calcinha estilo boxer curta de algodão com toque suave e elástico largo invisível na cintura.'
-    },
-    {
-        id: '24',
-        name: 'Conjunto Plus Size Bella Coral',
-        category: 'Plus Size',
-        price: 219.90,
-        original_price: 0,
-        image: [
-            'https://images.unsplash.com/photo-1616422285623-13ff0162193c?w=600&auto=format&fit=crop&q=80'
-        ],
-        badge: 'Novidade',
-        section: 'new-collection',
-        sizes: ['G', 'GG', 'XG'],
-        description: 'Conjunto em renda coral vibrante com aro duplo de metal e laterais largas modeladoras.'
     }
 ]
 
-function getLocalProducts() {
-    const data = localStorage.getItem('meraki_products')
-    const version = localStorage.getItem('meraki_products_version')
-    const CURRENT_VERSION = 'v6'
+// Initialize database schema sync
+export async function initSupabaseSync() {
+    try {
+        console.log('🔄 Sincronizando tabelas com o Supabase...')
+        
+        // 1. Sync Products (and seed if empty)
+        const { data: dbProducts, error: pError } = await supabase.from('products').select('*')
+        if (!pError) {
+            if (!dbProducts || dbProducts.length === 0) {
+                console.log('🌱 Banco vazio. Semeando produtos padrão no Supabase...')
+                await supabase.from('products').insert(DEFAULT_PRODUCTS)
+                const { data: reloadedProducts } = await supabase.from('products').select('*')
+                localStorage.setItem('meraki_products', JSON.stringify(reloadedProducts || DEFAULT_PRODUCTS))
+            } else {
+                localStorage.setItem('meraki_products', JSON.stringify(dbProducts))
+            }
+        }
 
-    if (!data || version !== CURRENT_VERSION) {
-        localStorage.setItem('meraki_products', JSON.stringify(DEFAULT_PRODUCTS))
-        localStorage.setItem('meraki_products_version', CURRENT_VERSION)
-        return DEFAULT_PRODUCTS
+        // 2. Sync Orders
+        const { data: dbOrders } = await supabase.from('orders').select('*')
+        if (dbOrders) {
+            localStorage.setItem('meraki_orders', JSON.stringify(dbOrders))
+        }
+
+        // 3. Sync Coupons
+        const { data: dbCoupons } = await supabase.from('coupons').select('*')
+        if (dbCoupons) {
+            localStorage.setItem('meraki_coupons', JSON.stringify(dbCoupons))
+        }
+
+        // 4. Sync Banners
+        const { data: dbBanners } = await supabase.from('banners').select('*')
+        if (dbBanners) {
+            localStorage.setItem('meraki_banners', JSON.stringify(dbBanners))
+        }
+
+        // 5. Sync Categories
+        const { data: dbCategories } = await supabase.from('categories').select('*')
+        if (dbCategories) {
+            localStorage.setItem('meraki_categories', JSON.stringify(dbCategories))
+        }
+
+        // 6. Sync Returns
+        const { data: dbReturns } = await supabase.from('returns').select('*')
+        if (dbReturns) {
+            // Group by email if needed, or save globally
+            localStorage.setItem('meraki_all_returns', JSON.stringify(dbReturns))
+        }
+
+        console.log('✅ Sincronização concluída com sucesso.')
+    } catch (e) {
+        console.error('⚠️ Falha ao sincronizar dados com Supabase:', e)
     }
-    return JSON.parse(data)
 }
 
+// Start sync immediately
+initSupabaseSync()
 
-function saveLocalProducts(products) {
-    localStorage.setItem('meraki_products', JSON.stringify(products))
+// Intercept LocalStorage writes to sync them back to Supabase
+const originalSetItem = localStorage.setItem.bind(localStorage)
+
+localStorage.setItem = function(key, value) {
+    originalSetItem(key, value)
+    
+    // Asynchronously push updates to Supabase
+    try {
+        const parsed = JSON.parse(value)
+        if (key === 'meraki_products') {
+            syncTableToSupabase('products', parsed)
+        } else if (key === 'meraki_orders') {
+            syncTableToSupabase('orders', parsed)
+        } else if (key === 'meraki_coupons') {
+            syncTableToSupabase('coupons', parsed)
+        } else if (key === 'meraki_banners') {
+            syncTableToSupabase('banners', parsed)
+        } else if (key === 'meraki_categories') {
+            syncTableToSupabase('categories', parsed)
+        } else if (key.startsWith('meraki_returns_')) {
+            syncTableToSupabase('returns', parsed)
+        }
+    } catch (e) {
+        // Not JSON or non-sync key
+    }
 }
 
-// =============================================
-// PRODUCTS
-// =============================================
+async function syncTableToSupabase(table, items) {
+    if (!Array.isArray(items)) return
+    try {
+        for (const item of items) {
+            const payload = { ...item }
+            // If the item has a temporary numeric ID (like mock products/orders), Supabase will auto-generate a UUID if omitted
+            if (payload.id && (payload.id.length < 10 || !isNaN(payload.id))) {
+                delete payload.id // Let Supabase generate a proper UUID
+            }
+            await supabase.from(table).upsert(payload, { onConflict: 'id' })
+        }
+    } catch (e) {
+        console.error(`Erro ao sincronizar tabela ${table} para o Supabase:`, e)
+    }
+}
 
+// Helper database functions expected by pages
 export async function getProducts() {
     try {
-        const products = getLocalProducts()
-        return { data: products, error: null }
+        const { data, error } = await supabase.from('products').select('*')
+        if (error) throw error
+        return { data: data || [], error: null }
     } catch (e) {
-        return { data: null, error: e }
+        return { data: [], error: e }
     }
 }
 
 export async function getProductById(id) {
     try {
-        const products = getLocalProducts()
-        const product = products.find(p => p.id === id)
-        return { data: product || null, error: product ? null : new Error('Product not found') }
+        const { data, error } = await supabase.from('products').select('*').eq('id', id).maybeSingle()
+        if (error) throw error
+        return { data, error: null }
     } catch (e) {
         return { data: null, error: e }
     }
@@ -394,25 +170,25 @@ export async function getProductById(id) {
 
 export async function getProductsBySection(section) {
     try {
-        const products = getLocalProducts()
-        const filtered = products.filter(p => p.section === section)
-        return { data: filtered, error: null }
+        const { data, error } = await supabase.from('products').select('*').eq('section', section)
+        if (error) throw error
+        return { data: data || [], error: null }
     } catch (e) {
-        return { data: null, error: e }
+        return { data: [], error: e }
     }
 }
 
 export async function createProduct(product) {
     try {
-        const products = getLocalProducts()
-        const newProduct = {
-            ...product,
-            id: String(Date.now() + Math.floor(Math.random() * 1000)),
-            created_at: new Date().toISOString()
-        }
-        products.unshift(newProduct)
-        saveLocalProducts(products)
-        return { data: newProduct, error: null }
+        const { data, error } = await supabase.from('products').insert([product]).select().single()
+        if (error) throw error
+        
+        // Update local cache
+        const current = JSON.parse(localStorage.getItem('meraki_products') || '[]')
+        current.unshift(data)
+        originalSetItem('meraki_products', JSON.stringify(current))
+
+        return { data, error: null }
     } catch (e) {
         return { data: null, error: e }
     }
@@ -420,13 +196,18 @@ export async function createProduct(product) {
 
 export async function updateProduct(id, updates) {
     try {
-        const products = getLocalProducts()
-        const idx = products.findIndex(p => p.id === id)
-        if (idx === -1) return { data: null, error: new Error('Product not found') }
-        
-        products[idx] = { ...products[idx], ...updates }
-        saveLocalProducts(products)
-        return { data: products[idx], error: null }
+        const { data, error } = await supabase.from('products').update(updates).eq('id', id).select().single()
+        if (error) throw error
+
+        // Update local cache
+        const current = JSON.parse(localStorage.getItem('meraki_products') || '[]')
+        const idx = current.findIndex(p => p.id === id)
+        if (idx !== -1) {
+            current[idx] = { ...current[idx], ...data }
+            originalSetItem('meraki_products', JSON.stringify(current))
+        }
+
+        return { data, error: null }
     } catch (e) {
         return { data: null, error: e }
     }
@@ -434,9 +215,14 @@ export async function updateProduct(id, updates) {
 
 export async function deleteProduct(id) {
     try {
-        let products = getLocalProducts()
-        products = products.filter(p => p.id !== id)
-        saveLocalProducts(products)
+        const { error } = await supabase.from('products').delete().eq('id', id)
+        if (error) throw error
+
+        // Update local cache
+        const current = JSON.parse(localStorage.getItem('meraki_products') || '[]')
+        const filtered = current.filter(p => p.id !== id)
+        originalSetItem('meraki_products', JSON.stringify(filtered))
+
         return { data: true, error: null }
     } catch (e) {
         return { data: null, error: e }
@@ -445,34 +231,40 @@ export async function deleteProduct(id) {
 
 export async function searchProducts(query) {
     try {
-        const products = getLocalProducts()
-        const normalizedQuery = query.toLowerCase()
-        const filtered = products.filter(p => 
-            p.name.toLowerCase().includes(normalizedQuery) || 
-            p.category.toLowerCase().includes(normalizedQuery) ||
-            (p.description && p.description.toLowerCase().includes(normalizedQuery))
-        )
-        return { data: filtered, error: null }
+        const { data, error } = await supabase
+            .from('products')
+            .select('*')
+            .or(`name.ilike.%${query}%,category.ilike.%${query}%,description.ilike.%${query}%`)
+        if (error) throw error
+        return { data: data || [], error: null }
     } catch (e) {
-        return { data: null, error: e }
+        return { data: [], error: e }
     }
 }
 
-// =============================================
-// STORAGE (Mock)
-// =============================================
-
+// Storage/image uploading
 export async function uploadImage(file) {
-    return new Promise((resolve) => {
-        const reader = new FileReader()
-        reader.onloadend = () => {
-            resolve({ url: reader.result, error: null })
+    try {
+        // Try uploading to Supabase Storage Bucket 'images'
+        const fileExt = file.name.split('.').pop()
+        const fileName = `${Math.random()}_${Date.now()}.${fileExt}`
+        const { data, error } = await supabase.storage.from('images').upload(fileName, file)
+        
+        if (error) {
+            // Fallback to FileReader Base64 encoding if bucket is not configured
+            return new Promise((resolve) => {
+                const reader = new FileReader()
+                reader.onloadend = () => resolve({ url: reader.result, error: null })
+                reader.onerror = (e) => resolve({ url: null, error: e })
+                reader.readAsDataURL(file)
+            })
         }
-        reader.onerror = (e) => {
-            resolve({ url: null, error: e })
-        }
-        reader.readAsDataURL(file)
-    })
+
+        const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(fileName)
+        return { url: publicUrl, error: null }
+    } catch (e) {
+        return { url: null, error: e }
+    }
 }
 
 export async function uploadMultipleImages(files) {
@@ -483,6 +275,13 @@ export async function uploadMultipleImages(files) {
 }
 
 export async function deleteImage(url) {
-    // No-op for local mock
-    return { error: null }
+    try {
+        if (url.includes('/storage/v1/object/public/images/')) {
+            const fileName = url.split('/').pop()
+            await supabase.storage.from('images').remove([fileName])
+        }
+        return { error: null }
+    } catch (e) {
+        return { error: e }
+    }
 }

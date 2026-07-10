@@ -430,14 +430,8 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onSearchOpen 
                                 </AnimatePresence>
                             </li>
                             <li>
-                                <Link to="/category/personalizaveis" onClick={() => smoothScrollToTop(1200)} className="relative text-[10px] lg:text-[11px] font-semibold uppercase tracking-[0.2em] text-[#1A1A1A] hover:text-[#7A3E4A] transition-all duration-300 group inline-block">
-                                    Personalizáveis
-                                    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-[1.5px] bg-[#C6A76A] transition-all duration-500 group-hover:w-full"></span>
-                                </Link>
-                            </li>
-                            <li>
-                                <Link to="/category/plus-size" onClick={() => smoothScrollToTop(1200)} className="relative text-[10px] lg:text-[11px] font-semibold uppercase tracking-[0.2em] text-[#1A1A1A] hover:text-[#7A3E4A] transition-all duration-300 group inline-block">
-                                    Plus Size
+                                <Link to="/returns" onClick={() => smoothScrollToTop(1200)} className="relative text-[10px] lg:text-[11px] font-semibold uppercase tracking-[0.2em] text-[#1A1A1A] hover:text-[#7A3E4A] transition-all duration-300 group inline-block">
+                                    Política de Troca
                                     <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-[1.5px] bg-[#C6A76A] transition-all duration-500 group-hover:w-full"></span>
                                 </Link>
                             </li>
@@ -462,7 +456,7 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onSearchOpen 
                         {/* User / Logged-in indicator (Hidden on mobile) */}
                         <div className="hidden md:block">
                             {session && initials ? (
-                                <Link to="/auth" className="group flex items-center gap-3 transition-all hover:-translate-y-0.5" aria-label="Minha Conta">
+                                <Link to="/profile" className="group flex items-center gap-3 transition-all hover:-translate-y-0.5" aria-label="Minha Conta">
                                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#1A1A1A] to-[#4A4A4A] flex items-center justify-center text-white text-[10px] font-bold shadow-premium ring-1 ring-black/5 group-hover:scale-110 transition-all duration-500">
                                         {initials}
                                     </div>
@@ -569,10 +563,7 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onSearchOpen 
                                     )}
                                 </li>
                                 <li className="border-b border-gray-50 pb-3">
-                                    <Link to="/category/personalizaveis" onClick={() => { smoothScrollToTop(1200); setMobileMenuOpen(false); }} className="text-sm font-semibold uppercase tracking-wider text-gray-800 hover:text-[#7A3E4A] block transition-colors">Personalizáveis</Link>
-                                </li>
-                                <li className="border-b border-gray-50 pb-3">
-                                    <Link to="/category/plus-size" onClick={() => { smoothScrollToTop(1200); setMobileMenuOpen(false); }} className="text-sm font-semibold uppercase tracking-wider text-gray-800 hover:text-[#7A3E4A] block transition-colors">Plus Size</Link>
+                                    <Link to="/returns" onClick={() => { smoothScrollToTop(1200); setMobileMenuOpen(false); }} className="text-sm font-semibold uppercase tracking-wider text-gray-800 hover:text-[#7A3E4A] block transition-colors">Política de Troca</Link>
                                 </li>
                                 <li className="border-b border-gray-50 pb-3">
                                     <Link to="/category/ofertas" onClick={() => { smoothScrollToTop(1200); setMobileMenuOpen(false); }} className="text-sm font-semibold uppercase tracking-wider text-[#7A3E4A] hover:text-[#7A3E4A] block transition-colors">Ofertas</Link>
@@ -584,7 +575,7 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onSearchOpen 
                         <div className="pt-6 border-t border-gray-100 space-y-4">
                             {session ? (
                                 <Link 
-                                    to="/auth" 
+                                    to="/profile" 
                                     onClick={() => setMobileMenuOpen(false)}
                                     className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
                                 >

@@ -4,6 +4,7 @@ import Header from '../components/Header.jsx'
 import BenefitsBar from '../components/BenefitsBar.jsx'
 import Footer from '../components/Footer.jsx'
 import { getAssetUrl } from '../utils/assets.js'
+import WhatsAppButton from '../components/WhatsAppButton.jsx'
 
 export default function InfoPage({ tab: propTab }) {
     const { tab: urlTab } = useParams()
@@ -444,6 +445,7 @@ export default function InfoPage({ tab: propTab }) {
 
             <BenefitsBar />
             <Footer />
+            <WhatsAppButton />
         </div>
     )
 }

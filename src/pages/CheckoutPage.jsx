@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useCart } from '../hooks/useCart.js'
 import { useAuth } from '../hooks/useAuth.js'
+import { signUp } from '../services/auth.js'
 import Header from '../components/Header.jsx'
 import Footer from '../components/Footer.jsx'
 import WhatsAppButton from '../components/WhatsAppButton.jsx'
@@ -19,6 +20,7 @@ export default function CheckoutPage() {
     const [email, setEmail] = useState(user?.email || '')
     const [phone, setPhone] = useState('')
     const [cpf, setCpf] = useState('')
+    const [password, setPassword] = useState('')
     
     // Address states
     const [cep, setCep] = useState('')
@@ -28,18 +30,27 @@ export default function CheckoutPage() {
     const [neighborhood, setNeighborhood] = useState('')
     const [city, setCity] = useState('')
     const [state, setState] = useState('')
+    const [shippingMethod, setShippingMethod] = useState('pac') // pac, sedex
+    const [availableShipping, setAvailableShipping] = useState([])
 
     // Address selection states
     const [savedAddresses, setSavedAddresses] = useState([])
     const [selectedAddressId, setSelectedAddressId] = useState('')
     const [addressLabel, setAddressLabel] = useState('Casa')
 
-    // Load saved addresses
+    // Load saved addresses and user data
     useEffect(() => {
         if (user) {
+            setName(user?.user_metadata?.full_name || '')
+            setEmail(user?.email || '')
+
             const users = JSON.parse(localStorage.getItem('meraki_users') || '[]')
             const dbUser = users.find(u => u.email === user.email)
             if (dbUser) {
+                if (dbUser.full_name) setName(dbUser.full_name)
+                if (dbUser.phone) setPhone(dbUser.phone)
+                if (dbUser.cpf) setCpf(dbUser.cpf)
+
                 let addresses = dbUser.addresses || []
                 // Fallback to migrating legacy address to list
                 if (addresses.length === 0 && dbUser.address) {
@@ -118,7 +129,24 @@ export default function CheckoutPage() {
     const [couponError, setCouponError] = useState('')
 
     const subtotal = Math.max(0, rawSubtotal - comboDiscount)
-    const shipping = subtotal >= 299 ? 0 : 19.90
+
+    useEffect(() => {
+        if (!state) {
+            setAvailableShipping([])
+            return
+        }
+        const isSP = state.toUpperCase() === 'SP'
+        const pacPrice = subtotal >= 299 ? 0 : 19.90
+        const sedexPrice = subtotal >= 299 ? 19.90 : 39.90
+        
+        setAvailableShipping([
+            { id: 'pac', label: 'PAC (Correios)', price: pacPrice, days: isSP ? '3 a 5 dias úteis' : '6 a 12 dias úteis' },
+            { id: 'sedex', label: 'SEDEX (Expresso)', price: sedexPrice, days: isSP ? '1 a 2 dias úteis' : '3 a 5 dias úteis' }
+        ])
+    }, [state, subtotal])
+
+    const selectedShippingOption = availableShipping.find(s => s.id === shippingMethod)
+    const shipping = selectedShippingOption ? selectedShippingOption.price : (subtotal >= 299 ? 0 : 19.90)
     
     // Pix discount is 5% off subtotal
     const pixDiscount = paymentMethod === 'pix' ? subtotal * 0.05 : 0
@@ -169,13 +197,21 @@ export default function CheckoutPage() {
         setNotification({ message, visible: true })
     }
 
+    const maskCep = (val) => {
+        return val
+            .replace(/\D/g, '')
+            .replace(/(\d{5})(\d)/, '$1-$2')
+            .slice(0, 9)
+    }
+
     const handleCepChange = async (e) => {
-        const val = e.target.value.replace(/\D/g, '')
-        setCep(val.slice(0, 8))
+        const masked = maskCep(e.target.value)
+        setCep(masked)
         
-        if (val.length === 8) {
+        const cleanVal = masked.replace(/\D/g, '')
+        if (cleanVal.length === 8) {
             try {
-                const response = await fetch(`https://viacep.com.br/ws/${val}/json/`)
+                const response = await fetch(`https://viacep.com.br/ws/${cleanVal}/json/`)
                 const data = await response.json()
                 if (!data.erro) {
                     setStreet(data.logradouro || '')
@@ -201,7 +237,7 @@ export default function CheckoutPage() {
             .slice(0, 14)
     }
 
-    const handleCheckoutSubmit = (e) => {
+    const handleCheckoutSubmit = async (e) => {
         e.preventDefault()
 
         if (cart.length === 0) {
@@ -209,12 +245,30 @@ export default function CheckoutPage() {
             return
         }
 
+        if (!user) {
+            if (!password) {
+                alert('Por favor, crie uma senha para realizar seu cadastro e finalizar o pedido.')
+                return
+            }
+            const { error: signUpError } = await signUp(
+                email.trim().toLowerCase(),
+                password,
+                name,
+                phone,
+                cpf
+            )
+            if (signUpError) {
+                alert('Erro ao realizar o cadastro: ' + signUpError.message)
+                return
+            }
+        }
+
         const orderId = `MRK-${Math.floor(100000 + Math.random() * 900000)}`
         
         const newOrder = {
             id: orderId,
             customerName: name,
-            customerEmail: email,
+            customerEmail: email.trim().toLowerCase(),
             customerPhone: phone,
             customerCpf: cpf,
             shippingAddress: {
@@ -244,16 +298,31 @@ export default function CheckoutPage() {
             created_at: new Date().toISOString()
         }
 
-        // Save new address to profile if logged in
-        if (user) {
-            const users = JSON.parse(localStorage.getItem('meraki_users') || '[]')
-            const idx = users.findIndex(u => u.email === user.email)
-            if (idx !== -1) {
-                let addresses = users[idx].addresses || []
-                if (selectedAddressId === 'new') {
-                    const newAddr = {
-                        id: 'addr-' + Date.now(),
-                        label: addressLabel || 'Outro',
+        // Save new address to profile
+        const activeEmail = user?.email || email.trim().toLowerCase()
+        const users = JSON.parse(localStorage.getItem('meraki_users') || '[]')
+        const idx = users.findIndex(u => u.email?.trim().toLowerCase() === activeEmail.trim().toLowerCase())
+        if (idx !== -1) {
+            let addresses = users[idx].addresses || []
+            if (selectedAddressId === 'new') {
+                const newAddr = {
+                    id: 'addr-' + Date.now(),
+                    label: addressLabel || 'Outro',
+                    cep,
+                    street,
+                    number,
+                    complement,
+                    neighborhood,
+                    city,
+                    state
+                }
+                addresses.push(newAddr)
+            } else {
+                // Update existing
+                const addrIdx = addresses.findIndex(a => a.id === selectedAddressId)
+                if (addrIdx !== -1) {
+                    addresses[addrIdx] = {
+                        ...addresses[addrIdx],
                         cep,
                         street,
                         number,
@@ -262,36 +331,20 @@ export default function CheckoutPage() {
                         city,
                         state
                     }
-                    addresses.push(newAddr)
-                } else {
-                    // Update existing
-                    const addrIdx = addresses.findIndex(a => a.id === selectedAddressId)
-                    if (addrIdx !== -1) {
-                        addresses[addrIdx] = {
-                            ...addresses[addrIdx],
-                            cep,
-                            street,
-                            number,
-                            complement,
-                            neighborhood,
-                            city,
-                            state
-                        }
-                    }
                 }
-                users[idx].addresses = addresses
-                // Also update fallback profile address fields
-                users[idx].address = street
-                users[idx].cep = cep
-                users[idx].number = number
-                users[idx].complement = complement
-                users[idx].neighborhood = neighborhood
-                users[idx].city = city
-                users[idx].state = state
-                
-                localStorage.setItem('meraki_users', JSON.stringify(users))
-                window.dispatchEvent(new Event('storage'))
             }
+            users[idx].addresses = addresses
+            // Also update fallback profile address fields
+            users[idx].address = street
+            users[idx].cep = cep
+            users[idx].number = number
+            users[idx].complement = complement
+            users[idx].neighborhood = neighborhood
+            users[idx].city = city
+            users[idx].state = state
+            
+            localStorage.setItem('meraki_users', JSON.stringify(users))
+            window.dispatchEvent(new Event('storage'))
         }
 
         // Save order to localStorage
@@ -334,7 +387,7 @@ export default function CheckoutPage() {
                     <span className="text-[#C6A76A] text-[10px] uppercase font-bold tracking-[0.4em] mb-2 block">
                         Finalização da Compra
                     </span>
-                    <h1 className="font-heading text-3xl md:text-4xl text-[#1A1A1A]">
+                    <h1 className="!font-sans text-2xl md:text-3xl font-bold tracking-tight text-[#1A1A1A] antialiased">
                         Checkout Seguro
                     </h1>
                 </div>
@@ -344,8 +397,8 @@ export default function CheckoutPage() {
                     <div className="lg:col-span-7 space-y-6">
                         {/* Personal Data */}
                         <div className="bg-white rounded-2xl p-6 md:p-8 border border-gray-100 shadow-sm space-y-4">
-                            <h2 className="font-heading text-lg font-bold text-[#1A1A1A] flex items-center gap-2 border-b border-gray-50 pb-3">
-                                <span className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">1</span>
+                            <h2 className="!font-sans text-base font-semibold text-[#1A1A1A] flex items-center gap-2.5 border-b border-gray-100 pb-3 antialiased">
+                                <span className="w-5.5 h-5.5 rounded-full bg-[#7A3E4A] text-white flex items-center justify-center text-[11px] font-bold font-sans antialiased">1</span>
                                 Dados Pessoais
                             </h2>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -391,13 +444,26 @@ export default function CheckoutPage() {
                                         className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:bg-white focus:border-[#7A3E4A] transition-all" 
                                     />
                                 </div>
+                                {!user && (
+                                    <div className="flex flex-col sm:col-span-2">
+                                        <label className="text-xs text-gray-500 font-semibold mb-1">Crie uma Senha para sua Conta</label>
+                                        <input 
+                                            type="password" 
+                                            required 
+                                            placeholder="Defina uma senha para finalizar seu cadastro"
+                                            value={password} 
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:bg-white focus:border-[#7A3E4A] transition-all" 
+                                        />
+                                    </div>
+                                )}
                             </div>
                         </div>
 
                         {/* Shipping Address */}
                         <div className="bg-white rounded-2xl p-6 md:p-8 border border-gray-100 shadow-sm space-y-4">
-                            <h2 className="font-heading text-lg font-bold text-[#1A1A1A] flex items-center gap-2 border-b border-gray-50 pb-3">
-                                <span className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">2</span>
+                            <h2 className="!font-sans text-base font-semibold text-[#1A1A1A] flex items-center gap-2.5 border-b border-gray-100 pb-3 antialiased">
+                                <span className="w-5.5 h-5.5 rounded-full bg-[#7A3E4A] text-white flex items-center justify-center text-[11px] font-bold font-sans antialiased">2</span>
                                 Endereço de Entrega
                             </h2>
 
@@ -423,8 +489,8 @@ export default function CheckoutPage() {
                                                         <span className="w-2.5 h-2.5 rounded-full bg-[#C6A76A]"></span>
                                                     )}
                                                 </div>
-                                                <p className="text-[11px] font-semibold text-gray-800 truncate">{addr.street}, {addr.number}</p>
-                                                <p className="text-[10px] text-gray-500 truncate">{addr.neighborhood} - {addr.city}/{addr.state}</p>
+                                                <div className="font-sans not-italic text-[11px] font-semibold text-gray-800 truncate">{addr.street}, {addr.number}</div>
+                                                <div className="font-sans not-italic text-[10px] text-gray-500 truncate">{addr.neighborhood} - {addr.city}/{addr.state}</div>
                                             </button>
                                         ))}
                                         <button
@@ -530,12 +596,40 @@ export default function CheckoutPage() {
                                     />
                                 </div>
                             </div>
+
+                            {availableShipping.length > 0 && (
+                                <div className="mt-6 pt-6 border-t border-gray-100 animate-[fadeIn_200ms_ease-out]">
+                                    <label className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3 block">Opções de Envio</label>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        {availableShipping.map(option => (
+                                            <button
+                                                key={option.id}
+                                                type="button"
+                                                onClick={() => setShippingMethod(option.id)}
+                                                className={`p-4 border rounded-2xl flex items-center justify-between transition-all text-left cursor-pointer ${
+                                                    shippingMethod === option.id
+                                                        ? 'border-[#7A3E4A] bg-[#FDF8F6] text-[#7A3E4A] ring-2 ring-[#7A3E4A]/5'
+                                                        : 'border-gray-200 bg-white hover:border-gray-300 text-gray-600'
+                                                }`}
+                                            >
+                                                <div>
+                                                    <div className="font-sans not-italic text-xs font-bold">{option.label}</div>
+                                                    <div className="font-sans not-italic text-[10px] text-gray-400 font-medium mt-0.5">Prazo: {option.days}</div>
+                                                </div>
+                                                <span className="text-sm font-black">
+                                                    {option.price === 0 ? 'Grátis' : formatCurrency(option.price)}
+                                                </span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Payment Options */}
                         <div className="bg-white rounded-2xl p-6 md:p-8 border border-gray-100 shadow-sm space-y-6">
-                            <h2 className="font-heading text-lg font-bold text-[#1A1A1A] flex items-center gap-2 border-b border-gray-50 pb-3">
-                                <span className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">3</span>
+                            <h2 className="!font-sans text-base font-semibold text-[#1A1A1A] flex items-center gap-2.5 border-b border-gray-100 pb-3 antialiased">
+                                <span className="w-5.5 h-5.5 rounded-full bg-[#7A3E4A] text-white flex items-center justify-center text-[11px] font-bold font-sans antialiased">3</span>
                                 Método de Pagamento
                             </h2>
                             
@@ -662,7 +756,7 @@ export default function CheckoutPage() {
                     {/* Right: Order Summary */}
                     <div className="lg:col-span-5">
                         <div className="bg-white rounded-2xl p-6 md:p-8 border border-gray-100 shadow-sm sticky top-28 space-y-6">
-                            <h2 className="font-heading text-lg font-bold text-[#1A1A1A] border-b border-gray-50 pb-3">
+                            <h2 className="!font-sans text-base font-semibold text-[#1A1A1A] border-b border-gray-100 pb-3 antialiased">
                                 Resumo do Pedido
                             </h2>
 

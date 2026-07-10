@@ -8,6 +8,7 @@ import CheckoutPage from './pages/CheckoutPage.jsx'
 import OrderSuccessPage from './pages/OrderSuccessPage.jsx'
 import ProductPage from './pages/ProductPage.jsx'
 import InfoPage from './pages/InfoPage.jsx'
+import ProfilePage from './pages/ProfilePage.jsx'
 import CartDrawer from './components/CartDrawer.jsx'
 
 function ScrollToTopReset() {
@@ -30,6 +31,7 @@ export default function App() {
                 <Route path="/category/:slug" element={<CategoryPage />} />
                 <Route path="/product/:id" element={<ProductPage />} />
                 <Route path="/checkout" element={<CheckoutPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/order-success/:orderId" element={<OrderSuccessPage />} />
                 
                 {/* Institutional & Atendimento Routes */}

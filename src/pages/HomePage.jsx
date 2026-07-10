@@ -24,18 +24,11 @@ export default function HomePage() {
     const [quickViewProduct, setQuickViewProduct] = useState(null)
     const [notification, setNotification] = useState({ message: '', visible: false })
     const [categories, setCategories] = useState(() => {
-        const stored = localStorage.getItem('meraki_categories')
-        if (stored) {
-            try {
-                const parsed = JSON.parse(stored)
-                return parsed.map(c => typeof c === 'string' ? { name: c, description: 'Coleção Meraki', image: '/placeholder.jpg' } : c)
-            } catch (e) { console.error(e) }
-        }
         return [
-            { name: 'Conjuntos', description: 'Sutiãs e calcinhas combinando', image: '/assets/categories/cat-conjuntos.jpg' },
-            { name: 'Linha Noite', description: 'Camisolas e pijamas elegantes', image: '/assets/categories/cat-noite.jpg' },
-            { name: 'Linha Sexy', description: 'Peças sensuais e sofisticadas', image: '/assets/categories/cat-sexy.jpg' },
-            { name: 'Plus Size', description: 'Elegância em todos os tamanhos', image: '/assets/categories/cat-plus.jpg' },
+            { name: 'Home', description: 'Voltar para a página inicial', image: '/assets/categories/cat-conjuntos.jpg', link: '/' },
+            { name: 'Categorias', description: 'Navegar pelas nossas coleções', image: '/assets/categories/cat-noite.jpg', link: '/category/conjuntos' },
+            { name: 'Política de Troca', description: 'Regras e prazos para trocas e devoluções', image: '/assets/categories/cat-sexy.jpg', link: '/returns' },
+            { name: 'Ofertas', description: 'Confira nossos produtos com descontos', image: '/assets/categories/cat-plus.jpg', link: '/category/ofertas' },
         ]
     })
 
@@ -56,6 +49,21 @@ export default function HomePage() {
         }
     })
 
+    const [editorial, setEditorial] = useState(() => {
+        const stored = localStorage.getItem('meraki_editorial')
+        if (stored) {
+            try { return JSON.parse(stored) } catch (e) { console.error(e) }
+        }
+        return {
+            label: 'Artesanal & Premium',
+            title: 'A arte de se sentir extraordinária.',
+            description: 'Cada costura, cada detalhe em renda foi pensado para elevar sua confiança e celebrar sua beleza única em todos os momentos.',
+            buttonText: 'Ver Manifesto',
+            buttonLink: '/story',
+            image: '/assets/banners/banner-2.jpg'
+        }
+    })
+
     // Auto-generate display texts from numeric price fields
     const promoPrice2 = Number(promoCombo.price2Items) || 139
     const promoPrice3 = Number(promoCombo.price3Items) || 169
@@ -70,11 +78,21 @@ export default function HomePage() {
                 try { setPromoCombo(JSON.parse(stored)) } catch (e) { console.error(e) }
             }
         }
+        const updateEditorial = () => {
+            const stored = localStorage.getItem('meraki_editorial')
+            if (stored) {
+                try { setEditorial(JSON.parse(stored)) } catch (e) { console.error(e) }
+            }
+        }
         window.addEventListener('storage', updatePromo)
+        window.addEventListener('storage', updateEditorial)
         window.addEventListener('promoComboUpdated', updatePromo)
+        window.addEventListener('editorialUpdated', updateEditorial)
         return () => {
             window.removeEventListener('storage', updatePromo)
+            window.removeEventListener('storage', updateEditorial)
             window.removeEventListener('promoComboUpdated', updatePromo)
+            window.removeEventListener('editorialUpdated', updateEditorial)
         }
     }, [])
 
@@ -325,13 +343,19 @@ export default function HomePage() {
                 <section className="py-12 px-4 max-w-7xl mx-auto" id="ofertas">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center bg-[#FDF8F6] p-8 md:p-16">
                         <div className="space-y-6">
-                            <span className="text-[#C6A76A] text-[10px] uppercase font-bold tracking-[0.4em]">Artesanal & Premium</span>
-                            <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl text-[#1A1A1A] leading-tight">A arte de se sentir <span className="italic">extraordinária</span>.</h2>
-                            <p className="text-gray-600 font-light leading-relaxed max-w-md">Cada costura, cada detalhe em renda foi pensado para elevar sua confiança e celebrar sua beleza única em todos os momentos.</p>
-                            <Link to="/shop" className="inline-block border-b-2 border-[#1A1A1A] pb-2 text-xs font-bold uppercase tracking-widest hover:text-[#C6A76A] hover:border-[#C6A76A] transition-all">Ver Manifesto</Link>
+                            <span className="text-[#C6A76A] text-[10px] uppercase font-bold tracking-[0.4em]">{editorial.label}</span>
+                            <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl text-[#1A1A1A] leading-tight">
+                                {editorial.title.includes('extraordinária') ? (
+                                    <>A arte de se sentir <span className="italic">extraordinária</span>.</>
+                                ) : (
+                                    editorial.title
+                                )}
+                            </h2>
+                            <p className="text-gray-600 font-light leading-relaxed max-w-md">{editorial.description}</p>
+                            <Link to={editorial.buttonLink} className="inline-block border-b-2 border-[#1A1A1A] pb-2 text-xs font-bold uppercase tracking-widest hover:text-[#C6A76A] hover:border-[#C6A76A] transition-all">{editorial.buttonText}</Link>
                         </div>
                         <div className="relative aspect-square">
-                            <img src={getAssetUrl('/assets/banners/banner-2.jpg')} className="w-full h-full object-cover shadow-2xl" alt="Manifesto Meraki" />
+                            <img src={getAssetUrl(editorial.image)} className="w-full h-full object-cover shadow-2xl" alt="Manifesto Meraki" />
                         </div>
                     </div>
                 </section>

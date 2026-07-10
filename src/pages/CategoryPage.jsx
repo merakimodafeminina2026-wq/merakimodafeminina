@@ -434,9 +434,23 @@ export default function CategoryPage() {
             // newest/default
             result.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
         }
-
         return result
     }, [allProducts, slug, selectedSize, sortBy, selectedSubcategory])
+
+    // Pagination
+    const [currentPage, setCurrentPage] = useState(1)
+    const ITEMS_PER_PAGE = 12
+
+    useEffect(() => {
+        setCurrentPage(1)
+    }, [slug, selectedSize, selectedSubcategory, sortBy])
+
+    const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE)
+    
+    const paginatedProducts = useMemo(() => {
+        const start = (currentPage - 1) * ITEMS_PER_PAGE
+        return filteredProducts.slice(start, start + ITEMS_PER_PAGE)
+    }, [filteredProducts, currentPage])
 
     const showNotification = useCallback((message) => {
         setNotification({ message, visible: true })
@@ -633,22 +647,75 @@ export default function CategoryPage() {
                         <div className="w-8 h-8 border-[1px] border-[#C6A76A] border-t-transparent rounded-full animate-spin" />
                     </div>
                 ) : filteredProducts.length > 0 ? (
-                    <div className={`grid grid-cols-2 gap-x-4 sm:gap-x-8 gap-y-8 sm:gap-y-12 ${viewCols === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-4'}`}>
-                        {filteredProducts.map((product, idx) => (
-                            <motion.div
-                                key={product.id}
-                                initial={{ opacity: 0, y: 30 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.8, delay: idx * 0.05, ease: [0.19, 1, 0.22, 1] }}
-                            >
-                                <ProductCard
-                                    product={product}
-                                    onQuickView={setQuickViewProduct}
-                                    onToggleWishlist={toggleWishlist}
-                                    isWishlisted={isWishlisted(product.id)}
-                                />
-                            </motion.div>
-                        ))}
+                    <div className="space-y-12">
+                        <div className={`grid grid-cols-2 gap-x-4 sm:gap-x-8 gap-y-8 sm:gap-y-12 ${viewCols === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-4'}`}>
+                            {paginatedProducts.map((product, idx) => (
+                                <motion.div
+                                    key={product.id}
+                                    initial={{ opacity: 0, y: 30 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.8, delay: idx * 0.05, ease: [0.19, 1, 0.22, 1] }}
+                                >
+                                    <ProductCard
+                                        product={product}
+                                        onQuickView={setQuickViewProduct}
+                                        onToggleWishlist={toggleWishlist}
+                                        isWishlisted={isWishlisted(product.id)}
+                                    />
+                                </motion.div>
+                            ))}
+                        </div>
+
+                        {/* Pagination */}
+                        {totalPages > 1 && (
+                            <div className="flex justify-center items-center gap-2 mt-16 font-sans">
+                                <button
+                                    onClick={() => {
+                                        setCurrentPage(prev => Math.max(prev - 1, 1))
+                                        window.scrollTo({ top: 300, behavior: 'smooth' })
+                                    }}
+                                    disabled={currentPage === 1}
+                                    className="w-10 h-10 rounded-xl border border-gray-200 flex items-center justify-center text-gray-500 hover:border-[#7A3E4A] hover:text-[#7A3E4A] transition-all disabled:opacity-50 disabled:hover:border-gray-200 disabled:hover:text-gray-500 cursor-pointer"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                </button>
+                                
+                                {[...Array(totalPages)].map((_, index) => {
+                                    const pageNumber = index + 1
+                                    return (
+                                        <button
+                                            key={pageNumber}
+                                            onClick={() => {
+                                                setCurrentPage(pageNumber)
+                                                window.scrollTo({ top: 300, behavior: 'smooth' })
+                                            }}
+                                            className={`w-10 h-10 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                                                currentPage === pageNumber
+                                                    ? 'bg-[#7A3E4A] border-[#7A3E4A] text-white shadow-md shadow-[#7A3E4A]/10'
+                                                    : 'border-gray-200 text-gray-600 hover:border-[#7A3E4A] hover:text-[#7A3E4A]'
+                                            }`}
+                                        >
+                                            {pageNumber}
+                                        </button>
+                                    )
+                                })}
+                                
+                                <button
+                                    onClick={() => {
+                                        setCurrentPage(prev => Math.min(prev + 1, totalPages))
+                                        window.scrollTo({ top: 300, behavior: 'smooth' })
+                                    }}
+                                    disabled={currentPage === totalPages}
+                                    className="w-10 h-10 rounded-xl border border-gray-200 flex items-center justify-center text-gray-500 hover:border-[#7A3E4A] hover:text-[#7A3E4A] transition-all disabled:opacity-50 disabled:hover:border-gray-200 disabled:hover:text-gray-500 cursor-pointer"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                            </div>
+                        )}
                     </div>
                 ) : (
                     <div className="text-center py-24 bg-white rounded-2xl border border-gray-100/50">

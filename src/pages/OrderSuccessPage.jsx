@@ -188,11 +188,17 @@ export default function OrderSuccessPage() {
                         </div>
                     </div>
 
-                    {/* Navigation button */}
-                    <div className="pt-4">
+                    {/* Navigation buttons */}
+                    <div className="pt-4 flex flex-col sm:flex-row gap-3 justify-center">
+                        <Link
+                            to="/auth"
+                            className="inline-block py-4 px-8 bg-[#7A3E4A] hover:bg-[#63303a] text-white text-xs font-bold uppercase tracking-[0.2em] rounded-xl transition-all shadow-md hover:scale-[1.01]"
+                        >
+                            Ver Meus Pedidos
+                        </Link>
                         <Link
                             to="/"
-                            className="inline-block py-4 px-10 bg-[#7A3E4A] hover:bg-[#63303a] text-white text-xs font-bold uppercase tracking-[0.2em] rounded-xl transition-all shadow-md hover:scale-[1.01]"
+                            className="inline-block py-4 px-8 border border-[#7A3E4A] text-[#7A3E4A] hover:bg-[#7A3E4A]/5 text-xs font-bold uppercase tracking-[0.2em] rounded-xl transition-all hover:scale-[1.01]"
                         >
                             Continuar Comprando
                         </Link>

@@ -300,7 +300,7 @@ export default function AuthPage() {
 
     // Derived order data for dashboard
     const allOrders = JSON.parse(localStorage.getItem('meraki_orders') || '[]')
-    const clientOrders = allOrders.filter(o => o.customerEmail === user?.email)
+    const clientOrders = allOrders.filter(o => o.customerEmail?.trim().toLowerCase() === user?.email?.trim().toLowerCase())
     const paidOrders = clientOrders.filter(o => o.status === 'Pago')
     const selectedOrderItems = returnOrderId
         ? (clientOrders.find(o => o.id === returnOrderId)?.items || [])

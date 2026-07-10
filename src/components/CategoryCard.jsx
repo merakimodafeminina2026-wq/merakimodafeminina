@@ -1,12 +1,13 @@
 import { Link } from 'react-router-dom'
 import { getAssetUrl } from '../utils/assets.js'
 
-export default function CategoryCard({ name, description, gradient, image }) {
+export default function CategoryCard({ name, description, gradient, image, link }) {
     const imageUrl = image ? getAssetUrl(image) : null
     const slug = name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(' ', '-')
+    const destination = link || `/category/${slug}`
 
     return (
-        <Link to={`/category/${slug}`} className={`relative block overflow-hidden h-72 group cursor-pointer ${gradient ? `bg-gradient-to-br ${gradient}` : 'bg-gray-150'} transition-all duration-1000 cubic-bezier(0.19, 1, 0.22, 1) hover:shadow-premium hover:-translate-y-2`}>
+        <Link to={destination} className={`relative block overflow-hidden h-72 group cursor-pointer ${gradient ? `bg-gradient-to-br ${gradient}` : 'bg-gray-150'} transition-all duration-1000 cubic-bezier(0.19, 1, 0.22, 1) hover:shadow-premium hover:-translate-y-2`}>
             {imageUrl && (
                 <img 
                     src={imageUrl} 
