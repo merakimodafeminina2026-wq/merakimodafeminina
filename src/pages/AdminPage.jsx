@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.js'
 import { getAssetUrl } from '../utils/assets.js'
 import { useProducts } from '../hooks/useProducts.js'
-import { createProduct, updateProduct, deleteProduct, uploadMultipleImages, deleteImage, createCategory } from '../services/database.js'
+import { createProduct, updateProduct, deleteProduct, uploadMultipleImages, deleteImage, createCategory, getProfiles } from '../services/database.js'
 import { signOut } from '../services/auth.js'
 import AdminSidebar from '../components/admin/AdminSidebar.jsx'
 import DashboardSection from '../components/admin/DashboardSection.jsx'
@@ -220,15 +220,16 @@ export default function AdminPage() {
             ]
             localStorage.setItem('meraki_banners', JSON.stringify(loadedBanners))
         }
-        let loadedCustomers = JSON.parse(localStorage.getItem('meraki_users') || '[]')
-
-        // Semeadura de dados removida para garantir ambiente de produção limpo
-        // Apenas dados provenientes do banco serão carregados
+        getProfiles().then(({ data }) => {
+            if (data) {
+                setCustomers(data)
+                localStorage.setItem('meraki_users', JSON.stringify(data))
+            }
+        }).catch(console.error)
 
         setOrders(loadedOrders)
         setCoupons(loadedCoupons)
         setBanners(loadedBanners)
-        setCustomers(loadedCustomers)
 
         const storedTopbar = localStorage.getItem('meraki_topbar_messages')
         const loadedTopbar = storedTopbar ? JSON.parse(storedTopbar) : [

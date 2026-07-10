@@ -300,6 +300,16 @@ export async function getProducts() {
     }
 }
 
+export async function getProfiles() {
+    try {
+        const { data, error } = await supabase.from('profiles').select('*')
+        if (error) throw error
+        return { data: data || [], error: null }
+    } catch (e) {
+        return { data: [], error: e }
+    }
+}
+
 export async function getProductById(id) {
     try {
         const { data, error } = await supabase.from('products').select('*').eq('id', id).maybeSingle()
