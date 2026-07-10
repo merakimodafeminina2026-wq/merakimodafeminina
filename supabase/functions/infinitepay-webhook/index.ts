@@ -14,6 +14,18 @@ serve(async (req) => {
   }
 
   try {
+    // Verify secret token from query param
+    const url = new URL(req.url)
+    const token = url.searchParams.get('token')
+    const expectedToken = Deno.env.get('WEBHOOK_SECRET') || 'default_secret_token_12345'
+    if (!token || token !== expectedToken) {
+      console.warn("Unauthorized webhook request attempt.")
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      })
+    }
+
     const payload = await req.json()
     console.log("Received InfinitePay webhook payload:", payload)
 

@@ -38,7 +38,7 @@ export async function signUp(email, password, fullName, phone = '', cpf = '') {
                     full_name: fullName,
                     phone: phone || null,
                     cpf: cpf || null,
-                    tipo_user: email === 'admin' || email.startsWith('admin@') ? 'admin' : 'customer'
+                    tipo_user: (email === 'admin' || email === 'admin@meraki.com' || email === 'admin@merakimodafeminina.com.br') ? 'admin' : 'customer'
                 })
             if (profileError) console.error('Error creating profile:', profileError)
         }

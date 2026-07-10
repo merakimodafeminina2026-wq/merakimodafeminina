@@ -84,7 +84,10 @@ function mapDbToFrontend(table, item) {
     return mapped
 }
 
+let isSyncing = false
+
 export async function initSupabaseSync() {
+    isSyncing = true
     try {
         console.log('🔄 Sincronizando tabelas com o Supabase...')
         
@@ -183,6 +186,8 @@ export async function initSupabaseSync() {
         console.log('✅ Sincronização concluída com sucesso.')
     } catch (e) {
         console.error('⚠️ Falha ao sincronizar dados com Supabase:', e)
+    } finally {
+        isSyncing = false
     }
 }
 
@@ -194,6 +199,8 @@ const originalSetItem = localStorage.setItem.bind(localStorage)
 
 localStorage.setItem = function(key, value) {
     originalSetItem(key, value)
+    
+    if (isSyncing) return
     
     // Asynchronously push updates to Supabase
     try {

@@ -17,7 +17,7 @@ serve(async (req) => {
     const payload = {
       handle: handle || "nicolly_gomes",
       redirect_url: `https://merakimodafeminina.com.br/order-success/${order_id}`,
-      webhook_url: "https://twlggjdthygqpgfxfhcv.supabase.co/functions/v1/infinitepay-webhook",
+      webhook_url: `https://twlggjdthygqpgfxfhcv.supabase.co/functions/v1/infinitepay-webhook?token=${Deno.env.get('WEBHOOK_SECRET') || 'default_secret_token_12345'}`,
       order_nsu: order_id,
       items: items.map((item: any) => ({
         description: item.name || item.description || "Produto",
