@@ -168,3 +168,27 @@ export function onAuthStateChange(callback) {
         }
     }
 }
+
+export async function resetPasswordForEmail(email, redirectUrl) {
+    try {
+        const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: redirectUrl || window.location.origin + '/auth?type=recovery'
+        })
+        if (error) throw error
+        return { data, error: null }
+    } catch (e) {
+        return { data: null, error: e }
+    }
+}
+
+export async function updatePassword(newPassword) {
+    try {
+        const { data, error } = await supabase.auth.updateUser({
+            password: newPassword
+        })
+        if (error) throw error
+        return { data, error: null }
+    } catch (e) {
+        return { data: null, error: e }
+    }
+}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.js'
-import { signIn, signUp, signOut, getUserProfile, signInWithProvider } from '../services/auth.js'
+import { signIn, signUp, signOut, getUserProfile, signInWithProvider, resetPasswordForEmail, updatePassword } from '../services/auth.js'
 import Header from '../components/Header.jsx'
 import BenefitsBar from '../components/BenefitsBar.jsx'
 import Footer from '../components/Footer.jsx'
@@ -36,13 +36,21 @@ export default function AuthPage() {
     const [returnItemId, setReturnItemId] = useState('')
     const [returnType, setReturnType] = useState('troca')
 
-    // Load header metrics
+    // Load header metrics and check password recovery params
     useEffect(() => {
         const storedWishlist = JSON.parse(localStorage.getItem('meraki_wishlist') || '[]')
         setWishlistCount(storedWishlist.length)
 
         const storedCart = JSON.parse(localStorage.getItem('meraki_cart') || '[]')
         setCartCount(storedCart.reduce((acc, item) => acc + item.quantity, 0))
+
+        // Check for password recovery redirection (search query or hash parameters)
+        const params = new URLSearchParams(window.location.search)
+        const isRecovery = params.get('type') === 'recovery' || window.location.hash.includes('type=recovery')
+        if (isRecovery) {
+            setTab('recovery')
+            showAlert('Por favor, digite sua nova senha abaixo.', 'success')
+        }
     }, [])
 
     useEffect(() => {
@@ -161,18 +169,43 @@ export default function AuthPage() {
         const email = e.target.forgotEmail.value.trim()
         setSubmitting(true)
         
-        const localUsersData = localStorage.getItem('meraki_users')
-        const users = localUsersData ? JSON.parse(localUsersData) : []
-        const found = users.some(u => u.email === email)
-        
-        await new Promise(resolve => setTimeout(resolve, 800))
+        // Supabase sends the email with a recovery link pointing to the same site auth page
+        const { error } = await resetPasswordForEmail(email)
         setSubmitting(false)
         
-        if (found) {
+        if (!error) {
             showAlert('Enviamos um link de recuperação para o seu e-mail!', 'success')
             e.target.reset()
         } else {
-            showAlert('E-mail não encontrado em nosso sistema.')
+            showAlert('Erro ao enviar e-mail de recuperação: ' + error.message)
+        }
+    }
+
+    // Reset password handler (when user clicks link in email and lands on recovery tab)
+    async function handleResetPassword(e) {
+        e.preventDefault()
+        setAlert({ message: '', type: '' })
+        const password = e.target.recoveryPassword.value
+        const confirm = e.target.recoveryConfirm.value
+
+        if (password !== confirm) {
+            showAlert('As senhas não coincidem.')
+            return
+        }
+
+        setSubmitting(true)
+        const { error } = await updatePassword(password)
+        setSubmitting(false)
+
+        if (!error) {
+            showAlert('Sua senha foi redefinida com sucesso! Redirecionando para login...', 'success')
+            setTimeout(() => {
+                setTab('login')
+                // Clear any hashes from url
+                navigate('/auth', { replace: true })
+            }, 2000)
+        } else {
+            showAlert('Erro ao redefinir senha: ' + error.message)
         }
     }
 
@@ -907,7 +940,33 @@ export default function AuthPage() {
                             </div>
                         )}
 
-                        {tab === 'forgot' ? (
+                        {tab === 'recovery' ? (
+                            <form onSubmit={handleResetPassword} className="animate-[fadeIn_300ms_ease-out] space-y-6">
+                                <p className="text-xs text-gray-500 leading-relaxed font-semibold">
+                                    Defina uma nova senha forte para acessar sua conta com segurança.
+                                </p>
+                                <div>
+                                    <label className="block font-heading text-xs font-semibold text-gray-700 tracking-wider mb-2">Nova Senha</label>
+                                    <input type="password" name="recoveryPassword" placeholder="No mínimo 6 caracteres" required minLength={6}
+                                        className="w-full bg-transparent px-0 py-2.5 border-b border-gray-200 focus:border-[#C6A76A] outline-none font-heading text-sm font-medium text-gray-900 transition-all placeholder:text-gray-400" />
+                                </div>
+                                <div>
+                                    <label className="block font-heading text-xs font-semibold text-gray-700 tracking-wider mb-2">Confirmar Nova Senha</label>
+                                    <input type="password" name="recoveryConfirm" placeholder="Confirme sua senha" required minLength={6}
+                                        className="w-full bg-transparent px-0 py-2.5 border-b border-gray-200 focus:border-[#C6A76A] outline-none font-heading text-sm font-medium text-gray-900 transition-all placeholder:text-gray-400" />
+                                </div>
+                                <button type="submit" disabled={submitting}
+                                    className="w-full py-4 bg-[#C6A76A] hover:bg-[#b09054] text-white font-heading text-xs font-bold uppercase tracking-wider rounded-xs transition-all active:scale-98 disabled:opacity-60 disabled:cursor-not-allowed shadow-xs cursor-pointer">
+                                    {submitting ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto" /> : 'Redefinir Minha Senha'}
+                                </button>
+                                <div className="text-center pt-2">
+                                    <button type="button" onClick={() => { setTab('login'); setAlert({ message: '', type: '' }) }} 
+                                        className="text-xs text-[#7A3E4A] hover:text-[#C6A76A] font-bold uppercase tracking-wider transition-colors cursor-pointer">
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </form>
+                        ) : tab === 'forgot' ? (
                             <form onSubmit={handleForgotPassword} className="animate-[fadeIn_300ms_ease-out] space-y-6">
                                 <p className="text-xs text-gray-500 leading-relaxed">
                                     Insira seu e-mail cadastrado e enviaremos as instruções para a redefinição da sua senha.
