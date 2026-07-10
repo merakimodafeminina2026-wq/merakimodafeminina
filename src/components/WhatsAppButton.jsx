@@ -1,7 +1,29 @@
+import { useState, useEffect } from 'react'
+
 export default function WhatsAppButton() {
+    const [whatsapp, setWhatsapp] = useState('5511999999999')
+
+    useEffect(() => {
+        const loadConfig = () => {
+            try {
+                const config = JSON.parse(localStorage.getItem('meraki_store_config'))
+                if (config?.whatsapp) {
+                    // Remove non-numeric characters just in case
+                    const cleanNum = config.whatsapp.replace(/\D/g, '')
+                    setWhatsapp(cleanNum)
+                }
+            } catch (e) {
+                console.error(e)
+            }
+        }
+        loadConfig()
+        window.addEventListener('storeConfigUpdated', loadConfig)
+        return () => window.removeEventListener('storeConfigUpdated', loadConfig)
+    }, [])
+
     return (
         <a
-            href="https://wa.me/5511999999999"
+            href={`https://wa.me/${whatsapp}`}
             target="_blank"
             rel="noopener noreferrer"
             className="fixed bottom-6 left-6 z-50 w-14 h-14 bg-[#25d366] text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center hover:-translate-y-1"

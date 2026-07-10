@@ -91,8 +91,23 @@ export async function initSupabaseSync() {
         // 6. Sync Returns
         const { data: dbReturns } = await supabase.from('returns').select('*')
         if (dbReturns) {
-            // Group by email if needed, or save globally
             localStorage.setItem('meraki_all_returns', JSON.stringify(dbReturns))
+        }
+
+        // 7. Sync Store Config
+        const { data: dbConfig } = await supabase.from('store_config').select('*').eq('id', 'default').maybeSingle()
+        if (dbConfig) {
+            localStorage.setItem('meraki_store_config', JSON.stringify(dbConfig))
+        } else {
+            const defaultConfig = {
+                id: 'default',
+                whatsapp: '5511999999999',
+                sac_phone: '(11) 2388-0403',
+                address: 'Rua Alpont, 428 - Bairro Capuava - Mauá - São Paulo. CEP: 09380-115',
+                cnpj: '57.484.768/0064-89'
+            }
+            await supabase.from('store_config').upsert(defaultConfig)
+            localStorage.setItem('meraki_store_config', JSON.stringify(defaultConfig))
         }
 
         console.log('✅ Sincronização concluída com sucesso.')
@@ -125,6 +140,10 @@ localStorage.setItem = function(key, value) {
             syncTableToSupabase('categories', parsed)
         } else if (key.startsWith('meraki_returns_')) {
             syncTableToSupabase('returns', parsed)
+        } else if (key === 'meraki_store_config') {
+            supabase.from('store_config').upsert(parsed).then(() => {
+                window.dispatchEvent(new Event('storeConfigUpdated'))
+            })
         }
     } catch (e) {
         // Not JSON or non-sync key

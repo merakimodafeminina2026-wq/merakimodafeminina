@@ -907,3 +907,113 @@ export function ReturnsSection({
         </div>
     )
 }
+
+// ─── SECTION 8: STORE SETTINGS ────────────────────────────────────────────────
+export function SettingsSection({ saving, setSaving }) {
+    const [whatsapp, setWhatsapp] = useState(() => {
+        const stored = JSON.parse(localStorage.getItem('meraki_store_config'))
+        return stored?.whatsapp || '5511999999999'
+    })
+    const [sacPhone, setSacPhone] = useState(() => {
+        const stored = JSON.parse(localStorage.getItem('meraki_store_config'))
+        return stored?.sac_phone || '(11) 2388-0403'
+    })
+    const [address, setAddress] = useState(() => {
+        const stored = JSON.parse(localStorage.getItem('meraki_store_config'))
+        return stored?.address || 'Rua Alpont, 428 - Bairro Capuava - Mauá - São Paulo. CEP: 09380-115'
+    })
+    const [cnpj, setCnpj] = useState(() => {
+        const stored = JSON.parse(localStorage.getItem('meraki_store_config'))
+        return stored?.cnpj || '57.484.768/0064-89'
+    })
+    const [message, setMessage] = useState('')
+
+    const handleSave = async (e) => {
+        e.preventDefault()
+        setSaving(true)
+        setMessage('')
+        try {
+            const newConfig = { id: 'default', whatsapp, sac_phone: sacPhone, address, cnpj }
+            localStorage.setItem('meraki_store_config', JSON.stringify(newConfig))
+            setMessage('Configurações salvas e integradas com o Supabase com sucesso!')
+            setTimeout(() => setMessage(''), 3000)
+        } catch (err) {
+            console.error(err)
+        }
+        setSaving(false)
+    }
+
+    return (
+        <div className="space-y-6">
+            <div className="bg-white p-6 rounded-2xl border border-[#EEEEEE]">
+                <div>
+                    <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider mb-1">Configurações de Contato e Endereço da Loja</h3>
+                    <p className="text-xs text-gray-400">Configure as informações de SAC, WhatsApp de atendimento e Endereço que aparecem no rodapé do site.</p>
+                </div>
+            </div>
+
+            <form onSubmit={handleSave} className="bg-white p-6 rounded-2xl border border-[#EEEEEE] space-y-4">
+                {message && (
+                    <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold rounded-xl">
+                        {message}
+                    </div>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-wider">Número do WhatsApp (Com DDD - Apenas Números)</label>
+                        <input
+                            type="text"
+                            value={whatsapp}
+                            onChange={(e) => setWhatsapp(e.target.value)}
+                            className="w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-sm outline-none focus:border-[#7A3E4A] focus:ring-2 focus:ring-[#7A3E4A]/10 transition-all font-medium"
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-wider">Telefone do SAC (Exibido formatado)</label>
+                        <input
+                            type="text"
+                            value={sacPhone}
+                            onChange={(e) => setSacPhone(e.target.value)}
+                            className="w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-sm outline-none focus:border-[#7A3E4A] focus:ring-2 focus:ring-[#7A3E4A]/10 transition-all font-medium"
+                            required
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-wider">Endereço Completo do Showroom / Loja Física</label>
+                    <textarea
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
+                        rows={3}
+                        className="w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-sm outline-none focus:border-[#7A3E4A] focus:ring-2 focus:ring-[#7A3E4A]/10 transition-all font-medium"
+                        required
+                    />
+                </div>
+
+                <div>
+                    <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-wider">CNPJ da Empresa</label>
+                    <input
+                        type="text"
+                        value={cnpj}
+                        onChange={(e) => setCnpj(e.target.value)}
+                        className="w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-sm outline-none focus:border-[#7A3E4A] focus:ring-2 focus:ring-[#7A3E4A]/10 transition-all font-medium"
+                        required
+                    />
+                </div>
+
+                <div className="flex gap-2 justify-end pt-2">
+                    <button
+                        type="submit"
+                        disabled={saving}
+                        className="px-6 py-3 bg-gradient-to-r from-[#7A3E4A] to-[#9A5060] text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:shadow-lg hover:shadow-[#7A3E4A]/30 transition-all cursor-pointer disabled:opacity-50"
+                    >
+                        {saving ? 'Salvando...' : 'Salvar Alterações'}
+                    </button>
+                </div>
+            </form>
+        </div>
+    )
+}

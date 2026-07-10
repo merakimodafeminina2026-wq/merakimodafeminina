@@ -15,6 +15,11 @@ export default function InfoPage({ tab: propTab }) {
     const [wishlistCount, setWishlistCount] = useState(0)
     const [searchOpen, setSearchOpen] = useState(false)
     const [dropdownOpen, setDropdownOpen] = useState(false)
+    const [storeConfig, setStoreConfig] = useState({
+        whatsapp: '5511999999999',
+        sac_phone: '(11) 2388-0403',
+        address: 'Avenida Alfredo Nasser, Qd. 14, Lt. 05 - Centro, Bonfinópolis - GO, CEP: 75225-000'
+    })
 
     // Sync active tab with route param or prop
     useEffect(() => {
@@ -36,6 +41,11 @@ export default function InfoPage({ tab: propTab }) {
 
         const storedCart = JSON.parse(localStorage.getItem('meraki_cart') || '[]')
         setCartCount(storedCart.reduce((acc, item) => acc + item.quantity, 0))
+
+        const config = JSON.parse(localStorage.getItem('meraki_store_config'))
+        if (config) {
+            setStoreConfig(config)
+        }
     }, [])
 
     const handleRemoveFromWishlist = (productId) => {
@@ -283,8 +293,8 @@ export default function InfoPage({ tab: propTab }) {
                         <div className="max-w-md my-6">
                             <div className="p-5 rounded-xl border border-gray-150 bg-white shadow-2xs">
                                 <h3 className="text-sm font-bold text-gray-800 mb-1">Showroom Meraki Bonfinópolis</h3>
-                                <p className="text-xs text-gray-500 leading-relaxed mb-3">Avenida Alfredo Nasser, Qd. 14, Lt. 05 - Centro, Bonfinópolis - GO, CEP: 75225-000</p>
-                                <span className="text-[10px] text-[#7A3E4A] font-bold uppercase tracking-wider">Telefone/WhatsApp: (11) 2388-0403</span>
+                                <p className="text-xs text-gray-550 leading-relaxed mb-3">{storeConfig.address}</p>
+                                <span className="text-[10px] text-[#7A3E4A] font-bold uppercase tracking-wider">Telefone/WhatsApp: {storeConfig.sac_phone}</span>
                             </div>
                         </div>
                     </div>

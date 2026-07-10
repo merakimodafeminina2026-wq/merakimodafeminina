@@ -2,6 +2,35 @@ import { useState, useEffect } from 'react'
 
 export default function Footer() {
     const [butterflySrc, setButterflySrc] = useState('/assets/borboleta-v2.png')
+    const [config, setConfig] = useState({
+        sac_phone: '(11) 2388-0403',
+        address: 'Rua Alpont, 428 - Bairro Capuava - Mauá - São Paulo. CEP: 09380-115',
+        cnpj: '57.484.768/0064-89'
+    })
+
+    useEffect(() => {
+        const loadConfig = () => {
+            try {
+                const stored = JSON.parse(localStorage.getItem('meraki_store_config'))
+                if (stored) {
+                    setConfig({
+                        sac_phone: stored.sac_phone || '(11) 2388-0403',
+                        address: stored.address || 'Rua Alpont, 428 - Bairro Capuava - Mauá - São Paulo. CEP: 09380-115',
+                        cnpj: stored.cnpj || '57.484.768/0064-89'
+                    })
+                }
+            } catch (e) {
+                console.error(e)
+            }
+        }
+        loadConfig()
+        window.addEventListener('storeConfigUpdated', loadConfig)
+        window.addEventListener('storage', loadConfig)
+        return () => {
+            window.removeEventListener('storeConfigUpdated', loadConfig)
+            window.removeEventListener('storage', loadConfig)
+        }
+    }, [])
 
     useEffect(() => {
         const img = new Image()
@@ -133,7 +162,7 @@ export default function Footer() {
 
                     {/* SAC Service */}
                     <div className="text-[10px] tracking-wider text-gray-400 font-semibold uppercase">
-                        SAC <span className="text-gray-550 font-bold ml-1.5">(11) 2388 0403</span>
+                        SAC <span className="text-gray-550 font-bold ml-1.5">{config.sac_phone}</span>
                     </div>
                 </div>
 
@@ -193,7 +222,7 @@ export default function Footer() {
                 {/* Footer Legal & Copyright */}
                 <div className="text-center md:text-left flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] text-gray-400 font-light">
                     <p className="leading-relaxed max-w-2xl">
-                        Horário de Atendimento: De segunda à sexta-feira, das 8h30 às 17h30, exceto feriados | Rua Alpont, 428 - Bairro Capuava - Mauá - São Paulo. CEP: 09380-115 | Meraki Comércio de Vestuário Ltda - CNPJ: 57.484.768/0064-89
+                        Horário de Atendimento: De segunda à sexta-feira, das 8h30 às 17h30, exceto feriados | {config.address} | Meraki Comércio de Vestuário Ltda - CNPJ: {config.cnpj}
                     </p>
                     <p className="shrink-0">
                         © Meraki 2026 - Todos os direitos reservados
