@@ -181,7 +181,9 @@ localStorage.setItem = function(key, value) {
         } else if (key === 'meraki_categories') {
             syncTableToSupabase('categories', parsed)
         } else if (key.startsWith('meraki_returns_')) {
-            syncTableToSupabase('returns', parsed)
+            const email = key.replace('meraki_returns_', '')
+            const returnsWithEmail = parsed.map(ret => ({ ...ret, customerEmail: email }))
+            syncTableToSupabase('returns', returnsWithEmail)
         } else if (key === 'meraki_store_config') {
             supabase.from('store_config').upsert(parsed).then(() => {
                 window.dispatchEvent(new Event('storeConfigUpdated'))
