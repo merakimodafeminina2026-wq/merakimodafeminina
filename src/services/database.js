@@ -12,11 +12,11 @@ const TABLE_COLUMNS = {
     categories: ['id', 'name', 'group', 'description', 'image', 'created_at'],
     products: [
         'id', 'name', 'category', 'price', 'original_price', 'image', 'badge', 'section', 'sizes', 'description', 'stock', 'created_at',
-        'colors', 'inPromoCombo', 'isCustomizable', 'customPriceWith', 'customPriceWithout', 'customFeeLetter', 'customFeeNumber', 'customFeeEmoji'
+        'colors', 'inpromocombo', 'iscustomizable', 'custompricewith', 'custompricewithout', 'customfeeletter', 'customfeenumber', 'customfeeemoji'
     ],
     store_config: [
         'id', 'whatsapp', 'sac_phone', 'address', 'cnpj', 'infinitepay_handle',
-        'topbarMessages', 'topbarStyle', 'promoCombo', 'editorial'
+        'topbarmessages', 'topbarstyle', 'promocombo', 'editorial'
     ]
 }
 
