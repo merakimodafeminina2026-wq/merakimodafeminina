@@ -275,9 +275,16 @@ export default function HomePage() {
                             <div className="lg:col-span-6 grid grid-cols-2 gap-4 sm:gap-6">
                                 {(() => {
                                     const promoProducts = allProducts.filter(p => p.inPromoCombo === true)
-                                    const displayProducts = promoProducts.length >= 2 
-                                        ? promoProducts.slice(0, 2) 
-                                        : allProducts.filter(p => p.name.toLowerCase().includes((promoCombo.query || 'sutiã').toLowerCase())).slice(0, 2)
+                                    const fallbackProducts = allProducts.filter(p => p.name.toLowerCase().includes((promoCombo.query || 'sutiã').toLowerCase()))
+                                    
+                                    const combined = [...promoProducts]
+                                    for (const fallback of fallbackProducts) {
+                                        if (combined.length >= 2) break
+                                        if (!combined.some(p => p.id === fallback.id)) {
+                                            combined.push(fallback)
+                                        }
+                                    }
+                                    const displayProducts = combined.slice(0, 2)
                                     return displayProducts.map(product => {
                                         const isWish = isWishlisted(product.id)
                                         return (
