@@ -51,7 +51,20 @@ export default function CheckoutPage() {
                     if (profile.phone) setPhone(profile.phone)
                     if (profile.cpf) setCpf(profile.cpf)
 
-                    let addresses = profile.addresses || []
+                    const addresses = []
+                    if (profile.address) {
+                        addresses.push({
+                            id: 'addr-profile',
+                            label: 'Principal',
+                            cep: profile.cep || '',
+                            street: profile.address || '',
+                            number: profile.number || '',
+                            complement: profile.complement || '',
+                            neighborhood: profile.neighborhood || '',
+                            city: profile.city || '',
+                            state: profile.state || ''
+                        })
+                    }
                     setSavedAddresses(addresses)
                     if (addresses.length > 0) {
                         const first = addresses[0]
@@ -286,41 +299,18 @@ export default function CheckoutPage() {
         }
 
         // Save new address to profile
+        // Save new address to profile
         if (user) {
-            const addresses = [...savedAddresses]
-            if (selectedAddressId === 'new') {
-                const newAddr = {
-                    id: 'addr-' + Date.now(),
-                    label: addressLabel || 'Outro',
-                    cep,
-                    street,
-                    number,
-                    complement,
-                    neighborhood,
-                    city,
-                    state
-                }
-                addresses.push(newAddr)
-            } else {
-                // Update existing
-                const addrIdx = addresses.findIndex(a => a.id === selectedAddressId)
-                if (addrIdx !== -1) {
-                    addresses[addrIdx] = {
-                        ...addresses[addrIdx],
-                        cep,
-                        street,
-                        number,
-                        complement,
-                        neighborhood,
-                        city,
-                        state
-                    }
-                }
-            }
             updateUserProfile(user.id, {
                 phone,
                 cpf,
-                addresses
+                address: street, // map street state to address column
+                cep,
+                number,
+                complement,
+                neighborhood,
+                city,
+                state
             }).catch(console.error)
         }
 
