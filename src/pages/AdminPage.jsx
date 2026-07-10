@@ -191,114 +191,7 @@ export default function AdminPage() {
     const [dragActive, setDragActive] = useState(false)
     const fileInputRef = useRef(null)
 
-    const seedMockData = () => {
-        const mockCoupons = [
-            { id: 'cp-1', code: 'MERAKI15', type: 'percentage', value: 15, minPurchase: 150 },
-            { id: 'cp-2', code: 'PIX20', type: 'fixed', value: 20, minPurchase: 100 },
-            { id: 'cp-3', code: 'OFF5', type: 'percentage', value: 5, minPurchase: 50 }
-        ]
-        const mockUsers = [
-            { id: 'admin-id-123', email: 'admin', password: 'admin', full_name: 'Administradora Meraki', tipo_user: 'admin', phone: '(11) 99999-9999', cpf: '123.456.789-00' },
-            { id: 'us-1', full_name: 'Carla Souza', email: 'carla.souza@email.com', phone: '(11) 98888-7777', cpf: '123.456.789-01', tipo_user: 'customer' },
-            { id: 'us-2', full_name: 'Marina Lima', email: 'marina.lima@email.com', phone: '(21) 97777-6666', cpf: '987.654.321-02', tipo_user: 'customer' },
-            { id: 'us-3', full_name: 'Amanda Oliveira', email: 'amanda.oliveira@email.com', phone: '(31) 96666-5555', cpf: '456.789.123-03', tipo_user: 'customer' }
-        ]
-        const mockOrders = [
-            {
-                id: 'ord-982713',
-                customerName: 'Carla Souza',
-                customerEmail: 'carla.souza@email.com',
-                customerPhone: '(11) 98888-7777',
-                customerCpf: '123.456.789-01',
-                created_at: new Date(Date.now() - 3600000 * 2).toISOString(),
-                status: 'Pago',
-                items: [
-                    { id: 'p-1', name: 'Conjunto Rendado Bella', price: 129.90, quantity: 2, size: 'M', image: [] }
-                ],
-                subtotal: 259.80,
-                shipping: 0,
-                discount: 38.97,
-                total: 220.83,
-                shippingAddress: { street: 'Av. Paulista', number: '1000', complement: 'Apto 12', neighborhood: 'Bela Vista', city: 'São Paulo', state: 'SP', cep: '01310-100' }
-            },
-            {
-                id: 'ord-812731',
-                customerName: 'Marina Lima',
-                customerEmail: 'marina.lima@email.com',
-                customerPhone: '(21) 97777-6666',
-                customerCpf: '987.654.321-02',
-                created_at: new Date(Date.now() - 3600000 * 24).toISOString(),
-                status: 'Enviado',
-                items: [
-                    { id: 'p-2', name: 'Robe de Seda Satin', price: 189.90, quantity: 1, size: 'G', image: [] }
-                ],
-                subtotal: 189.90,
-                shipping: 15.00,
-                discount: 0,
-                total: 204.90,
-                shippingAddress: { street: 'Rua Copacabana', number: '450', complement: '', neighborhood: 'Copacabana', city: 'Rio de Janeiro', state: 'RJ', cep: '22020-002' }
-            },
-            {
-                id: 'ord-731289',
-                customerName: 'Amanda Oliveira',
-                customerEmail: 'amanda.oliveira@email.com',
-                customerPhone: '(31) 96666-5555',
-                customerCpf: '456.789.123-03',
-                created_at: new Date(Date.now() - 3600000 * 48).toISOString(),
-                status: 'Entregue',
-                items: [
-                    { id: 'p-3', name: 'Baby Doll Romantic', price: 110.00, quantity: 3, size: 'P', image: [] }
-                ],
-                subtotal: 330.00,
-                shipping: 0,
-                discount: 20.00,
-                total: 310.00,
-                shippingAddress: { street: 'Rua Bahia', number: '200', complement: 'Bloco B', neighborhood: 'Savassi', city: 'Belo Horizonte', state: 'MG', cep: '30190-010' }
-            }
-        ]
 
-        const mockReturnsCarla = [
-            {
-                id: 'ret-1002',
-                orderId: 'ord-982713',
-                itemId: 'p-1',
-                type: 'devolução',
-                reason: 'Ficou um pouco largo no busto.',
-                date: new Date(Date.now() - 3600000 * 1).toISOString(),
-                status: 'Autorizado (Aguardando Postagem)',
-                postageCode: 'PR583019284BR'
-            }
-        ]
-
-        const mockReturnsMarina = [
-            {
-                id: 'ret-1003',
-                orderId: 'ord-812731',
-                itemId: 'p-2',
-                type: 'troca',
-                reason: 'Gostaria de trocar pelo tamanho M.',
-                date: new Date(Date.now() - 3600000 * 12).toISOString(),
-                status: 'Produto Recebido (Em Análise)',
-                postageCode: 'PR109382103BR'
-            }
-        ]
-
-        localStorage.setItem('meraki_coupons', JSON.stringify(mockCoupons))
-        localStorage.setItem('meraki_users', JSON.stringify(mockUsers))
-        localStorage.setItem('meraki_orders', JSON.stringify(mockOrders))
-        localStorage.setItem('meraki_returns_carla.souza@email.com', JSON.stringify(mockReturnsCarla))
-        localStorage.setItem('meraki_returns_marina.lima@email.com', JSON.stringify(mockReturnsMarina))
-
-        setCoupons(mockCoupons)
-        setCustomers(mockUsers)
-        setOrders(mockOrders)
-        
-        const allReturns = [
-            { ...mockReturnsCarla[0], customerEmail: 'carla.souza@email.com' },
-            { ...mockReturnsMarina[0], customerEmail: 'marina.lima@email.com' }
-        ]
-        setReturns(allReturns)
-    }
 
     useEffect(() => {
         let loadedOrders = JSON.parse(localStorage.getItem('meraki_orders') || '[]')
@@ -825,13 +718,7 @@ export default function AdminPage() {
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
-                        <button
-                            onClick={seedMockData}
-                            className="hidden md:flex items-center gap-1.5 text-xs text-[#C6A76A] hover:text-[#7A3E4A] font-bold transition-colors px-3 py-1.5 rounded-lg bg-[#C6A76A]/10 hover:bg-[#7A3E4A]/5 cursor-pointer border border-[#C6A76A]/20"
-                        >
-                            <Icon path="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" className="w-4 h-4" />
-                            Gerar Dados de Teste
-                        </button>
+
                         <Link
                             to="/"
                             className="hidden md:flex items-center gap-1.5 text-xs text-gray-500 hover:text-[#7A3E4A] font-semibold transition-colors px-3 py-1.5 rounded-lg hover:bg-[#7A3E4A]/5"
