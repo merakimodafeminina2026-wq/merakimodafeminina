@@ -926,6 +926,10 @@ export function SettingsSection({ saving, setSaving }) {
         const stored = JSON.parse(localStorage.getItem('meraki_store_config'))
         return stored?.cnpj || '57.484.768/0064-89'
     })
+    const [infinitepayHandle, setInfinitepayHandle] = useState(() => {
+        const stored = JSON.parse(localStorage.getItem('meraki_store_config'))
+        return stored?.infinitepay_handle || 'nicolly_gomes'
+    })
     const [message, setMessage] = useState('')
 
     const handleSave = async (e) => {
@@ -933,7 +937,7 @@ export function SettingsSection({ saving, setSaving }) {
         setSaving(true)
         setMessage('')
         try {
-            const newConfig = { id: 'default', whatsapp, sac_phone: sacPhone, address, cnpj }
+            const newConfig = { id: 'default', whatsapp, sac_phone: sacPhone, address, cnpj, infinitepay_handle: infinitepayHandle }
             localStorage.setItem('meraki_store_config', JSON.stringify(newConfig))
             setMessage('Configurações salvas e integradas com o Supabase com sucesso!')
             setTimeout(() => setMessage(''), 3000)
@@ -1000,6 +1004,18 @@ export function SettingsSection({ saving, setSaving }) {
                         value={cnpj}
                         onChange={(e) => setCnpj(e.target.value)}
                         className="w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-sm outline-none focus:border-[#7A3E4A] focus:ring-2 focus:ring-[#7A3E4A]/10 transition-all font-medium"
+                        required
+                    />
+                </div>
+
+                <div>
+                    <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-wider">InfiniteTag / Handle da InfinitePay (Sem o $)</label>
+                    <input
+                        type="text"
+                        value={infinitepayHandle}
+                        onChange={(e) => setInfinitepayHandle(e.target.value)}
+                        className="w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-sm outline-none focus:border-[#7A3E4A] focus:ring-2 focus:ring-[#7A3E4A]/10 transition-all font-medium"
+                        placeholder="nicolly_gomes"
                         required
                     />
                 </div>

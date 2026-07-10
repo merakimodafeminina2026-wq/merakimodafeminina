@@ -104,7 +104,8 @@ export async function initSupabaseSync() {
                 whatsapp: '5511999999999',
                 sac_phone: '(11) 2388-0403',
                 address: 'Rua Alpont, 428 - Bairro Capuava - Mauá - São Paulo. CEP: 09380-115',
-                cnpj: '57.484.768/0064-89'
+                cnpj: '57.484.768/0064-89',
+                infinitepay_handle: 'nicolly_gomes'
             }
             await supabase.from('store_config').upsert(defaultConfig)
             localStorage.setItem('meraki_store_config', JSON.stringify(defaultConfig))
