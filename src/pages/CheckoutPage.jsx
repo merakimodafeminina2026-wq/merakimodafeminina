@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useCart } from '../hooks/useCart.js'
 import { useAuth } from '../hooks/useAuth.js'
-import { signUp } from '../services/auth.js'
+import { signUp, getUserProfile, updateUserProfile } from '../services/auth.js'
 import Header from '../components/Header.jsx'
 import Footer from '../components/Footer.jsx'
 import WhatsAppButton from '../components/WhatsAppButton.jsx'
@@ -45,45 +45,31 @@ export default function CheckoutPage() {
             setName(user?.user_metadata?.full_name || '')
             setEmail(user?.email || '')
 
-            const users = JSON.parse(localStorage.getItem('meraki_users') || '[]')
-            const dbUser = users.find(u => u.email === user.email)
-            if (dbUser) {
-                if (dbUser.full_name) setName(dbUser.full_name)
-                if (dbUser.phone) setPhone(dbUser.phone)
-                if (dbUser.cpf) setCpf(dbUser.cpf)
+            getUserProfile(user.id).then(({ profile }) => {
+                if (profile) {
+                    if (profile.full_name) setName(profile.full_name)
+                    if (profile.phone) setPhone(profile.phone)
+                    if (profile.cpf) setCpf(profile.cpf)
 
-                let addresses = dbUser.addresses || []
-                // Fallback to migrating legacy address to list
-                if (addresses.length === 0 && dbUser.address) {
-                    addresses = [{
-                        id: 'addr-default',
-                        label: 'Principal',
-                        cep: dbUser.cep || '',
-                        street: dbUser.address || '',
-                        number: dbUser.number || '',
-                        complement: dbUser.complement || '',
-                        neighborhood: dbUser.neighborhood || '',
-                        city: dbUser.city || '',
-                        state: dbUser.state || ''
-                    }]
-                }
-                setSavedAddresses(addresses)
-                if (addresses.length > 0) {
-                    const first = addresses[0]
-                    setSelectedAddressId(first.id)
-                    setCep(first.cep || '')
-                    setStreet(first.street || '')
-                    setNumber(first.number || '')
-                    setComplement(first.complement || '')
-                    setNeighborhood(first.neighborhood || '')
-                    setCity(first.city || '')
-                    setState(first.state || '')
+                    let addresses = profile.addresses || []
+                    setSavedAddresses(addresses)
+                    if (addresses.length > 0) {
+                        const first = addresses[0]
+                        setSelectedAddressId(first.id)
+                        setCep(first.cep || '')
+                        setStreet(first.street || '')
+                        setNumber(first.number || '')
+                        setComplement(first.complement || '')
+                        setNeighborhood(first.neighborhood || '')
+                        setCity(first.city || '')
+                        setState(first.state || '')
+                    } else {
+                        setSelectedAddressId('new')
+                    }
                 } else {
                     setSelectedAddressId('new')
                 }
-            } else {
-                setSelectedAddressId('new')
-            }
+            }).catch(console.error)
         } else {
             setSelectedAddressId('new')
         }
@@ -300,11 +286,8 @@ export default function CheckoutPage() {
         }
 
         // Save new address to profile
-        const activeEmail = user?.email || email.trim().toLowerCase()
-        const users = JSON.parse(localStorage.getItem('meraki_users') || '[]')
-        const idx = users.findIndex(u => u.email?.trim().toLowerCase() === activeEmail.trim().toLowerCase())
-        if (idx !== -1) {
-            let addresses = users[idx].addresses || []
+        if (user) {
+            const addresses = [...savedAddresses]
             if (selectedAddressId === 'new') {
                 const newAddr = {
                     id: 'addr-' + Date.now(),
@@ -334,18 +317,11 @@ export default function CheckoutPage() {
                     }
                 }
             }
-            users[idx].addresses = addresses
-            // Also update fallback profile address fields
-            users[idx].address = street
-            users[idx].cep = cep
-            users[idx].number = number
-            users[idx].complement = complement
-            users[idx].neighborhood = neighborhood
-            users[idx].city = city
-            users[idx].state = state
-            
-            localStorage.setItem('meraki_users', JSON.stringify(users))
-            window.dispatchEvent(new Event('storage'))
+            updateUserProfile(user.id, {
+                phone,
+                cpf,
+                addresses
+            }).catch(console.error)
         }
 
         // Save order to localStorage
