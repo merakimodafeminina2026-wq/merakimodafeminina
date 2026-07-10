@@ -10,7 +10,10 @@ const TABLE_COLUMNS = {
     banners: ['id', 'image', 'alt', 'created_at'],
     returns: ['id', 'orderid', 'itemid', 'customeremail', 'type', 'postagecode', 'status', 'created_at'],
     categories: ['id', 'name', 'group', 'description', 'image', 'created_at'],
-    products: ['id', 'name', 'category', 'price', 'original_price', 'image', 'badge', 'section', 'sizes', 'description', 'stock', 'created_at']
+    products: [
+        'id', 'name', 'category', 'price', 'original_price', 'image', 'badge', 'section', 'sizes', 'description', 'stock', 'created_at',
+        'colors', 'inPromoCombo', 'isCustomizable', 'customPriceWith', 'customPriceWithout', 'customFeeLetter', 'customFeeNumber', 'customFeeEmoji'
+    ]
 }
 
 // Maps database columns to alternative frontend keys
@@ -20,7 +23,14 @@ const FIELD_MAPPING = {
     minpurchase: ['minPurchase', 'minpurchase'],
     orderid: ['orderId', 'orderid'],
     itemid: ['itemId', 'itemid'],
-    postagecode: ['postageCode', 'postagecode']
+    postagecode: ['postageCode', 'postagecode'],
+    inpromocombo: ['inPromoCombo', 'inpromocombo'],
+    iscustomizable: ['isCustomizable', 'iscustomizable'],
+    custompricewith: ['customPriceWith', 'custompricewith'],
+    custompricewithout: ['customPriceWithout', 'custompricewithout'],
+    customfeeletter: ['customFeeLetter', 'customfeeletter'],
+    customfeenumber: ['customFeeNumber', 'customfeenumber'],
+    customfeeemoji: ['customFeeEmoji', 'customfeeemoji']
 }
 
 // Normalize a category value (object or string) to its name string
@@ -50,6 +60,13 @@ function mapDbToFrontend(table, item) {
         if (item.minpurchase !== undefined) mapped.minPurchase = item.minpurchase
     } else if (table === 'products') {
         mapped.category = normalizeCategoryName(item.category)
+        if (item.inpromocombo !== undefined) mapped.inPromoCombo = item.inpromocombo
+        if (item.iscustomizable !== undefined) mapped.isCustomizable = item.iscustomizable
+        if (item.custompricewith !== undefined) mapped.customPriceWith = item.custompricewith
+        if (item.custompricewithout !== undefined) mapped.customPriceWithout = item.custompricewithout
+        if (item.customfeeletter !== undefined) mapped.customFeeLetter = item.customfeeletter
+        if (item.customfeenumber !== undefined) mapped.customFeeNumber = item.customfeenumber
+        if (item.customfeeemoji !== undefined) mapped.customFeeEmoji = item.customfeeemoji
     }
     return mapped
 }
