@@ -1,50 +1,6 @@
 import { supabase } from './supabase.js'
 
-// Cache default products for auto-seeding if Supabase is empty
-const DEFAULT_PRODUCTS = [
-    {
-        name: 'Conjunto de Renda Sophie Noir',
-        category: 'Conjuntos',
-        price: 189.90,
-        original_price: 249.90,
-        image: [
-            'https://images.unsplash.com/photo-1616422285623-13ff0162193c?w=600&auto=format&fit=crop&q=80',
-            'https://images.unsplash.com/photo-1608748010899-18f300247112?w=600&auto=format&fit=crop&q=80'
-        ],
-        badge: 'Mais Vendido',
-        section: 'best-sellers',
-        sizes: ['P', 'M', 'G'],
-        description: 'Conjunto delicado em renda premium francesa com sutiã com aro e calcinha fio regulável.'
-    },
-    {
-        name: 'Robe Satin Royale',
-        category: 'Linha Noite',
-        price: 219.90,
-        original_price: 0,
-        image: [
-            'https://images.unsplash.com/photo-1582533561751-ef6f6ab93a2e?w=600&auto=format&fit=crop&q=80',
-            'https://images.unsplash.com/photo-1618220179428-22790b461013?w=600&auto=format&fit=crop&q=80'
-        ],
-        badge: 'Luxo',
-        section: 'featured',
-        sizes: ['M', 'G', 'GG'],
-        description: 'Robe em cetim de seda pura com acabamento em renda chantilly nas mangas.'
-    },
-    {
-        name: 'Body Red Velvet Sexy',
-        category: 'Linha Sexy',
-        price: 159.90,
-        original_price: 199.90,
-        image: [
-            'https://images.unsplash.com/photo-1618220179428-22790b461013?w=600&auto=format&fit=crop&q=80',
-            'https://images.unsplash.com/photo-1608748010899-18f300247112?w=600&auto=format&fit=crop&q=80'
-        ],
-        badge: 'Novidade',
-        section: 'new-collection',
-        sizes: ['P', 'M', 'G'],
-        description: 'Body cavado em veludo molhado vermelho e detalhes em tule transparente.'
-    }
-]
+
 
 // Initialize database schema sync
 // Define expected columns for each database table
@@ -102,17 +58,10 @@ export async function initSupabaseSync() {
     try {
         console.log('🔄 Sincronizando tabelas com o Supabase...')
         
-        // 1. Sync Products (and seed if empty)
+        // 1. Sync Products
         const { data: dbProducts, error: pError } = await supabase.from('products').select('*')
         if (!pError) {
-            if (!dbProducts || dbProducts.length === 0) {
-                console.log('🌱 Banco vazio. Semeando produtos padrão no Supabase...')
-                await supabase.from('products').insert(DEFAULT_PRODUCTS)
-                const { data: reloadedProducts } = await supabase.from('products').select('*')
-                localStorage.setItem('meraki_products', JSON.stringify(reloadedProducts || DEFAULT_PRODUCTS))
-            } else {
-                localStorage.setItem('meraki_products', JSON.stringify(dbProducts))
-            }
+            localStorage.setItem('meraki_products', JSON.stringify(dbProducts || []))
         }
 
         // 2. Sync Orders
