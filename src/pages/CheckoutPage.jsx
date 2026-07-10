@@ -606,36 +606,54 @@ export default function CheckoutPage() {
                                 Método de Pagamento
                             </h2>
 
-                            <div className="p-5 bg-gradient-to-br from-[#7A3E4A]/5 to-[#9A5060]/5 border border-[#7A3E4A]/10 rounded-2xl space-y-4">
-                                <div className="flex gap-3 items-start">
-                                    <div className="p-3 bg-[#7A3E4A] rounded-xl text-white mt-1">
-                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                                        </svg>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setPaymentMethod('pix')}
+                                    className={`p-4 border rounded-2xl flex flex-col items-start gap-1.5 transition-all text-left cursor-pointer ${
+                                        paymentMethod === 'pix'
+                                            ? 'border-[#7A3E4A] bg-[#FDF8F6] text-[#7A3E4A] ring-2 ring-[#7A3E4A]/5'
+                                            : 'border-gray-200 bg-white hover:border-gray-300 text-gray-600'
+                                    }`}
+                                >
+                                    <div className="flex justify-between w-full items-center">
+                                        <span className="text-sm font-bold">Pagar com Pix</span>
+                                        <span className="text-[9px] uppercase tracking-wider font-extrabold px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-md">
+                                            5% OFF
+                                        </span>
                                     </div>
-                                    <div>
-                                        <h3 className="font-bold text-sm text-[#1A1A1A]">Checkout Seguro InfinitePay</h3>
-                                        <p className="text-xs text-gray-500 font-light mt-1">
-                                            Você será redirecionada para a página oficial e criptografada da **InfinitePay** para concluir o pagamento de forma 100% segura.
-                                        </p>
-                                    </div>
-                                </div>
+                                    <span className="text-[10px] text-gray-400 font-light mt-0.5">
+                                        Aprovado na hora. O código Pix Copia e Cola será gerado após finalizar.
+                                    </span>
+                                </button>
 
-                                <div className="border-t border-[#7A3E4A]/10 pt-4 flex flex-wrap gap-4 justify-around text-center">
-                                    <div className="flex flex-col items-center">
-                                        <span className="text-xs font-bold text-gray-800">Pix</span>
-                                        <span className="text-[10px] text-emerald-600 font-bold">Aprovado na hora</span>
+                                <button
+                                    type="button"
+                                    onClick={() => setPaymentMethod('card')}
+                                    className={`p-4 border rounded-2xl flex flex-col items-start gap-1.5 transition-all text-left cursor-pointer ${
+                                        paymentMethod === 'card'
+                                            ? 'border-[#7A3E4A] bg-[#FDF8F6] text-[#7A3E4A] ring-2 ring-[#7A3E4A]/5'
+                                            : 'border-gray-200 bg-white hover:border-gray-300 text-gray-600'
+                                    }`}
+                                >
+                                    <div className="flex justify-between w-full items-center">
+                                        <span className="text-sm font-bold">Cartão de Crédito / Débito</span>
+                                        <span className="text-[9px] uppercase tracking-wider font-extrabold px-2 py-0.5 bg-amber-50 text-amber-700 rounded-md">
+                                            Até 12x
+                                        </span>
                                     </div>
-                                    <div className="w-[1px] bg-gray-200"></div>
-                                    <div className="flex flex-col items-center">
-                                        <span className="text-xs font-bold text-gray-800">Cartão de Crédito</span>
-                                        <span className="text-[10px] text-gray-500 font-medium">Até 12x sem juros</span>
-                                    </div>
-                                    <div className="w-[1px] bg-gray-200"></div>
-                                    <div className="flex flex-col items-center">
-                                        <span className="text-xs font-bold text-gray-800">Cartão de Débito</span>
-                                        <span className="text-[10px] text-gray-500 font-medium">À vista</span>
-                                    </div>
+                                    <span className="text-[10px] text-gray-400 font-light mt-0.5">
+                                        Pague no crédito ou débito com segurança pela plataforma InfinitePay.
+                                    </span>
+                                </button>
+                            </div>
+
+                            <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100/50 border border-gray-100 rounded-2xl flex gap-3 text-xs text-gray-500">
+                                <svg className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
+                                <div>
+                                    Você será redirecionada de forma segura para o checkout da **InfinitePay** para concluir o seu pagamento com a opção escolhida.
                                 </div>
                             </div>
                         </div>
