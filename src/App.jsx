@@ -21,15 +21,49 @@ function ScrollToTopReset() {
 }
 
 function SplashLoader() {
+    const [butterflySrc, setButterflySrc] = useState('/assets/borboleta-v2.png')
+
+    useEffect(() => {
+        const img = new Image()
+        img.src = '/assets/borboleta-v2.png'
+        img.onload = () => {
+            const canvas = document.createElement('canvas')
+            canvas.width = img.width
+            canvas.height = img.height
+            const ctx = canvas.getContext('2d')
+            if (ctx) {
+                ctx.drawImage(img, 0, 0)
+                try {
+                    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+                    const data = imgData.data
+                    for (let i = 0; i < data.length; i += 4) {
+                        const r = data[i]
+                        const g = data[i+1]
+                        const b = data[i+2]
+                        if (r > 185 && g > 185 && b > 185) {
+                            data[i+3] = 0 // make light background transparent
+                        }
+                    }
+                    ctx.putImageData(imgData, 0, 0)
+                    setButterflySrc(canvas.toDataURL())
+                } catch (e) {
+                    console.error("Erro ao remover fundo da borboleta:", e)
+                }
+            }
+        }
+    }, [])
+
     return (
         <div className="fixed inset-0 flex flex-col items-center justify-center z-[99999]" style={{ background: 'linear-gradient(135deg, #FAF9F5 0%, #F5EEE9 100%)' }}>
             <div className="flex flex-col items-center gap-6">
                 <div className="relative flex flex-col items-center">
                     {/* Animated Butterfly */}
                     <img 
-                        src="/assets/borboleta-v2.png" 
+                        src={butterflySrc} 
                         alt="Borboleta Meraki" 
-                        className="w-16 h-16 md:w-20 md:h-20 object-contain animate-bounce mb-2"
+                        className={`w-16 h-16 md:w-20 md:h-20 object-contain animate-bounce mb-2 transition-opacity duration-200 ${
+                            butterflySrc.startsWith('data:') ? 'opacity-100' : 'opacity-0'
+                        }`}
                         style={{ animationDuration: '2s' }}
                     />
                     {/* Logo Text */}
