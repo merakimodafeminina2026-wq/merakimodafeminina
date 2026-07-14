@@ -1396,7 +1396,7 @@ export default function AdminPage() {
                             <div>
                                 <label className={labelCls}>Upload de Imagem Desktop <span className="text-[9px] text-[#C6A76A] lowercase font-normal">(Recomendado: 1920x800px)</span></label>
                                 <input type="file" accept="image/*" onChange={e => {
-                                    if (e.target.files?.[0]) compressImage(e.target.files[0], 2000, 16 / 5).then(f => setBannerImageFiles([f]))
+                                    if (e.target.files?.[0]) setBannerImageFiles([e.target.files[0]])
                                 }} className="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#7A3E4A]/10 file:text-[#7A3E4A] hover:file:bg-[#7A3E4A]/20 cursor-pointer" />
                             </div>
                             <div><label className={labelCls}>Ou Link de Imagem Desktop</label><input type="text" placeholder="https://..." value={bannerForm.image} onChange={e => setBannerForm(prev => ({ ...prev, image: e.target.value }))} className={inputCls} /></div>
@@ -1404,7 +1404,7 @@ export default function AdminPage() {
                             <div className="border-t border-dashed border-[#EEEEEE] pt-3">
                                 <label className={labelCls}>Upload de Imagem Mobile (Opcional) <span className="text-[9px] text-[#C6A76A] lowercase font-normal">(Recomendado: 800x1000px ou vertical)</span></label>
                                 <input type="file" accept="image/*" onChange={e => {
-                                    if (e.target.files?.[0]) compressImage(e.target.files[0], 1000, 4 / 5).then(f => setBannerMobileImageFiles([f]))
+                                    if (e.target.files?.[0]) setBannerMobileImageFiles([e.target.files[0]])
                                 }} className="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#7A3E4A]/10 file:text-[#7A3E4A] hover:file:bg-[#7A3E4A]/20 cursor-pointer" />
                             </div>
                             <div><label className={labelCls}>Ou Link de Imagem Mobile</label><input type="text" placeholder="https://..." value={bannerForm.mobile_image} onChange={e => setBannerForm(prev => ({ ...prev, mobile_image: e.target.value }))} className={inputCls} /></div>
