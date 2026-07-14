@@ -82,7 +82,7 @@ export default function HeroBanner() {
     if (!slides || slides.length === 0) return null;
 
     return (
-        <section className="relative w-full overflow-hidden bg-[#F5EDE3] aspect-[4/3] md:aspect-[16/5] max-h-[500px]">
+        <section className="relative w-full overflow-hidden bg-[#F5EDE3] aspect-[16/7] md:aspect-[16/5] max-h-[500px]">
             <div className="absolute inset-0">
                 <AnimatePresence mode="wait" custom={direction}>
                     <motion.div
