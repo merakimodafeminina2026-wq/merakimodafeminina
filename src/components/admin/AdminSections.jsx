@@ -368,7 +368,7 @@ export function BannersSection({
                                     accept="image/*" 
                                     onChange={async (e) => {
                                         if (e.target.files?.[0]) {
-                                            const file = await compressImage(e.target.files[0])
+                                            const file = await compressImage(e.target.files[0], 2000)
                                             const { urls } = await uploadMultipleImages([file])
                                             if (urls?.[0]) {
                                                 handleUpdateBannerImage(bn.id, urls[0])
@@ -434,7 +434,7 @@ export function PromoComboSection({
                         setSaving(true)
                         let imageUrl = promoCombo.image
                         if (files?.[0]) {
-                            const compressedFile = await compressImage(files[0])
+                            const compressedFile = await compressImage(files[0], 1600)
                             const { urls } = await uploadMultipleImages([compressedFile])
                             if (urls?.[0]) imageUrl = urls[0]
                         }
@@ -574,7 +574,7 @@ export function EditorialSection({
                         setSaving(true)
                         let imageUrl = editorial.image
                         if (files?.[0]) {
-                            const compressedFile = await compressImage(files[0])
+                            const compressedFile = await compressImage(files[0], 1600)
                             const { urls } = await uploadMultipleImages([compressedFile])
                             if (urls?.[0]) imageUrl = urls[0]
                         }
@@ -670,7 +670,7 @@ export function CategoriesSection({
                         
                         let imageUrl = '/placeholder.jpg'
                         if (files?.[0]) {
-                            const compressedFile = await compressImage(files[0])
+                            const compressedFile = await compressImage(files[0], 1200)
                             const { urls } = await uploadMultipleImages([compressedFile])
                             if (urls?.[0]) imageUrl = urls[0]
                         }

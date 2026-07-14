@@ -337,7 +337,7 @@ export default function AdminPage() {
         )
     }
 
-    const compressImage = (file) => new Promise((resolve) => {
+    const compressImage = (file, maxWidth = 1000) => new Promise((resolve) => {
         const reader = new FileReader()
         reader.readAsDataURL(file)
         reader.onload = (event) => {
@@ -345,14 +345,14 @@ export default function AdminPage() {
             img.src = event.target.result
             img.onload = () => {
                 const canvas = document.createElement('canvas')
-                const MAX_WIDTH = 1000
+                const MAX_WIDTH = maxWidth
                 let width = img.width, height = img.height
                 if (width > MAX_WIDTH) { height = Math.round((height * MAX_WIDTH) / width); width = MAX_WIDTH }
                 canvas.width = width; canvas.height = height
                 canvas.getContext('2d').drawImage(img, 0, 0, width, height)
                 canvas.toBlob((blob) => {
                     resolve(blob ? new File([blob], file.name.replace(/\.[^/.]+$/, '') + '.webp', { type: 'image/webp', lastModified: Date.now() }) : file)
-                }, 'image/webp', 0.8)
+                }, 'image/webp', 0.9)
             }
             img.onerror = () => resolve(file)
         }
@@ -1342,7 +1342,7 @@ export default function AdminPage() {
                             <div>
                                 <label className={labelCls}>Upload de Imagem <span className="text-[9px] text-[#C6A76A] lowercase font-normal">(Recomendado: 1920x800px - Proporção 16:7)</span></label>
                                 <input type="file" accept="image/*" onChange={e => {
-                                    if (e.target.files?.[0]) compressImage(e.target.files[0]).then(f => setBannerImageFiles([f]))
+                                    if (e.target.files?.[0]) compressImage(e.target.files[0], 2000).then(f => setBannerImageFiles([f]))
                                 }} className="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#7A3E4A]/10 file:text-[#7A3E4A] hover:file:bg-[#7A3E4A]/20 cursor-pointer" />
                             </div>
                             <div><label className={labelCls}>Ou Link de Imagem</label><input type="text" placeholder="https://..." value={bannerForm.image} onChange={e => setBannerForm(prev => ({ ...prev, image: e.target.value }))} className={inputCls} /></div>
