@@ -291,6 +291,25 @@ function filterPayloadForTable(table, item) {
 async function syncTableToSupabase(table, items) {
     if (!Array.isArray(items)) return
     try {
+        const conflictKey = table === 'categories' ? 'name' : table === 'coupons' ? 'code' : 'id'
+
+        // For local-first array tables, delete items from Supabase that are missing in the new list
+        if (table === 'banners' || table === 'coupons' || table === 'categories') {
+            const currentKeys = items.map(item => item[conflictKey]).filter(Boolean)
+            if (currentKeys.length > 0) {
+                const inList = `(${currentKeys.map(k => `"${k}"`).join(',')})`
+                await supabase.from(table).delete().not(conflictKey, 'in', inList)
+            } else {
+                if (conflictKey === 'id') {
+                    await supabase.from(table).delete().neq('id', '00000000-0000-0000-0000-000000000000')
+                } else if (conflictKey === 'name') {
+                    await supabase.from(table).delete().neq('name', '___impossible_name___')
+                } else if (conflictKey === 'code') {
+                    await supabase.from(table).delete().neq('code', '___impossible_code___')
+                }
+            }
+        }
+
         for (const item of items) {
             const payload = filterPayloadForTable(table, item)
 
@@ -299,7 +318,6 @@ async function syncTableToSupabase(table, items) {
                 delete payload.id // Let Supabase generate a proper UUID
             }
 
-            const conflictKey = table === 'categories' ? 'name' : table === 'coupons' ? 'code' : 'id'
             const { error } = await supabase.from(table).upsert(payload, { onConflict: conflictKey })
             if (error) {
                 console.error(`Erro ao upsertar item na tabela ${table}:`, error.message, payload)
