@@ -390,7 +390,7 @@ export function BannersSection({
                                         accept="image/*" 
                                         onChange={async (e) => {
                                             if (e.target.files?.[0]) {
-                                                const file = await compressImage(e.target.files[0], 2000)
+                                                const file = await compressImage(e.target.files[0], 2000, 16 / 5)
                                                 const { urls } = await uploadMultipleImages([file])
                                                 if (urls?.[0]) {
                                                     handleUpdateBannerImage(bn.id, urls[0])
@@ -415,7 +415,7 @@ export function BannersSection({
                                         accept="image/*" 
                                         onChange={async (e) => {
                                             if (e.target.files?.[0]) {
-                                                const file = await compressImage(e.target.files[0], 1000)
+                                                const file = await compressImage(e.target.files[0], 1000, 4 / 5)
                                                 const { urls } = await uploadMultipleImages([file])
                                                 if (urls?.[0]) {
                                                     handleUpdateBannerMobileImage(bn.id, urls[0])

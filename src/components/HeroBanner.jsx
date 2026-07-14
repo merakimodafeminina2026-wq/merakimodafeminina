@@ -88,20 +88,13 @@ export default function HeroBanner() {
 
     if (!slides || slides.length === 0) return null;
 
-    return (
-        <section className="relative w-full overflow-hidden bg-[#F5EDE3]">
-            {/* Dynamic dummy image that naturally pushes the height of the banner container */}
-            <picture className="invisible block w-full h-auto pointer-events-none select-none">
-                {slides[current]?.mobile_image && (
-                    <source media="(max-w: 768px)" srcSet={getAssetUrl(slides[current].mobile_image)} />
-                )}
-                <img
-                    src={getAssetUrl(slides[current]?.image)}
-                    alt=""
-                    className="w-full h-auto block"
-                />
-            </picture>
+    const hasMobileImage = !!slides[current]?.mobile_image
+    const aspectClass = isMobile && hasMobileImage
+        ? 'aspect-[4/5]'
+        : 'aspect-[16/7] md:aspect-[16/5]'
 
+    return (
+        <section className={`relative w-full overflow-hidden bg-[#F5EDE3] transition-all duration-300 max-h-[600px] ${aspectClass}`}>
             <div className="absolute inset-0">
                 <AnimatePresence mode="wait" custom={direction}>
                     <motion.div
@@ -114,21 +107,21 @@ export default function HeroBanner() {
                         transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
                         className="absolute inset-0"
                     >
-                        {/* Banner Image - Rendered fully without scaling to preserve baked-in text */}
+                        {/* Banner Image */}
                         <motion.div
                             initial={{ scale: 1 }}
                             animate={{ scale: 1 }}
                             className="absolute inset-0"
                         >
-                            <Link to={slides[current].link} className="block w-full h-auto">
-                                <picture className="block w-full h-auto">
+                            <Link to={slides[current].link} className="block w-full h-full">
+                                <picture className="block w-full h-full">
                                     {slides[current].mobile_image && (
                                         <source media="(max-w: 768px)" srcSet={getAssetUrl(slides[current].mobile_image)} />
                                     )}
                                     <img
                                         src={getAssetUrl(slides[current].image)}
                                         alt={slides[current].alt}
-                                        className="w-full h-auto block"
+                                        className="w-full h-full object-cover object-center"
                                         draggable={false}
                                     />
                                 </picture>
