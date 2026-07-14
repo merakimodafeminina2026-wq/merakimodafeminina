@@ -13,6 +13,8 @@ import { useProducts } from '../hooks/useProducts.js'
 import { useCart } from '../hooks/useCart.js'
 import { useWishlist } from '../hooks/useWishlist.js'
 
+const slugifyCategory = (name) => name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s-]/g, '').trim().replace(/[\s-]+/g, '-')
+
 // Mapping of slug to readable names and descriptions
 const CATEGORY_META = {
     'body': {
@@ -45,8 +47,8 @@ const CATEGORY_META = {
         subtitle: 'Detalhes que complementam seu estilo',
         description: 'Cintas-liga, perneiras, algemas e acessórios meraki premium para dar o toque final de poder à sua produção.'
     },
-    'personalizaveis': {
-        title: 'Personalizáveis',
+    'personalizados': {
+        title: 'Personalizados',
         subtitle: 'Peças únicas com a sua essência',
         description: 'Adicione letras, números ou emojis exclusivos em suas peças Meraki e crie algo totalmente único.'
     },
@@ -65,10 +67,15 @@ const CATEGORY_META = {
         subtitle: 'Sutiãs e calcinhas combinando',
         description: 'Sincronia perfeita entre rendas premium, modelagem confortável e design sofisticado para o seu dia a dia ou ocasiões especiais.'
     },
-    'linha-noite': {
-        title: 'Linha Noite',
-        subtitle: 'Camisolas e pijamas elegantes',
+    'camisolas-babydolls': {
+        title: 'Camisolas & Babydolls',
+        subtitle: 'Camisolas e baby dolls elegantes',
         description: 'Sinta o toque suave da seda e do cetim premium em peças desenhadas para proporcionar noites relaxantes com elegância incomparável.'
+    },
+    'moda-praia': {
+        title: 'Moda Praia',
+        subtitle: 'Biquínis e moda praia',
+        description: 'Coleção de biquínis e moda praia feminina para arrasar no verão.'
     },
     'linha-sexy': {
         title: 'Linha Sexy',
@@ -175,7 +182,7 @@ const CATEGORY_SUBCATEGORIES = {
             )
         }
     ],
-    'linha-noite': [
+    'camisolas-babydolls': [
         {
             name: 'Robes',
             id: 'Robes',
@@ -349,7 +356,7 @@ export default function CategoryPage() {
             return 'Balconet'
         }
         
-        if (slug === 'linha-noite') {
+        if (slug === 'camisolas-babydolls') {
             if (name.includes('robe') || name.includes('satin') || name.includes('royale')) return 'Robes'
             if (name.includes('pijama') || name.includes('calça') || name.includes('manga')) return 'Pijamas'
             if (name.includes('camisola') || name.includes('longa')) return 'Camisolas'
@@ -405,8 +412,8 @@ export default function CategoryPage() {
         } else {
             // Find category name mapping
             const cleanSlug = slug.toLowerCase()
-            result = result.filter(p => {
-                const catName = p.category ? p.category.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(' ', '-') : ''
+             result = result.filter(p => {
+                const catName = p.category ? slugifyCategory(p.category) : ''
                 return catName === cleanSlug
             })
         }

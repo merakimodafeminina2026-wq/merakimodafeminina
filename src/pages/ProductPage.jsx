@@ -12,6 +12,8 @@ import QuickViewModal from '../components/QuickViewModal.jsx'
 import Notification from '../components/Notification.jsx'
 import WhatsAppButton from '../components/WhatsAppButton.jsx'
 
+const slugifyCategory = (name) => name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s-]/g, '').trim().replace(/[\s-]+/g, '-')
+
 export default function ProductPage() {
     const { id } = useParams()
     const { products, loading } = useProducts()
@@ -219,7 +221,7 @@ export default function ProductPage() {
             <nav className="max-w-7xl mx-auto px-4 w-full py-4 text-xs text-gray-400">
                 <Link to="/" className="hover:text-gray-900 transition-colors">Home</Link>
                 <span className="mx-2">/</span>
-                <Link to={`/category/${product.category.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(' ', '-')}`} className="hover:text-gray-900 transition-colors">
+                <Link to={`/category/${slugifyCategory(product.category)}`} className="hover:text-gray-900 transition-colors">
                     {product.category}
                 </Link>
                 <span className="mx-2">/</span>

@@ -10,6 +10,8 @@ const defaultTopBarMessages = [
     "Ganhe 5% de desconto pagando no PIX!"
 ]
 
+const slugifyCategory = (name) => name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s-]/g, '').trim().replace(/[\s-]+/g, '-')
+
 const categoryImages = {
     'conjuntos': 'https://images.unsplash.com/photo-1616422285623-13ff0162193c?auto=format&fit=crop&w=400&q=80',
     'calcinhas': 'https://images.unsplash.com/photo-1573140247632-f8fd74997d5c?auto=format&fit=crop&w=400&q=80',
@@ -17,13 +19,14 @@ const categoryImages = {
     'body': 'https://images.unsplash.com/photo-1508962914676-134849a727f0?auto=format&fit=crop&w=400&q=80',
     'camisola': 'https://images.unsplash.com/photo-1518622358385-8ea7d0794bf6?auto=format&fit=crop&w=400&q=80',
     'baby-doll': 'https://images.unsplash.com/photo-1549064482-6779ba3292fe?auto=format&fit=crop&w=400&q=80',
-    'linha-noite': 'https://images.unsplash.com/photo-1518622358385-8ea7d0794bf6?auto=format&fit=crop&w=400&q=80',
+    'camisolas-babydolls': 'https://images.unsplash.com/photo-1518622358385-8ea7d0794bf6?auto=format&fit=crop&w=400&q=80',
     'plus-size': 'https://images.unsplash.com/photo-1581338834647-b0fb40704e21?auto=format&fit=crop&w=400&q=80',
-    'personalizaveis': 'https://images.unsplash.com/photo-1549439602-43ebcb23281f?auto=format&fit=crop&w=400&q=80',
+    'personalizados': 'https://images.unsplash.com/photo-1549439602-43ebcb23281f?auto=format&fit=crop&w=400&q=80',
     'fantasias': 'https://images.unsplash.com/photo-1502301197179-6522b4bce294?auto=format&fit=crop&w=400&q=80',
     'sex-shop': 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=400&q=80',
     'acessorios': 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=400&q=80',
-    'linha-sexy': 'https://images.unsplash.com/photo-1566207274740-0f8cf6b7d5a5?auto=format&fit=crop&w=400&q=80'
+    'linha-sexy': 'https://images.unsplash.com/photo-1566207274740-0f8cf6b7d5a5?auto=format&fit=crop&w=400&q=80',
+    'moda-praia': 'https://images.unsplash.com/photo-1502301197179-6522b4bce294?auto=format&fit=crop&w=400&q=80'
 }
 
 export default function Header({ cartCount = 0, wishlistCount = 0, onSearchOpen }) {
@@ -284,7 +287,7 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onSearchOpen 
                                                         {groupedCategories['Lingerie'].map(item => (
                                                             <li key={item.name}>
                                                                 <Link 
-                                                                    to={`/category/${item.name.toLowerCase().replace(/\s+/g, '-')}`} 
+                                                                    to={`/category/${slugifyCategory(item.name)}`} 
                                                                     onClick={() => setIsMegaMenuOpen(false)} 
                                                                     onMouseEnter={() => setHoveredCategory(item)}
                                                                     onMouseLeave={() => setHoveredCategory(null)}
@@ -310,7 +313,7 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onSearchOpen 
                                                         {groupedCategories['Noite & Especiais'].map(item => (
                                                             <li key={item.name}>
                                                                 <Link 
-                                                                    to={`/category/${item.name.toLowerCase().replace(/\s+/g, '-')}`} 
+                                                                    to={`/category/${slugifyCategory(item.name)}`} 
                                                                     onClick={() => setIsMegaMenuOpen(false)} 
                                                                     onMouseEnter={() => setHoveredCategory(item)}
                                                                     onMouseLeave={() => setHoveredCategory(null)}
@@ -335,7 +338,7 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onSearchOpen 
                                                         {groupedCategories['Destaques'].map(item => (
                                                             <li key={item.name}>
                                                                 <Link 
-                                                                    to={`/category/${item.name.toLowerCase().replace(/\s+/g, '-')}`} 
+                                                                    to={`/category/${slugifyCategory(item.name)}`} 
                                                                     onClick={() => setIsMegaMenuOpen(false)} 
                                                                     onMouseEnter={() => setHoveredCategory(item)}
                                                                     onMouseLeave={() => setHoveredCategory(null)}
@@ -360,7 +363,7 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onSearchOpen 
                                                         {groupedCategories['Sensual'].map(item => (
                                                             <li key={item.name}>
                                                                 <Link 
-                                                                    to={`/category/${item.name.toLowerCase().replace(/\s+/g, '-')}`} 
+                                                                    to={`/category/${slugifyCategory(item.name)}`} 
                                                                     onClick={() => setIsMegaMenuOpen(false)} 
                                                                     onMouseEnter={() => setHoveredCategory(item)}
                                                                     onMouseLeave={() => setHoveredCategory(null)}
@@ -401,7 +404,7 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onSearchOpen 
                                                     </p>
                                                 </div>
                                                 <Link 
-                                                    to={hoveredCategory ? `/category/${hoveredCategory.name.toLowerCase().replace(/\s+/g, '-')}` : "/category/plus-size"} 
+                                                    to={hoveredCategory ? `/category/${slugifyCategory(hoveredCategory.name)}` : "/category/plus-size"} 
                                                     onClick={() => setIsMegaMenuOpen(false)}
                                                     className={`relative z-10 w-full py-2 bg-gradient-to-r ${hoveredCategory ? 'from-[#C6A76A] to-[#A88940] hover:shadow-[#C6A76A]/20' : 'from-[#7A3E4A] to-[#9A5060] hover:shadow-[#7A3E4A]/20'} text-white text-[9px] font-bold uppercase tracking-wider text-center rounded-lg hover:shadow-md transition-all duration-300 block`}
                                                 >
@@ -534,7 +537,7 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onSearchOpen 
                                             {categories.map(sub => (
                                                 <li key={sub.name}>
                                                     <Link 
-                                                        to={`/category/${sub.name.toLowerCase().replace(/\s+/g, '-')}`} 
+                                                        to={`/category/${slugifyCategory(sub.name)}`} 
                                                         onClick={() => { smoothScrollToTop(1200); setMobileMenuOpen(false); }}
                                                         className="text-xs font-medium text-gray-500 hover:text-[#7A3E4A] block transition-colors py-1"
                                                     >
