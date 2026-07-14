@@ -84,6 +84,7 @@ function mapDbToFrontend(table, item) {
     return mapped
 }
 
+export let isInitialSyncComplete = false
 let isSyncing = false
 
 export async function initSupabaseSync() {
@@ -148,13 +149,13 @@ export async function initSupabaseSync() {
                 sac_phone: '(11) 2388-0403',
                 address: 'Rua Alpont, 428 - Bairro Capuava - Mauá - São Paulo. CEP: 09380-115',
                 cnpj: '57.484.768/0064-89',
-                infinitepay_handle: 'nicolly_gomes',
+                infinitepay_handle: 'merakimodafeminina2026',
                 topbarMessages: [
                     "✨ Frete Grátis acima de R$ 299 • Parcele em até 12x",
                     "Utilize o cupom BEMVIND010 em sua primeira compra!",
                     "Ganhe 5% de desconto pagando no PIX!"
                 ],
-                topbarStyle: { backgroundColor: '#7A3E4A', textColor: '#FFFFFF', speed: 15 },
+                topbarStyle: { bgColor: '#C6A76A', textColor: '#FFFFFF' },
                 promoCombo: {
                     title: 'Combo Sutiã',
                     subtitle: 'Do P ao EG. Diversos modelos para você escolher.',
@@ -168,14 +169,12 @@ export async function initSupabaseSync() {
                 editorial: {
                     label: 'Artesanal & Premium',
                     title: 'A arte de se sentir extraordinária.',
-                    description: 'Cada costura, cada detalhe em renda foi pensado para elevar sua confiança e celebrar sua beleza única em todos os momentos.',
+                    description: 'Cada costura, cada detalhe in renda foi pensado para elevar sua confiança e celebrar sua beleza única em todos os momentos.',
                     buttonText: 'Ver Manifesto',
                     buttonLink: '/story',
                     image: '/assets/banners/banner-2.jpg'
                 }
             }
-            const payload = filterPayloadForTable('store_config', defaultConfig)
-            await supabase.from('store_config').upsert(payload)
             localStorage.setItem('meraki_store_config', JSON.stringify(defaultConfig))
             localStorage.setItem('meraki_topbar_messages', JSON.stringify(defaultConfig.topbarMessages))
             localStorage.setItem('meraki_topbar_style', JSON.stringify(defaultConfig.topbarStyle))
@@ -201,6 +200,8 @@ export async function initSupabaseSync() {
         console.error('⚠️ Falha ao sincronizar dados com Supabase:', e)
     } finally {
         isSyncing = false
+        isInitialSyncComplete = true
+        window.dispatchEvent(new Event('meraki_db_synced'))
     }
 }
 
