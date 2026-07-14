@@ -180,29 +180,6 @@ export default function AdminPage() {
         let loadedOrders = JSON.parse(localStorage.getItem('meraki_orders') || '[]')
         let loadedCoupons = JSON.parse(localStorage.getItem('meraki_coupons') || '[]')
         let loadedBanners = JSON.parse(localStorage.getItem('meraki_banners') || '[]')
-        if (loadedBanners.length === 0) {
-            loadedBanners = [
-                {
-                    id: 'default-1',
-                    image: '/assets/banners/banner-1.jpg',
-                    alt: 'Nova Coleção Meraki - Transforme-se',
-                    link: '/shop',
-                },
-                {
-                    id: 'default-2',
-                    image: '/assets/banners/banner-2.jpg',
-                    alt: 'Estilo e Elegância - Meraki Store',
-                    link: '/shop',
-                },
-                {
-                    id: 'default-3',
-                    image: '/assets/banners/banner-3.jpg',
-                    alt: 'Sua melhor versão com Meraki',
-                    link: '/shop',
-                },
-            ]
-            localStorage.setItem('meraki_banners', JSON.stringify(loadedBanners))
-        }
         getProfiles().then(({ data }) => {
             if (data) {
                 setCustomers(data)

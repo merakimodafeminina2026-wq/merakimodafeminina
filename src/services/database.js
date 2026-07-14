@@ -420,12 +420,13 @@ export async function searchProducts(query) {
 // Storage/image uploading
 export async function uploadImage(file) {
     try {
-        // Try uploading to Supabase Storage Bucket 'images'
+        // Try uploading to Supabase Storage Bucket 'product-images'
         const fileExt = file.name.split('.').pop()
-        const fileName = `${Math.random()}_${Date.now()}.${fileExt}`
-        const { data, error } = await supabase.storage.from('images').upload(fileName, file)
+        const fileName = `products/${Math.random()}_${Date.now()}.${fileExt}`
+        const { data, error } = await supabase.storage.from('product-images').upload(fileName, file)
         
         if (error) {
+            console.error('Supabase upload error:', error.message)
             // Fallback to FileReader Base64 encoding if bucket is not configured
             return new Promise((resolve) => {
                 const reader = new FileReader()
@@ -435,7 +436,7 @@ export async function uploadImage(file) {
             })
         }
 
-        const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(fileName)
+        const { data: { publicUrl } } = supabase.storage.from('product-images').getPublicUrl(fileName)
         return { url: publicUrl, error: null }
     } catch (e) {
         return { url: null, error: e }
@@ -451,7 +452,13 @@ export async function uploadMultipleImages(files) {
 
 export async function deleteImage(url) {
     try {
-        if (url.includes('/storage/v1/object/public/images/')) {
+        if (url.includes('/storage/v1/object/public/product-images/')) {
+            const parts = url.split('/storage/v1/object/public/product-images/')
+            if (parts.length > 1) {
+                const pathInBucket = parts[1]
+                await supabase.storage.from('product-images').remove([pathInBucket])
+            }
+        } else if (url.includes('/storage/v1/object/public/images/')) {
             const fileName = url.split('/').pop()
             await supabase.storage.from('images').remove([fileName])
         }
