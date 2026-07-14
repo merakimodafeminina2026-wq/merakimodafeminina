@@ -85,27 +85,10 @@ export default function AdminPage() {
                 return parsed.map(c => typeof c === 'string' ? { name: c, description: 'Coleção Meraki', image: '/placeholder.jpg', group: 'Lingerie' } : c)
             } catch (e) { console.error(e) }
         }
-        return [
-            { name: 'Conjuntos', group: 'Lingerie', description: 'Sutiãs e calcinhas combinando com caimento perfeito.', image: 'https://images.unsplash.com/photo-1616422285623-13ff0162193c?auto=format&fit=crop&w=400&q=80' },
-            { name: 'Calcinhas', group: 'Lingerie', description: 'Modelos confortáveis em renda e microfibra.', image: 'https://images.unsplash.com/photo-1573140247632-f8fd74997d5c?auto=format&fit=crop&w=400&q=80' },
-            { name: 'Tanga', group: 'Lingerie', description: 'Sensualidade e conforto para o dia a dia.', image: 'https://images.unsplash.com/photo-1582533561751-ef6f6ab93a2e?auto=format&fit=crop&w=400&q=80' },
-            { name: 'Body', group: 'Lingerie', description: 'Peças versáteis que modelam e realçam suas curvas.', image: 'https://images.unsplash.com/photo-1508962914676-134849a727f0?auto=format&fit=crop&w=400&q=80' },
-            
-            { name: 'Camisola', group: 'Noite & Especiais', description: 'Leveza e elegância para suas noites.', image: 'https://images.unsplash.com/photo-1518622358385-8ea7d0794bf6?auto=format&fit=crop&w=400&q=80' },
-            { name: 'Baby Doll', group: 'Noite & Especiais', description: 'Frescor e estilo romântico em cetim e renda.', image: 'https://images.unsplash.com/photo-1549064482-6779ba3292fe?auto=format&fit=crop&w=400&q=80' },
-            { name: 'Linha Noite', group: 'Noite & Especiais', description: 'Pijamas e robes sofisticados de alta costura.', image: 'https://images.unsplash.com/photo-1518622358385-8ea7d0794bf6?auto=format&fit=crop&w=400&q=80' },
-            { name: 'Plus Size', group: 'Noite & Especiais', description: 'Modelagens exclusivas que valorizam sua beleza.', image: 'https://images.unsplash.com/photo-1581338834647-b0fb40704e21?auto=format&fit=crop&w=400&q=80' },
-            
-            { name: 'Personalizáveis', group: 'Destaques', description: 'Peças únicas com gravação personalizada de nomes.', image: 'https://images.unsplash.com/photo-1549439602-43ebcb23281f?auto=format&fit=crop&w=400&q=80' },
-            { name: 'Fantasias', group: 'Destaques', description: 'Momentos inesquecíveis com designs temáticos sensuais.', image: 'https://images.unsplash.com/photo-1502301197179-6522b4bce294?auto=format&fit=crop&w=400&q=80' },
-            
-            { name: 'Sex Shop', group: 'Sensual', description: 'Acessórios e cosméticos para apimentar a relação.', image: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=400&q=80' },
-            { name: 'Acessórios', group: 'Sensual', description: 'Complementos ideais para compor seu visual íntimo.', image: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=400&q=80' },
-            { name: 'Linha Sexy', group: 'Sensual', description: 'Lingerie provocante com rendas e recortes ousados.', image: 'https://images.unsplash.com/photo-1566207274740-0f8cf6b7d5a5?auto=format&fit=crop&w=400&q=80' }
-        ]
+        return []
     })
     const [newCategoryName, setNewCategoryName] = useState('')
-    const [selectedModalCategory, setSelectedModalCategory] = useState('Conjuntos')
+    const [selectedModalCategory, setSelectedModalCategory] = useState('')
     const [selectedModalSizes, setSelectedModalSizes] = useState(['P', 'M', 'G', 'GG'])
 
     // Pagination states
@@ -259,7 +242,7 @@ export default function AdminPage() {
             const imgs = product?.image || []
             setExistingImages(Array.isArray(imgs) ? imgs : (imgs ? [imgs] : []))
             setImageFiles([])
-            setSelectedModalCategory(product?.category || 'Conjuntos')
+            setSelectedModalCategory(product?.category || categories[0]?.name || '')
             setSelectedModalSizes(product?.sizes || [])
             setSelectedModalSection(product?.section || 'best-sellers')
             setSelectedModalColors(product?.colors || [])
@@ -272,7 +255,7 @@ export default function AdminPage() {
         } else if (modal.open && !modal.editing) {
             setExistingImages([])
             setImageFiles([])
-            setSelectedModalCategory(categories[0] || 'Conjuntos')
+            setSelectedModalCategory(categories[0]?.name || '')
             setSelectedModalSizes(['P', 'M', 'G', 'GG'])
             setSelectedModalSection(sections[0]?.id || 'best-sellers')
             setSelectedModalColors([])

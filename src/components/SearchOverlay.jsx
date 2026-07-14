@@ -3,6 +3,17 @@ import { useState } from 'react'
 export default function SearchOverlay({ isOpen, onClose }) {
     const [query, setQuery] = useState('')
 
+    const categories = (() => {
+        try {
+            const stored = localStorage.getItem('meraki_categories')
+            if (stored) {
+                const parsed = JSON.parse(stored)
+                return parsed.map(c => typeof c === 'string' ? c : (c.name || ''))
+            }
+        } catch (e) { console.error(e) }
+        return []
+    })()
+
     if (!isOpen) return null
 
     return (
@@ -26,20 +37,22 @@ export default function SearchOverlay({ isOpen, onClose }) {
                         </svg>
                     </button>
                 </div>
-                <div className="mt-6">
-                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Sugestões</h4>
-                    <div className="flex flex-wrap gap-2">
-                        {['Conjuntos', 'Linha Noite', 'Body', 'Pijama', 'Plus Size', 'Promoções'].map(tag => (
-                            <button
-                                key={tag}
-                                onClick={() => setQuery(tag)}
-                                className="px-4 py-2 bg-background border border-transparent rounded-full text-sm font-medium text-gray-700 hover:bg-primary-light/20 hover:border-primary hover:text-primary transition-all duration-300"
-                            >
-                                {tag}
-                            </button>
-                        ))}
+                {categories.length > 0 && (
+                    <div className="mt-6">
+                        <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Sugestões</h4>
+                        <div className="flex flex-wrap gap-2">
+                            {categories.map(tag => (
+                                <button
+                                    key={tag}
+                                    onClick={() => setQuery(tag)}
+                                    className="px-4 py-2 bg-background border border-transparent rounded-full text-sm font-medium text-gray-700 hover:bg-primary-light/20 hover:border-primary hover:text-primary transition-all duration-300"
+                                >
+                                    {tag}
+                                </button>
+                            ))}
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
         </div>
     )

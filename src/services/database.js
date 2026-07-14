@@ -184,6 +184,19 @@ export async function initSupabaseSync() {
         }
 
         console.log('✅ Sincronização concluída com sucesso.')
+        
+        // Dispatch global events to notify components that database sync is complete
+        window.dispatchEvent(new Event('categoriesUpdated'))
+        window.dispatchEvent(new Event('productsUpdated'))
+        window.dispatchEvent(new Event('bannersUpdated'))
+        window.dispatchEvent(new Event('couponsUpdated'))
+        window.dispatchEvent(new Event('ordersUpdated'))
+        window.dispatchEvent(new Event('returnsUpdated'))
+        window.dispatchEvent(new Event('storeConfigUpdated'))
+        window.dispatchEvent(new Event('topbarMessagesUpdated'))
+        window.dispatchEvent(new Event('topbarStyleUpdated'))
+        window.dispatchEvent(new Event('promoComboUpdated'))
+        window.dispatchEvent(new Event('editorialUpdated'))
     } catch (e) {
         console.error('⚠️ Falha ao sincronizar dados com Supabase:', e)
     } finally {
