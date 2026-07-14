@@ -247,13 +247,20 @@ export default function HomePage() {
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                             {/* Promo Banner Left Side */}
                             <div className="lg:col-span-6 bg-[#FAF6F3] rounded-3xl p-8 md:p-12 flex flex-col justify-between items-center text-center relative overflow-hidden min-h-[500px]">
-                                {/* Product Image top */}
-                                <div className="w-full max-w-[340px] mx-auto overflow-hidden rounded-2xl mb-6">
-                                    <img 
-                                        src={getAssetUrl(promoCombo.image)} 
-                                        alt={promoCombo.title} 
-                                        className="w-full h-auto max-h-[350px] object-contain hover:scale-105 transition-transform duration-700"
-                                    />
+                                {/* Product Image top - Elegant framed luxury portrait */}
+                                <div className="w-full max-w-[340px] mx-auto overflow-hidden rounded-3xl mb-6 relative shadow-lg bg-gradient-to-tr from-[#F3ECE6] to-[#FCFAF8] p-3 border border-[#E3D7C5]/45 hover:shadow-2xl transition-all duration-500 group/img">
+                                    <div className="w-full h-[260px] rounded-2xl overflow-hidden bg-white shadow-inner flex items-center justify-center border border-gray-100/50">
+                                        <img 
+                                            src={getAssetUrl(promoCombo.image)} 
+                                            alt={promoCombo.title} 
+                                            className="w-full h-full object-contain hover:scale-108 transition-transform duration-700 p-3"
+                                        />
+                                    </div>
+                                    {/* Subtle decorative gold sparkle corner details */}
+                                    <div className="absolute top-1.5 left-1.5 w-1 h-1 rounded-full bg-[#C6A76A]/40" />
+                                    <div className="absolute top-1.5 right-1.5 w-1 h-1 rounded-full bg-[#C6A76A]/40" />
+                                    <div className="absolute bottom-1.5 left-1.5 w-1 h-1 rounded-full bg-[#C6A76A]/40" />
+                                    <div className="absolute bottom-1.5 right-1.5 w-1 h-1 rounded-full bg-[#C6A76A]/40" />
                                 </div>
                                 <div className="space-y-4 max-w-md z-10">
                                     <span className="text-[#7A3E4A] text-xs font-bold uppercase tracking-[0.3em] block">{promoCombo.title}</span>
