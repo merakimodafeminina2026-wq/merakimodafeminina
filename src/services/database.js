@@ -7,7 +7,7 @@ import { supabase } from './supabase.js'
 const TABLE_COLUMNS = {
     orders: ['id', 'customername', 'customeremail', 'total', 'status', 'items', 'created_at'],
     coupons: ['id', 'code', 'value', 'type', 'minpurchase', 'created_at'],
-    banners: ['id', 'image', 'alt', 'created_at'],
+    banners: ['id', 'image', 'mobile_image', 'alt', 'created_at'],
     returns: ['id', 'orderid', 'itemid', 'customeremail', 'type', 'postagecode', 'status', 'created_at'],
     categories: ['id', 'name', 'group', 'description', 'image', 'created_at'],
     products: [

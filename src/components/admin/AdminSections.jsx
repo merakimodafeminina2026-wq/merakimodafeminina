@@ -314,7 +314,6 @@ export function CouponsSection({
     )
 }
 
-// ─── SECTION 5: BANNERS ───────────────────────────────────────────────────────
 export function BannersSection({
     banners,
     setBannerModal,
@@ -322,6 +321,7 @@ export function BannersSection({
     compressImage,
     uploadMultipleImages,
     handleUpdateBannerImage,
+    handleUpdateBannerMobileImage,
     handleDeleteBanner
 }) {
     return (
@@ -330,7 +330,7 @@ export function BannersSection({
                 <div>
                     <h2 className="text-sm font-black text-gray-900">Banners do Carrossel</h2>
                     <p className="text-[10px] text-gray-400 font-medium">
-                        {banners.length} banner{banners.length !== 1 ? 's' : ''} ativo{banners.length !== 1 ? 's' : ''} • <span className="text-[#C6A76A] font-bold">Recomendado: 1920x800px (16:7)</span>
+                        {banners.length} banner{banners.length !== 1 ? 's' : ''} ativo{banners.length !== 1 ? 's' : ''} • <span className="text-[#C6A76A] font-bold">Responsivo (Desktop + Mobile)</span>
                     </p>
                 </div>
                 <button onClick={() => setBannerModal(true)} className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-[#7A3E4A] to-[#9A5060] text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:shadow-lg hover:shadow-[#7A3E4A]/30 transition-all cursor-pointer">
@@ -338,52 +338,101 @@ export function BannersSection({
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {banners.map(bn => (
-                    <div key={bn.id} className="bg-white rounded-2xl border border-[#EEEEEE] overflow-hidden hover:border-[#7A3E4A]/20 hover:shadow-lg transition-all group">
-                        <div className="aspect-[16/7] bg-gray-100 overflow-hidden">
-                            <img src={getAssetUrl(bn.image)} alt={bn.alt} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <div key={bn.id} className="bg-white rounded-2xl border border-[#EEEEEE] overflow-hidden hover:border-[#7A3E4A]/20 hover:shadow-lg transition-all group p-4 space-y-4">
+                        {/* Previews: Widescreen Desktop + Vertical Mobile side-by-side */}
+                        <div className="grid grid-cols-3 gap-3">
+                            {/* Desktop preview (2/3 width) */}
+                            <div className="col-span-2 space-y-1">
+                                <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wider">Desktop (Widescreen)</span>
+                                <div className="aspect-[16/7] bg-gray-50 rounded-xl overflow-hidden border border-gray-100 flex items-center justify-center">
+                                    <img src={getAssetUrl(bn.image)} alt={bn.alt} className="w-full h-full object-cover" />
+                                </div>
+                            </div>
+                            {/* Mobile preview (1/3 width) */}
+                            <div className="col-span-1 space-y-1">
+                                <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wider">Mobile (Vertical)</span>
+                                <div className="aspect-[4/5] bg-gray-50 rounded-xl overflow-hidden border border-gray-100 flex items-center justify-center relative">
+                                    {bn.mobile_image ? (
+                                        <img src={getAssetUrl(bn.mobile_image)} alt={bn.alt} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="text-center p-2 text-[8px] text-gray-300 font-bold">Sem imagem mobile</div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
-                        <div className="p-4 space-y-2">
+
+                        <div className="space-y-3 pt-2 border-t border-[#EEEEEE]/60">
                             <div className="flex justify-between items-start gap-2">
                                 <div>
-                                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Alt Text</p>
-                                    <p className="text-xs font-semibold text-gray-700 truncate max-w-[120px]">{bn.alt}</p>
+                                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Texto Alternativo (Alt)</p>
+                                    <p className="text-xs font-semibold text-gray-700 truncate max-w-[200px]">{bn.alt}</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-[9px] font-bold text-[#C6A76A] uppercase tracking-widest">Tamanho</p>
-                                    <p className="text-[10px] font-bold text-gray-500">1920x800px</p>
+                                    <p className="text-[9px] font-bold text-[#C6A76A] uppercase tracking-widest">Link de Destino</p>
+                                    <p className="text-[10px] font-bold text-gray-500 truncate max-w-[120px]">{bn.link}</p>
                                 </div>
                             </div>
-                            <div className="grid grid-cols-2 gap-2 mt-2">
-                                <button
-                                    onClick={() => document.getElementById(`change-banner-file-${bn.id}`).click()}
-                                    className="py-2 rounded-xl bg-[#7A3E4A]/10 text-[#7A3E4A] hover:bg-[#7A3E4A]/20 text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer text-center"
-                                >
-                                    Trocar Imagem
-                                </button>
-                                <input 
-                                    id={`change-banner-file-${bn.id}`}
-                                    type="file" 
-                                    accept="image/*" 
-                                    onChange={async (e) => {
-                                        if (e.target.files?.[0]) {
-                                            const file = await compressImage(e.target.files[0], 2000)
-                                            const { urls } = await uploadMultipleImages([file])
-                                            if (urls?.[0]) {
-                                                handleUpdateBannerImage(bn.id, urls[0])
+
+                            <div className="grid grid-cols-2 gap-2">
+                                {/* Change Desktop Image */}
+                                <div>
+                                    <button
+                                        onClick={() => document.getElementById(`change-banner-desk-${bn.id}`).click()}
+                                        className="w-full py-2 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-600 text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer text-center"
+                                    >
+                                        Foto Desktop
+                                    </button>
+                                    <input 
+                                        id={`change-banner-desk-${bn.id}`}
+                                        type="file" 
+                                        accept="image/*" 
+                                        onChange={async (e) => {
+                                            if (e.target.files?.[0]) {
+                                                const file = await compressImage(e.target.files[0], 2000)
+                                                const { urls } = await uploadMultipleImages([file])
+                                                if (urls?.[0]) {
+                                                    handleUpdateBannerImage(bn.id, urls[0])
+                                                }
                                             }
-                                        }
-                                    }}
-                                    className="hidden" 
-                                />
-                                <button
-                                    onClick={() => handleDeleteBanner(bn.id)}
-                                    className="py-2 rounded-xl border border-red-100 text-red-400 hover:bg-red-50 hover:text-red-600 text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer"
-                                >
-                                    Remover
-                                </button>
+                                        }}
+                                        className="hidden" 
+                                    />
+                                </div>
+
+                                {/* Change Mobile Image */}
+                                <div>
+                                    <button
+                                        onClick={() => document.getElementById(`change-banner-mob-${bn.id}`).click()}
+                                        className="w-full py-2 rounded-xl bg-[#7A3E4A]/10 text-[#7A3E4A] hover:bg-[#7A3E4A]/20 text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer text-center"
+                                    >
+                                        Foto Mobile
+                                    </button>
+                                    <input 
+                                        id={`change-banner-mob-${bn.id}`}
+                                        type="file" 
+                                        accept="image/*" 
+                                        onChange={async (e) => {
+                                            if (e.target.files?.[0]) {
+                                                const file = await compressImage(e.target.files[0], 1000)
+                                                const { urls } = await uploadMultipleImages([file])
+                                                if (urls?.[0]) {
+                                                    handleUpdateBannerMobileImage(bn.id, urls[0])
+                                                }
+                                            }
+                                        }}
+                                        className="hidden" 
+                                    />
+                                </div>
                             </div>
+
+                            <button
+                                onClick={() => handleDeleteBanner(bn.id)}
+                                className="w-full py-2 rounded-xl border border-red-100 text-red-400 hover:bg-red-50 hover:text-red-600 text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer"
+                            >
+                                Remover Banner
+                            </button>
                         </div>
                     </div>
                 ))}

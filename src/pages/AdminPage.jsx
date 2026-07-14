@@ -165,8 +165,9 @@ export default function AdminPage() {
 
     // Form inputs
     const [couponForm, setCouponForm] = useState({ code: '', type: 'percentage', value: '', minPurchase: '' })
-    const [bannerForm, setBannerForm] = useState({ image: '', alt: '', link: '/shop' })
+    const [bannerForm, setBannerForm] = useState({ image: '', mobile_image: '', alt: '', link: '/shop' })
     const [bannerImageFiles, setBannerImageFiles] = useState([])
+    const [bannerMobileImageFiles, setBannerMobileImageFiles] = useState([])
 
     // Product Images states
     const [imageFiles, setImageFiles] = useState([])
@@ -433,15 +434,32 @@ export default function AdminPage() {
     const handleCreateBanner = async (e) => {
         e.preventDefault(); setSaving(true)
         let imageUrl = bannerForm.image
+        let mobileImageUrl = bannerForm.mobile_image || ''
+
         if (bannerImageFiles.length > 0) {
             const { urls } = await uploadMultipleImages(bannerImageFiles)
             if (urls?.[0]) imageUrl = urls[0]
         }
+        if (bannerMobileImageFiles.length > 0) {
+            const { urls } = await uploadMultipleImages(bannerMobileImageFiles)
+            if (urls?.[0]) mobileImageUrl = urls[0]
+        }
+
         if (!imageUrl) { alert('Por favor insira um link de imagem ou faça upload de um arquivo.'); setSaving(false); return }
-        const newBanner = { id: 'bn-' + Date.now(), image: imageUrl, alt: bannerForm.alt || 'Banner Meraki', link: bannerForm.link || '/shop' }
+        const newBanner = { 
+            id: 'bn-' + Date.now(), 
+            image: imageUrl, 
+            mobile_image: mobileImageUrl, 
+            alt: bannerForm.alt || 'Banner Meraki', 
+            link: bannerForm.link || '/shop' 
+        }
         const updated = [...banners, newBanner]
         setBanners(updated); localStorage.setItem('meraki_banners', JSON.stringify(updated))
-        setBannerForm({ image: '', alt: '', link: '/shop' }); setBannerImageFiles([]); setBannerModal(false); setSaving(false)
+        setBannerForm({ image: '', mobile_image: '', alt: '', link: '/shop' })
+        setBannerImageFiles([])
+        setBannerMobileImageFiles([])
+        setBannerModal(false)
+        setSaving(false)
         window.dispatchEvent(new Event('bannersUpdated'))
     }
 
@@ -453,6 +471,12 @@ export default function AdminPage() {
 
     const handleUpdateBannerImage = (id, newImageUrl) => {
         const updated = banners.map(b => b.id === id ? { ...b, image: newImageUrl } : b)
+        setBanners(updated); localStorage.setItem('meraki_banners', JSON.stringify(updated))
+        window.dispatchEvent(new Event('bannersUpdated'))
+    }
+
+    const handleUpdateBannerMobileImage = (id, newMobileImageUrl) => {
+        const updated = banners.map(b => b.id === id ? { ...b, mobile_image: newMobileImageUrl } : b)
         setBanners(updated); localStorage.setItem('meraki_banners', JSON.stringify(updated))
         window.dispatchEvent(new Event('bannersUpdated'))
     }
@@ -677,6 +701,7 @@ export default function AdminPage() {
                             compressImage={compressImage}
                             uploadMultipleImages={uploadMultipleImages}
                             handleUpdateBannerImage={handleUpdateBannerImage}
+                            handleUpdateBannerMobileImage={handleUpdateBannerMobileImage}
                             handleDeleteBanner={handleDeleteBanner}
                         />
                     )}
@@ -1340,12 +1365,21 @@ export default function AdminPage() {
                         </div>
                         <form onSubmit={handleCreateBanner} className="p-5 space-y-4">
                             <div>
-                                <label className={labelCls}>Upload de Imagem <span className="text-[9px] text-[#C6A76A] lowercase font-normal">(Recomendado: 1920x800px - Proporção 16:7)</span></label>
+                                <label className={labelCls}>Upload de Imagem Desktop <span className="text-[9px] text-[#C6A76A] lowercase font-normal">(Recomendado: 1920x800px)</span></label>
                                 <input type="file" accept="image/*" onChange={e => {
                                     if (e.target.files?.[0]) compressImage(e.target.files[0], 2000).then(f => setBannerImageFiles([f]))
                                 }} className="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#7A3E4A]/10 file:text-[#7A3E4A] hover:file:bg-[#7A3E4A]/20 cursor-pointer" />
                             </div>
-                            <div><label className={labelCls}>Ou Link de Imagem</label><input type="text" placeholder="https://..." value={bannerForm.image} onChange={e => setBannerForm(prev => ({ ...prev, image: e.target.value }))} className={inputCls} /></div>
+                            <div><label className={labelCls}>Ou Link de Imagem Desktop</label><input type="text" placeholder="https://..." value={bannerForm.image} onChange={e => setBannerForm(prev => ({ ...prev, image: e.target.value }))} className={inputCls} /></div>
+                            
+                            <div className="border-t border-dashed border-[#EEEEEE] pt-3">
+                                <label className={labelCls}>Upload de Imagem Mobile (Opcional) <span className="text-[9px] text-[#C6A76A] lowercase font-normal">(Recomendado: 800x1000px ou vertical)</span></label>
+                                <input type="file" accept="image/*" onChange={e => {
+                                    if (e.target.files?.[0]) compressImage(e.target.files[0], 1000).then(f => setBannerMobileImageFiles([f]))
+                                }} className="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#7A3E4A]/10 file:text-[#7A3E4A] hover:file:bg-[#7A3E4A]/20 cursor-pointer" />
+                            </div>
+                            <div><label className={labelCls}>Ou Link de Imagem Mobile</label><input type="text" placeholder="https://..." value={bannerForm.mobile_image} onChange={e => setBannerForm(prev => ({ ...prev, mobile_image: e.target.value }))} className={inputCls} /></div>
+                            
                             <div><label className={labelCls}>Texto Alternativo (Alt)</label><input type="text" placeholder="Ex: Nova Coleção" value={bannerForm.alt} onChange={e => setBannerForm(prev => ({ ...prev, alt: e.target.value }))} className={inputCls} /></div>
                             <div><label className={labelCls}>Link de Destino</label><input type="text" value={bannerForm.link} onChange={e => setBannerForm(prev => ({ ...prev, link: e.target.value }))} className={inputCls} /></div>
                             <button type="submit" disabled={saving} className="w-full py-4 bg-gradient-to-r from-[#7A3E4A] to-[#9A5060] text-white text-xs font-black uppercase tracking-widest rounded-xl hover:shadow-lg hover:shadow-[#7A3E4A]/30 transition-all cursor-pointer disabled:opacity-50">
