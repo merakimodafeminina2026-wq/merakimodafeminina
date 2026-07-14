@@ -120,15 +120,15 @@ export default function HeroBanner() {
                             animate={{ scale: 1 }}
                             className="absolute inset-0"
                         >
-                            <Link to={slides[current].link} className="block w-full h-full">
-                                <picture className="block w-full h-full">
+                            <Link to={slides[current].link} className="block w-full h-auto">
+                                <picture className="block w-full h-auto">
                                     {slides[current].mobile_image && (
                                         <source media="(max-w: 768px)" srcSet={getAssetUrl(slides[current].mobile_image)} />
                                     )}
                                     <img
                                         src={getAssetUrl(slides[current].image)}
                                         alt={slides[current].alt}
-                                        className="w-full h-full object-cover object-center"
+                                        className="w-full h-auto block"
                                         draggable={false}
                                     />
                                 </picture>
