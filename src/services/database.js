@@ -298,7 +298,7 @@ async function syncTableToSupabase(table, items) {
             const currentKeys = items.map(item => item[conflictKey]).filter(Boolean)
             if (currentKeys.length > 0) {
                 const inList = `(${currentKeys.map(k => `"${k}"`).join(',')})`
-                await supabase.from(table).delete().not(conflictKey, 'in', inList)
+                await supabase.from(table).delete().filter(conflictKey, 'not.in', inList)
             } else {
                 if (conflictKey === 'id') {
                     await supabase.from(table).delete().neq('id', '00000000-0000-0000-0000-000000000000')
