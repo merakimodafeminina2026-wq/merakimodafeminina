@@ -59,9 +59,11 @@ export default function HeroBanner() {
         };
         window.addEventListener('storage', handleStorage)
         window.addEventListener('bannersUpdated', handleStorage)
+        window.addEventListener('meraki_db_synced', handleStorage)
         return () => {
             window.removeEventListener('storage', handleStorage)
             window.removeEventListener('bannersUpdated', handleStorage)
+            window.removeEventListener('meraki_db_synced', handleStorage)
         }
     }, [])
 
