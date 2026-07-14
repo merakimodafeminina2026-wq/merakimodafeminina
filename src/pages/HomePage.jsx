@@ -248,11 +248,11 @@ export default function HomePage() {
                             {/* Promo Banner Left Side */}
                             <div className="lg:col-span-6 bg-[#FAF6F3] rounded-3xl p-8 md:p-12 flex flex-col justify-between items-center text-center relative overflow-hidden min-h-[500px]">
                                 {/* Product Image top */}
-                                <div className="w-full max-w-[340px] aspect-[4/3] mx-auto overflow-hidden rounded-2xl mb-6">
+                                <div className="w-full max-w-[340px] mx-auto overflow-hidden rounded-2xl mb-6">
                                     <img 
                                         src={getAssetUrl(promoCombo.image)} 
                                         alt={promoCombo.title} 
-                                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                                        className="w-full h-auto max-h-[350px] object-contain hover:scale-105 transition-transform duration-700"
                                     />
                                 </div>
                                 <div className="space-y-4 max-w-md z-10">

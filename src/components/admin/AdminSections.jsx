@@ -529,8 +529,8 @@ export function PromoComboSection({
 
                     <div className="flex gap-4 pt-2">
                         {promoCombo.image && (
-                            <div className="w-24 h-18 rounded-lg overflow-hidden border border-[#EEEEEE]">
-                                <img src={getAssetUrl(promoCombo.image)} alt="Preview" className="w-full h-full object-cover" />
+                            <div className="w-24 h-24 rounded-lg overflow-hidden border border-[#EEEEEE] bg-gray-50 flex items-center justify-center">
+                                <img src={getAssetUrl(promoCombo.image)} alt="Preview" className="max-w-full max-h-full object-contain" />
                             </div>
                         )}
                         <button type="submit" disabled={saving} className="px-5 py-3 bg-[#7A3E4A] hover:bg-[#603039] text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer disabled:opacity-50 self-end">
