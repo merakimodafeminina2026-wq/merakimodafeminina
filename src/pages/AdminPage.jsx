@@ -559,7 +559,7 @@ export default function AdminPage() {
         { id: 'editorial',  label: 'Manifesto Editorial', icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.282.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.282.477-4.5 1.253' },
         { id: 'topbar',   label: 'Faixa Promocional', icon: 'M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z' },
         { id: 'customers',label: 'Clientes',          icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z' },
-        { id: 'returns',  label: 'Devoluções',        icon: 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15' },
+        { id: 'returns',  label: 'Trocas',            icon: 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15' },
         { id: 'settings', label: 'Configuração da Loja', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' },
     ]
 
@@ -1427,7 +1427,7 @@ export default function AdminPage() {
                     <div className="fixed inset-0 z-[90] bg-black/50 backdrop-blur-sm" onClick={() => setSelectedReturn(null)} />
                     <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[95] bg-white rounded-2xl shadow-2xl max-w-sm w-[calc(100%-2rem)]">
                         <div className="flex items-center justify-between p-5 border-b border-[#EEEEEE]">
-                            <h2 className="text-sm font-black text-gray-900">Gerenciar Devolução</h2>
+                            <h2 className="text-sm font-black text-gray-900">Gerenciar Troca</h2>
                             <button onClick={() => setSelectedReturn(null)} className="w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center cursor-pointer transition-colors">
                                 <Icon path="M6 18L18 6M6 6l12 12" className="w-4 h-4 text-gray-600" />
                             </button>
@@ -1437,7 +1437,7 @@ export default function AdminPage() {
                                 <div className="flex justify-between"><span className="font-bold text-gray-400">Protocolo</span><span className="font-mono text-gray-700 text-[10px]">{selectedReturn.id}</span></div>
                                 <div className="flex justify-between"><span className="font-bold text-gray-400">Cliente</span><span className="text-gray-700">{selectedReturn.customerEmail}</span></div>
                                 <div className="flex justify-between"><span className="font-bold text-gray-400">Pedido</span><span className="text-gray-700">{selectedReturn.orderId}</span></div>
-                                <div className="flex justify-between"><span className="font-bold text-gray-400">Tipo</span><span className={`font-bold capitalize ${selectedReturn.type === 'devolução' ? 'text-red-500' : 'text-sky-500'}`}>{selectedReturn.type}</span></div>
+                                <div className="flex justify-between"><span className="font-bold text-gray-400">Tipo</span><span className="font-bold text-sky-500">Troca</span></div>
                                 {selectedReturn.reason && <div className="border-t border-[#EEEEEE] pt-2"><span className="font-bold text-gray-400 block mb-1">Motivo</span><p className="text-gray-600 italic">"{selectedReturn.reason}"</p></div>}
                             </div>
 
