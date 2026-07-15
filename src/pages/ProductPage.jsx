@@ -21,7 +21,6 @@ export default function ProductPage() {
     const { wishlistCount, toggleWishlist, isWishlisted } = useWishlist()
 
     const [selectedSize, setSelectedSize] = useState(null)
-    const [selectedCup, setSelectedCup] = useState('B')
     const [quantity, setQuantity] = useState(1)
     const [activeTab, setActiveTab] = useState('description')
     const [searchOpen, setSearchOpen] = useState(false)
@@ -400,21 +399,7 @@ export default function ProductPage() {
                             </div>
                         )}
 
-                        {/* Cup Selection (matching the design screenshot "Selecione a taça") */}
-                        <div className="mb-8">
-                            <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">Selecione a Taça</h4>
-                            <div className="flex gap-2.5">
-                                {['A', 'B', 'C'].map(cup => (
-                                    <button
-                                        key={cup}
-                                        onClick={() => setSelectedCup(cup)}
-                                        className={`w-10 h-10 rounded-full border text-xs uppercase font-extrabold flex items-center justify-center transition-all ${selectedCup === cup ? 'border-[#7A3E4A] text-[#7A3E4A] border-2 bg-transparent scale-105 shadow-xs' : 'border-gray-300 text-gray-650 hover:border-gray-450 bg-white'}`}
-                                    >
-                                        {cup}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
+
 
                         {/* Personalization Section */}
                         {isCustomizableProduct && (
