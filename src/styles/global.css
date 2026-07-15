@@ -201,3 +201,43 @@ img {
     animation: butterflyFlight 4s ease-in-out infinite;
     transform-origin: center;
 }
+
+/* Background butterflies keyframes */
+@keyframes butterfly-flutter {
+    0%, 100% {
+        transform: scaleX(1);
+    }
+    50% {
+        transform: scaleX(0.2);
+    }
+}
+
+@keyframes butterfly-drift-1 {
+    0% {
+        transform: translate(-10vw, 110vh) rotate(35deg);
+    }
+    100% {
+        transform: translate(110vw, -10vh) rotate(35deg);
+    }
+}
+
+@keyframes butterfly-drift-2 {
+    0% {
+        transform: translate(110vw, 110vh) rotate(-35deg);
+    }
+    100% {
+        transform: translate(-10vw, -10vh) rotate(-35deg);
+    }
+}
+
+@keyframes butterfly-drift-3 {
+    0% {
+        transform: translate(-10vw, 20vh) rotate(15deg);
+    }
+    50% {
+        transform: translate(50vw, 60vh) rotate(45deg);
+    }
+    100% {
+        transform: translate(110vw, 10vh) rotate(15deg);
+    }
+}
