@@ -241,3 +241,56 @@ img {
         transform: translate(110vw, 10vh) rotate(15deg);
     }
 }
+
+@keyframes butterfly-drift-4 {
+    0% {
+        transform: translate(-10vw, -10vh) rotate(145deg);
+    }
+    100% {
+        transform: translate(110vw, 110vh) rotate(145deg);
+    }
+}
+
+/* Tinkerbell Fairy Flight & Pixie Dust Keyframes */
+@keyframes fairy-fly {
+    0% {
+        transform: translate(-10vw, 85vh) rotate(15deg);
+    }
+    25% {
+        transform: translate(25vw, 25vh) rotate(-5deg);
+    }
+    50% {
+        transform: translate(60vw, 65vh) rotate(20deg);
+    }
+    75% {
+        transform: translate(85vw, 30vh) rotate(-10deg);
+    }
+    100% {
+        transform: translate(110vw, -10vh) rotate(15deg);
+    }
+}
+
+@keyframes pixie-dust-decay {
+    0% {
+        opacity: 0;
+        transform: translateY(0) scale(0) rotate(0deg);
+        filter: blur(0px);
+    }
+    20% {
+        opacity: 0.9;
+        transform: translateY(0) scale(1.2) rotate(45deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.2) rotate(180deg);
+        filter: blur(1.5px);
+    }
+}
+
+.animate-fairy-flight {
+    animation: fairy-fly 15s linear infinite;
+}
+
+.animate-pixie-dust {
+    animation: pixie-dust-decay 1.5s ease-out infinite;
+}

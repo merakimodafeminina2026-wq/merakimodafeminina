@@ -899,15 +899,17 @@ export default function AuthPage() {
                         {/* Borboletas de fundo (sombras translúcidas voando) */}
                         {showButterflyBg && (
                             <div className="absolute inset-0 pointer-events-none overflow-hidden select-none z-6">
-                                {/* Tinkerbell Fairy Flight */}
-                                <div className="absolute z-10 pointer-events-none animate-fairy-flight" style={{ width: '40px', height: '40px', left: 0, top: 0 }}>
-                                    <svg viewBox="0 0 100 100" className="w-full h-full fill-current text-[#C6A76A] drop-shadow-[0_0_12px_rgba(255,215,0,0.95)]">
-                                        <path d="M48,32 C46,30 43,26 44,22 C45,18 49,16 51,19 C53,22 51,28 50,30 L55,42 C57,44 60,42 62,40 C64,38 66,39 65,42 C64,45 59,48 56,48 L52,58 C53,64 56,72 58,78 C59,81 57,83 54,82 C51,81 48,74 47,68 L44,79 C43,82 40,81 41,78 C42,75 44,65 45,58 L41,48 C37,47 32,45 28,42 C25,40 26,38 29,39 C32,40 37,42 41,43 L45,35 Z" />
-                                        <path d="M47,33 C42,28 32,15 35,8 C38,1 48,10 50,22 Z" opacity="0.8" />
-                                        <path d="M49,34 C54,29 64,18 62,11 C60,4 51,12 49,23 Z" opacity="0.8" />
-                                        <path d="M45,38 C38,38 28,34 26,27 C24,20 35,24 43,33 Z" opacity="0.6" />
-                                        <circle cx="28" cy="42" r="3" className="fill-white animate-ping" />
-                                    </svg>
+                                {/* Borboleta Líder (Tinkerbell) - usa a imagem real da logo voando na frente */}
+                                <div 
+                                    className="absolute z-10 pointer-events-none animate-fairy-flight" 
+                                    style={{ width: '52px', height: '52px', left: 0, top: 0, filter: 'drop-shadow(0 0 10px rgba(198,167,106,0.9))' }}
+                                >
+                                    <img
+                                        src={processedButterflySrc}
+                                        alt="Borboleta líder"
+                                        className={`w-full h-full object-contain transition-opacity duration-300 ${processedButterflySrc.startsWith('data:') ? 'opacity-100' : 'opacity-0'}`}
+                                        style={{ animation: 'butterfly-flutter 0.25s linear infinite' }}
+                                    />
                                 </div>
 
                                 {/* Pixie Dust Trail (Sparkles) */}
