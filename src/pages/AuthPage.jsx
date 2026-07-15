@@ -867,34 +867,34 @@ export default function AuthPage() {
                     <div className={`relative ${showButterflyBg ? 'w-full min-h-[70vh] flex items-center justify-center overflow-hidden py-12 px-4 bg-gradient-to-tr from-[#FAF6F0] via-[#F4EDE5] to-[#FAF6F0]' : ''}`}>
                         {/* Borboletas de fundo (sombras translúcidas voando) */}
                         {showButterflyBg && (
-                            <div className="absolute inset-0 pointer-events-none overflow-hidden select-none z-0">
+                            <div className="absolute inset-0 pointer-events-none overflow-hidden select-none z-6">
                                 {/* Borboleta 1 */}
-                                <div className="absolute w-8 h-8 opacity-[0.07] text-[#7A3E4A]" style={{ animation: 'butterfly-drift-1 25s linear infinite', left: '5%', bottom: '0%' }}>
-                                    <svg viewBox="0 0 100 100" className="w-full h-full fill-current animate-logo-breath" style={{ animation: 'butterfly-flutter 0.3s linear infinite' }}>
+                                <div className="absolute w-8 h-8 opacity-[0.14] text-[#7A3E4A]" style={{ animation: 'butterfly-drift-1 25s linear infinite', left: '5%', bottom: '0%' }}>
+                                    <svg viewBox="0 0 100 100" className="w-full h-full fill-current" style={{ animation: 'butterfly-flutter 0.3s linear infinite' }}>
                                         <path d="M 50 40 C 35 10, 10 20, 15 45 C 18 55, 35 60, 48 50 C 45 65, 30 85, 50 85 C 70 85, 55 65, 52 50 C 65 60, 82 55, 85 45 C 90 20, 65 10, 50 40 Z" />
                                     </svg>
                                 </div>
                                 {/* Borboleta 2 */}
-                                <div className="absolute w-6 h-6 opacity-[0.05] text-[#7A3E4A]" style={{ animation: 'butterfly-drift-2 30s linear infinite', right: '5%', bottom: '0%', animationDelay: '-7s' }}>
-                                    <svg viewBox="0 0 100 100" className="w-full h-full fill-current animate-logo-breath" style={{ animation: 'butterfly-flutter 0.24s linear infinite' }}>
+                                <div className="absolute w-6 h-6 opacity-[0.12] text-[#7A3E4A]" style={{ animation: 'butterfly-drift-2 30s linear infinite', right: '5%', bottom: '0%', animationDelay: '-7s' }}>
+                                    <svg viewBox="0 0 100 100" className="w-full h-full fill-current" style={{ animation: 'butterfly-flutter 0.24s linear infinite' }}>
                                         <path d="M 50 40 C 35 10, 10 20, 15 45 C 18 55, 35 60, 48 50 C 45 65, 30 85, 50 85 C 70 85, 55 65, 52 50 C 65 60, 82 55, 85 45 C 90 20, 65 10, 50 40 Z" />
                                     </svg>
                                 </div>
                                 {/* Borboleta 3 */}
-                                <div className="absolute w-10 h-10 opacity-[0.06] text-[#7A3E4A]" style={{ animation: 'butterfly-drift-3 28s linear infinite', left: '0%', top: '20%', animationDelay: '-14s' }}>
-                                    <svg viewBox="0 0 100 100" className="w-full h-full fill-current animate-logo-breath" style={{ animation: 'butterfly-flutter 0.35s linear infinite' }}>
+                                <div className="absolute w-10 h-10 opacity-[0.15] text-[#7A3E4A]" style={{ animation: 'butterfly-drift-3 28s linear infinite', left: '0%', top: '20%', animationDelay: '-14s' }}>
+                                    <svg viewBox="0 0 100 100" className="w-full h-full fill-current" style={{ animation: 'butterfly-flutter 0.35s linear infinite' }}>
                                         <path d="M 50 40 C 35 10, 10 20, 15 45 C 18 55, 35 60, 48 50 C 45 65, 30 85, 50 85 C 70 85, 55 65, 52 50 C 65 60, 82 55, 85 45 C 90 20, 65 10, 50 40 Z" />
                                     </svg>
                                 </div>
                                 {/* Borboleta 4 */}
-                                <div className="absolute w-7 h-7 opacity-[0.07] text-[#7A3E4A]" style={{ animation: 'butterfly-drift-1 32s linear infinite', left: '25%', bottom: '0%', animationDelay: '-4s' }}>
-                                    <svg viewBox="0 0 100 100" className="w-full h-full fill-current animate-logo-breath" style={{ animation: 'butterfly-flutter 0.28s linear infinite' }}>
+                                <div className="absolute w-7 h-7 opacity-[0.13] text-[#7A3E4A]" style={{ animation: 'butterfly-drift-1 32s linear infinite', left: '25%', bottom: '0%', animationDelay: '-4s' }}>
+                                    <svg viewBox="0 0 100 100" className="w-full h-full fill-current" style={{ animation: 'butterfly-flutter 0.28s linear infinite' }}>
                                         <path d="M 50 40 C 35 10, 10 20, 15 45 C 18 55, 35 60, 48 50 C 45 65, 30 85, 50 85 C 70 85, 55 65, 52 50 C 65 60, 82 55, 85 45 C 90 20, 65 10, 50 40 Z" />
                                     </svg>
                                 </div>
                                 {/* Borboleta 5 */}
-                                <div className="absolute w-9 h-9 opacity-[0.04] text-[#7A3E4A]" style={{ animation: 'butterfly-drift-2 26s linear infinite', right: '25%', bottom: '0%', animationDelay: '-18s' }}>
-                                    <svg viewBox="0 0 100 100" className="w-full h-full fill-current animate-logo-breath" style={{ animation: 'butterfly-flutter 0.32s linear infinite' }}>
+                                <div className="absolute w-9 h-9 opacity-[0.11] text-[#7A3E4A]" style={{ animation: 'butterfly-drift-2 26s linear infinite', right: '25%', bottom: '0%', animationDelay: '-18s' }}>
+                                    <svg viewBox="0 0 100 100" className="w-full h-full fill-current" style={{ animation: 'butterfly-flutter 0.32s linear infinite' }}>
                                         <path d="M 50 40 C 35 10, 10 20, 15 45 C 18 55, 35 60, 48 50 C 45 65, 30 85, 50 85 C 70 85, 55 65, 52 50 C 65 60, 82 55, 85 45 C 90 20, 65 10, 50 40 Z" />
                                     </svg>
                                 </div>
