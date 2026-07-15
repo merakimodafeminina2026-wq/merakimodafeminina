@@ -900,7 +900,7 @@ export default function AuthPage() {
                         {showButterflyBg && (
                             <div className="absolute inset-0 pointer-events-none overflow-hidden select-none z-6">
                                 {/* Borboleta 1 */}
-                                <div className="absolute w-8 h-8 opacity-[0.14]" style={{ animation: 'butterfly-drift-1 25s linear infinite', left: '5%', bottom: '0%' }}>
+                                <div className="absolute w-16 h-16 opacity-[0.14]" style={{ animation: 'butterfly-drift-1 25s linear infinite', left: '5%', bottom: '0%' }}>
                                     <img 
                                         src={processedButterflySrc} 
                                         alt="Borboleta" 
@@ -909,7 +909,7 @@ export default function AuthPage() {
                                     />
                                 </div>
                                 {/* Borboleta 2 */}
-                                <div className="absolute w-6 h-6 opacity-[0.11]" style={{ animation: 'butterfly-drift-2 30s linear infinite', right: '5%', bottom: '0%', animationDelay: '-7s' }}>
+                                <div className="absolute w-12 h-12 opacity-[0.11]" style={{ animation: 'butterfly-drift-2 30s linear infinite', right: '5%', bottom: '0%', animationDelay: '-7s' }}>
                                     <img 
                                         src={processedButterflySrc} 
                                         alt="Borboleta" 
@@ -918,7 +918,7 @@ export default function AuthPage() {
                                     />
                                 </div>
                                 {/* Borboleta 3 */}
-                                <div className="absolute w-10 h-10 opacity-[0.16]" style={{ animation: 'butterfly-drift-3 28s linear infinite', left: '0%', top: '20%', animationDelay: '-14s' }}>
+                                <div className="absolute w-20 h-20 opacity-[0.16]" style={{ animation: 'butterfly-drift-3 28s linear infinite', left: '0%', top: '20%', animationDelay: '-14s' }}>
                                     <img 
                                         src={processedButterflySrc} 
                                         alt="Borboleta" 
@@ -927,7 +927,7 @@ export default function AuthPage() {
                                     />
                                 </div>
                                 {/* Borboleta 4 */}
-                                <div className="absolute w-7 h-7 opacity-[0.13]" style={{ animation: 'butterfly-drift-1 32s linear infinite', left: '25%', bottom: '0%', animationDelay: '-4s' }}>
+                                <div className="absolute w-14 h-14 opacity-[0.13]" style={{ animation: 'butterfly-drift-1 32s linear infinite', left: '25%', bottom: '0%', animationDelay: '-4s' }}>
                                     <img 
                                         src={processedButterflySrc} 
                                         alt="Borboleta" 
@@ -936,7 +936,7 @@ export default function AuthPage() {
                                     />
                                 </div>
                                 {/* Borboleta 5 */}
-                                <div className="absolute w-9 h-9 opacity-[0.10]" style={{ animation: 'butterfly-drift-2 26s linear infinite', right: '25%', bottom: '0%', animationDelay: '-18s' }}>
+                                <div className="absolute w-18 h-18 opacity-[0.10]" style={{ animation: 'butterfly-drift-2 26s linear infinite', right: '25%', bottom: '0%', animationDelay: '-18s' }}>
                                     <img 
                                         src={processedButterflySrc} 
                                         alt="Borboleta" 
@@ -945,7 +945,7 @@ export default function AuthPage() {
                                     />
                                 </div>
                                 {/* Borboleta 6 */}
-                                <div className="absolute w-8 h-8 opacity-[0.14]" style={{ animation: 'butterfly-drift-4 24s linear infinite', left: '15%', top: '0%', animationDelay: '-3s' }}>
+                                <div className="absolute w-16 h-16 opacity-[0.14]" style={{ animation: 'butterfly-drift-4 24s linear infinite', left: '15%', top: '0%', animationDelay: '-3s' }}>
                                     <img 
                                         src={processedButterflySrc} 
                                         alt="Borboleta" 
@@ -954,7 +954,7 @@ export default function AuthPage() {
                                     />
                                 </div>
                                 {/* Borboleta 7 */}
-                                <div className="absolute w-6 h-6 opacity-[0.11]" style={{ animation: 'butterfly-drift-3 35s linear infinite', left: '0%', top: '40%', animationDelay: '-10s' }}>
+                                <div className="absolute w-12 h-12 opacity-[0.11]" style={{ animation: 'butterfly-drift-3 35s linear infinite', left: '0%', top: '40%', animationDelay: '-10s' }}>
                                     <img 
                                         src={processedButterflySrc} 
                                         alt="Borboleta" 
@@ -963,7 +963,7 @@ export default function AuthPage() {
                                     />
                                 </div>
                                 {/* Borboleta 8 */}
-                                <div className="absolute w-10 h-10 opacity-[0.16]" style={{ animation: 'butterfly-drift-4 29s linear infinite', left: '40%', top: '0%', animationDelay: '-22s' }}>
+                                <div className="absolute w-20 h-20 opacity-[0.16]" style={{ animation: 'butterfly-drift-4 29s linear infinite', left: '40%', top: '0%', animationDelay: '-22s' }}>
                                     <img 
                                         src={processedButterflySrc} 
                                         alt="Borboleta" 
