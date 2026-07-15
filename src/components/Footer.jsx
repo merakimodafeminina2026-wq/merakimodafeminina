@@ -70,7 +70,7 @@ export default function Footer() {
                 <div className="flex justify-center mb-10">
                     <a 
                         href="#/" 
-                        className="font-heading text-2xl md:text-3xl font-bold tracking-[0.22em] text-[#1A1A1A] hover:text-[#7A3E4A] transition-colors inline-flex items-center gap-2"
+                        className="font-heading text-2xl md:text-3xl font-bold tracking-[0.3em] text-[#1A1A1A] hover:text-[#7A3E4A] transition-colors inline-flex items-center gap-2"
                     >
                         <img 
                             src={butterflySrc} 

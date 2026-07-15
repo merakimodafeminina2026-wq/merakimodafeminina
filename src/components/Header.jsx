@@ -225,7 +225,7 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onSearchOpen 
                         <Link 
                             to="/" 
                             onClick={() => { smoothScrollToTop(1200); setMobileMenuOpen(false); }}
-                            className="font-heading text-2xl md:text-2.5xl lg:text-3xl font-bold tracking-[0.15em] text-[#1A1A1A] hover:text-[#7A3E4A] transition-all duration-500 inline-flex items-center gap-2 animate-logo-breath"
+                            className="font-heading text-2xl md:text-2.5xl lg:text-3xl font-bold tracking-[0.3em] text-[#1A1A1A] hover:text-[#7A3E4A] transition-all duration-500 inline-flex items-center gap-2 animate-logo-breath"
                         >
                             <img 
                                 src={butterflySrc} 
