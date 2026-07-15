@@ -27,7 +27,7 @@ export default function HomePage() {
         return [
             { name: 'Home', description: 'Voltar para a página inicial', image: '/assets/categories/cat-conjuntos.jpg', link: '/' },
             { name: 'Categorias', description: 'Navegar pelas nossas coleções', image: '/assets/categories/cat-noite.jpg', link: '/category/conjuntos' },
-            { name: 'Política de Troca', description: 'Regras e prazos para trocas e devoluções', image: '/assets/categories/cat-sexy.jpg', link: '/returns' },
+            { name: 'Política de Troca', description: 'Regras e prazos para trocas de produtos', image: '/assets/categories/cat-sexy.jpg', link: '/returns' },
             { name: 'Ofertas', description: 'Confira nossos produtos com descontos', image: '/assets/categories/cat-plus.jpg', link: '/category/ofertas' },
         ]
     })

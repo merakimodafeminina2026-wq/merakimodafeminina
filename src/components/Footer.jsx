@@ -113,7 +113,7 @@ export default function Footer() {
                             <li><a href="#/security" className="hover:text-[#7A3E4A] transition-colors">Compra Segura</a></li>
                             <li><a href="#/payment" className="hover:text-[#7A3E4A] transition-colors">Formas de Pagamento</a></li>
                             <li><a href="#/delivery" className="hover:text-[#7A3E4A] transition-colors">Entrega e Frete</a></li>
-                            <li><a href="#/returns" className="hover:text-[#7A3E4A] transition-colors">Trocas e Devoluções</a></li>
+                            <li><a href="#/returns" className="hover:text-[#7A3E4A] transition-colors">Política de Troca</a></li>
                             <li><a href="#/withdrawal" className="hover:text-[#7A3E4A] transition-colors">Direito de Arrependimento</a></li>
                             <li><a href="#/privacy" className="hover:text-[#7A3E4A] transition-colors">Política de Privacidade</a></li>
                             <li><a href="#/promotional-rules" className="hover:text-[#7A3E4A] transition-colors">Regras promocionais</a></li>

@@ -86,7 +86,7 @@ export default function InfoPage({ tab: propTab }) {
         { id: 'security', label: 'Compra Segura', category: 'Atendimento' },
         { id: 'payment', label: 'Formas de Pagamento', category: 'Atendimento' },
         { id: 'delivery', label: 'Entrega e Frete', category: 'Atendimento' },
-        { id: 'returns', label: 'Trocas e Devoluções', category: 'Atendimento' },
+        { id: 'returns', label: 'Política de Troca', category: 'Atendimento' },
         { id: 'withdrawal', label: 'Direito de Arrependimento', category: 'Atendimento' },
         { id: 'privacy', label: 'Política de Privacidade', category: 'Atendimento' },
         { id: 'promotional-rules', label: 'Regras Promocionais', category: 'Atendimento' },
@@ -228,15 +228,15 @@ export default function InfoPage({ tab: propTab }) {
             case 'returns':
                 return (
                     <div className="space-y-6">
-                        <h2 className="text-2xl font-bold text-gray-900 border-b pb-4">Trocas e Devoluções</h2>
+                        <h2 className="text-2xl font-bold text-gray-900 border-b pb-4">Política de Troca</h2>
                         <p className="text-sm leading-relaxed text-gray-600">
-                            Queremos que você se sinta plenamente satisfeita com a sua lingerie Meraki. Se for necessária a troca ou devolução da peça, o processo é descomplicado e seguro.
+                            Queremos que você se sinta plenamente satisfeita com a sua lingerie Meraki. Por se tratar de peças íntimas e por questões de higiene e saúde, <strong>não realizamos devoluções ou reembolsos</strong>, mas oferecemos um processo de troca seguro e descomplicado.
                         </p>
-                        <h3 className="text-sm font-bold text-[#7A3E4A] uppercase tracking-wider mt-4">Regras Gerais</h3>
+                        <h3 className="text-sm font-bold text-[#7A3E4A] uppercase tracking-wider mt-4">Regras de Troca</h3>
                         <ul className="list-disc pl-5 text-xs text-gray-650 space-y-2">
                             <li><strong>Prazo de Solicitação:</strong> Até <strong>7 dias corridos</strong> após a entrega do produto, contados conforme o rastreamento da transportadora.</li>
-                            <li><strong>Condições da Peça:</strong> Os produtos não podem apresentar sinais de uso, lavagem, manchas, odores ou alterações e devem conter a etiqueta original fixada.</li>
-                            <li><strong>Primeira Troca Grátis:</strong> O frete de retorno do produto para troca é custeado pela Meraki por meio de código de autorização de postagem reversa.</li>
+                            <li><strong>Condições da Peça:</strong> Os produtos não podem apresentar qualquer sinal de uso, prova inadequada, lavagem, manchas, odores ou alterações e devem conter a etiqueta original fixada.</li>
+                            <li><strong>Troca por tamanho ou modelo:</strong> O frete de retorno do produto para troca é custeado pela Meraki por meio de código de autorização de postagem reversa na primeira troca.</li>
                         </ul>
                     </div>
                 )

@@ -536,37 +536,17 @@ export default function AuthPage() {
                             {dashboardTab === 'returns' && (
                                 <div className="space-y-5 animate-[fadeIn_200ms_ease-out]">
                                     <div className="flex items-center justify-between">
-                                        <h2 className="text-xs font-bold text-[#2d1a1e] uppercase tracking-[0.15em]">Trocas & Devoluções</h2>
+                                        <h2 className="text-xs font-bold text-[#2d1a1e] uppercase tracking-[0.15em]">Solicitação de Troca</h2>
                                     </div>
 
                                     {/* ─ REQUEST FORM ─ */}
                                     <div className="bg-white border border-[#E8E0D8] overflow-hidden">
                                         <div className="bg-[#7A3E4A] px-4 py-3">
-                                            <h3 className="text-white text-[10px] font-bold uppercase tracking-[0.2em]">Nova Solicitação</h3>
+                                            <h3 className="text-white text-[10px] font-bold uppercase tracking-[0.2em]">Solicitação de Troca</h3>
                                         </div>
 
                                         <form onSubmit={handleRequestReturn} className="p-4 space-y-4">
 
-                                            {/* Type toggle */}
-                                            <div>
-                                                <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2">Tipo de Solicitação</p>
-                                                <div className="flex">
-                                                    {['troca', 'devolução'].map(type => (
-                                                        <button
-                                                            key={type}
-                                                            type="button"
-                                                            onClick={() => setReturnType(type)}
-                                                            className={`flex-1 py-2.5 text-[10px] font-bold uppercase tracking-wider border transition-all ${
-                                                                returnType === type
-                                                                    ? 'bg-[#7A3E4A] text-white border-[#7A3E4A]'
-                                                                    : 'bg-white text-gray-400 border-[#E8E0D8] hover:border-[#C6A76A] hover:text-[#7A3E4A]'
-                                                            }`}
-                                                        >
-                                                            {type}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </div>
 
                                             {/* Step 1: Select Order */}
                                             <div>

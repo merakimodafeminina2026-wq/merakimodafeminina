@@ -548,7 +548,7 @@ export default function ProductPage() {
                                     onClick={() => setActiveTab('shipping')}
                                     className={`pb-3 border-b-2 transition-all ${activeTab === 'shipping' ? 'border-[#7A3E4A] text-gray-900' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
                                 >
-                                    Trocas e Devoluções
+                                    Política de Troca
                                 </button>
                             </div>
 
@@ -564,8 +564,8 @@ export default function ProductPage() {
                                     </>
                                 ) : (
                                     <>
-                                        <p>Queremos que você ame sua compra! Se por qualquer motivo não ficar satisfeita, a primeira troca é grátis dentro do prazo de 30 dias após o recebimento.</p>
-                                        <p>As peças devem ser devolvidas com etiquetas intactas e na embalagem original, sem marcas de uso.</p>
+                                        <p>Por questões de higiene e saúde (peças íntimas), não realizamos devoluções ou reembolsos de produtos. No entanto, oferecemos a troca de tamanho ou modelo caso a peça esteja em perfeito estado, sem marcas de uso, com etiquetas intactas e na embalagem original.</p>
+                                        <p>O prazo para solicitar a troca é de até 7 dias corridos após o recebimento.</p>
                                     </>
                                 )}
                             </div>
