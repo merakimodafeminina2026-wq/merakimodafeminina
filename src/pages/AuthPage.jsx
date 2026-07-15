@@ -864,7 +864,7 @@ export default function AuthPage() {
 
                 ) : (
                     /* ── LOGIN / CADASTRO — estilo original nude ── */
-                    <div className={`relative ${showButterflyBg ? 'w-full min-h-[70vh] flex items-center justify-center overflow-hidden py-12 px-4 bg-gradient-to-tr from-[#FAF6F0] via-[#F4EDE5] to-[#FAF6F0] rounded-2xl border border-gray-150/50' : ''}`}>
+                    <div className={`relative ${showButterflyBg ? 'w-full min-h-[70vh] flex items-center justify-center overflow-hidden py-12 px-4 bg-gradient-to-tr from-[#FAF6F0] via-[#F4EDE5] to-[#FAF6F0]' : ''}`}>
                         {/* Borboletas de fundo (sombras translúcidas voando) */}
                         {showButterflyBg && (
                             <div className="absolute inset-0 pointer-events-none overflow-hidden select-none z-0">
