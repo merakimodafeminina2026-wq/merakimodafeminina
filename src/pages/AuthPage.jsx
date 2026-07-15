@@ -899,6 +899,43 @@ export default function AuthPage() {
                         {/* Borboletas de fundo (sombras translúcidas voando) */}
                         {showButterflyBg && (
                             <div className="absolute inset-0 pointer-events-none overflow-hidden select-none z-6">
+                                {/* Tinkerbell Fairy Flight */}
+                                <div className="absolute z-10 pointer-events-none animate-fairy-flight" style={{ width: '40px', height: '40px', left: 0, top: 0 }}>
+                                    <svg viewBox="0 0 100 100" className="w-full h-full fill-current text-[#C6A76A] drop-shadow-[0_0_12px_rgba(255,215,0,0.95)]">
+                                        <path d="M48,32 C46,30 43,26 44,22 C45,18 49,16 51,19 C53,22 51,28 50,30 L55,42 C57,44 60,42 62,40 C64,38 66,39 65,42 C64,45 59,48 56,48 L52,58 C53,64 56,72 58,78 C59,81 57,83 54,82 C51,81 48,74 47,68 L44,79 C43,82 40,81 41,78 C42,75 44,65 45,58 L41,48 C37,47 32,45 28,42 C25,40 26,38 29,39 C32,40 37,42 41,43 L45,35 Z" />
+                                        <path d="M47,33 C42,28 32,15 35,8 C38,1 48,10 50,22 Z" opacity="0.8" />
+                                        <path d="M49,34 C54,29 64,18 62,11 C60,4 51,12 49,23 Z" opacity="0.8" />
+                                        <path d="M45,38 C38,38 28,34 26,27 C24,20 35,24 43,33 Z" opacity="0.6" />
+                                        <circle cx="28" cy="42" r="3" className="fill-white animate-ping" />
+                                    </svg>
+                                </div>
+
+                                {/* Pixie Dust Trail (Sparkles) */}
+                                {[...Array(16)].map((_, i) => (
+                                    <div 
+                                        key={i} 
+                                        className="absolute z-9 pointer-events-none animate-fairy-flight" 
+                                        style={{ 
+                                            width: '12px', 
+                                            height: '12px', 
+                                            left: 0, 
+                                            top: 0, 
+                                            animationDelay: `${-0.12 * (i + 1)}s` 
+                                        }}
+                                    >
+                                        <div 
+                                            className="w-full h-full animate-pixie-dust flex items-center justify-center"
+                                            style={{ 
+                                                animationDelay: `${0.1 * i}s` 
+                                            }}
+                                        >
+                                            <svg viewBox="0 0 24 24" className="w-full h-full fill-current text-[#C6A76A] drop-shadow-[0_0_6px_rgba(255,223,120,0.9)]">
+                                                <path d="M12 2l2.4 7.2 7.2 2.4-7.2 2.4-2.4 7.2-2.4-7.2-7.2-2.4 7.2-2.4z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                ))}
+
                                 {/* Borboleta 1 */}
                                 <div className="absolute w-16 h-16 opacity-[0.14]" style={{ animation: 'butterfly-drift-1 25s linear infinite', left: '5%', bottom: '0%' }}>
                                     <img 
@@ -969,6 +1006,78 @@ export default function AuthPage() {
                                         alt="Borboleta" 
                                         className={`w-full h-full object-contain transition-opacity duration-300 ${processedButterflySrc.startsWith('data:') ? 'opacity-100' : 'opacity-0'}`} 
                                         style={{ animation: 'butterfly-flutter 0.35s linear infinite' }} 
+                                    />
+                                </div>
+                                {/* Borboleta 9 */}
+                                <div className="absolute w-14 h-14 opacity-[0.12]" style={{ animation: 'butterfly-drift-1 22s linear infinite', left: '10%', bottom: '0%', animationDelay: '-12s' }}>
+                                    <img 
+                                        src={processedButterflySrc} 
+                                        alt="Borboleta" 
+                                        className={`w-full h-full object-contain transition-opacity duration-300 ${processedButterflySrc.startsWith('data:') ? 'opacity-100' : 'opacity-0'}`} 
+                                        style={{ animation: 'butterfly-flutter 0.32s linear infinite' }} 
+                                    />
+                                </div>
+                                {/* Borboleta 10 */}
+                                <div className="absolute w-16 h-16 opacity-[0.13]" style={{ animation: 'butterfly-drift-2 28s linear infinite', right: '15%', bottom: '0%', animationDelay: '-5s' }}>
+                                    <img 
+                                        src={processedButterflySrc} 
+                                        alt="Borboleta" 
+                                        className={`w-full h-full object-contain transition-opacity duration-300 ${processedButterflySrc.startsWith('data:') ? 'opacity-100' : 'opacity-0'}`} 
+                                        style={{ animation: 'butterfly-flutter 0.26s linear infinite' }} 
+                                    />
+                                </div>
+                                {/* Borboleta 11 */}
+                                <div className="absolute w-12 h-12 opacity-[0.10]" style={{ animation: 'butterfly-drift-3 30s linear infinite', left: '5%', top: '30%', animationDelay: '-8s' }}>
+                                    <img 
+                                        src={processedButterflySrc} 
+                                        alt="Borboleta" 
+                                        className={`w-full h-full object-contain transition-opacity duration-300 ${processedButterflySrc.startsWith('data:') ? 'opacity-100' : 'opacity-0'}`} 
+                                        style={{ animation: 'butterfly-flutter 0.28s linear infinite' }} 
+                                    />
+                                </div>
+                                {/* Borboleta 12 */}
+                                <div className="absolute w-18 h-18 opacity-[0.14]" style={{ animation: 'butterfly-drift-4 26s linear infinite', left: '30%', top: '0%', animationDelay: '-15s' }}>
+                                    <img 
+                                        src={processedButterflySrc} 
+                                        alt="Borboleta" 
+                                        className={`w-full h-full object-contain transition-opacity duration-300 ${processedButterflySrc.startsWith('data:') ? 'opacity-100' : 'opacity-0'}`} 
+                                        style={{ animation: 'butterfly-flutter 0.3s linear infinite' }} 
+                                    />
+                                </div>
+                                {/* Borboleta 13 */}
+                                <div className="absolute w-16 h-16 opacity-[0.12]" style={{ animation: 'butterfly-drift-1 34s linear infinite', left: '20%', bottom: '0%', animationDelay: '-19s' }}>
+                                    <img 
+                                        src={processedButterflySrc} 
+                                        alt="Borboleta" 
+                                        className={`w-full h-full object-contain transition-opacity duration-300 ${processedButterflySrc.startsWith('data:') ? 'opacity-100' : 'opacity-0'}`} 
+                                        style={{ animation: 'butterfly-flutter 0.35s linear infinite' }} 
+                                    />
+                                </div>
+                                {/* Borboleta 14 */}
+                                <div className="absolute w-14 h-14 opacity-[0.10]" style={{ animation: 'butterfly-drift-2 32s linear infinite', right: '30%', bottom: '0%', animationDelay: '-2s' }}>
+                                    <img 
+                                        src={processedButterflySrc} 
+                                        alt="Borboleta" 
+                                        className={`w-full h-full object-contain transition-opacity duration-300 ${processedButterflySrc.startsWith('data:') ? 'opacity-100' : 'opacity-0'}`} 
+                                        style={{ animation: 'butterfly-flutter 0.24s linear infinite' }} 
+                                    />
+                                </div>
+                                {/* Borboleta 15 */}
+                                <div className="absolute w-20 h-20 opacity-[0.15]" style={{ animation: 'butterfly-drift-3 25s linear infinite', left: '0%', top: '50%', animationDelay: '-11s' }}>
+                                    <img 
+                                        src={processedButterflySrc} 
+                                        alt="Borboleta" 
+                                        className={`w-full h-full object-contain transition-opacity duration-300 ${processedButterflySrc.startsWith('data:') ? 'opacity-100' : 'opacity-0'}`} 
+                                        style={{ animation: 'butterfly-flutter 0.28s linear infinite' }} 
+                                    />
+                                </div>
+                                {/* Borboleta 16 */}
+                                <div className="absolute w-12 h-12 opacity-[0.11]" style={{ animation: 'butterfly-drift-4 27s linear infinite', left: '50%', top: '0%', animationDelay: '-17s' }}>
+                                    <img 
+                                        src={processedButterflySrc} 
+                                        alt="Borboleta" 
+                                        className={`w-full h-full object-contain transition-opacity duration-300 ${processedButterflySrc.startsWith('data:') ? 'opacity-100' : 'opacity-0'}`} 
+                                        style={{ animation: 'butterfly-flutter 0.32s linear infinite' }} 
                                     />
                                 </div>
                             </div>
