@@ -98,7 +98,7 @@ export default function ProductCard({ product, onQuickView, onToggleWishlist, is
                         ))}
                     </div>
 
-                    <h3 className="font-sans text-sm sm:text-base font-semibold text-[#1A1A1A] tracking-tight leading-snug line-clamp-2 h-10 sm:h-12 overflow-hidden px-1">
+                    <h3 className="font-sans text-base sm:text-lg font-semibold text-[#1A1A1A] tracking-tight leading-snug line-clamp-2 h-12 sm:h-14 overflow-hidden px-1">
                         {product.name}
                     </h3>
                 </div>
