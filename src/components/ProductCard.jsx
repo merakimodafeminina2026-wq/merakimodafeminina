@@ -153,7 +153,28 @@ export default function ProductCard({ product, onQuickView, onToggleWishlist, is
                     {/* Color Swatches */}
                     <div className="flex justify-center gap-1.5 py-1">
                         {colors.map((colorName, cIdx) => {
-                            const hex = colorHexMap[colorName] || '#CCCCCC'
+                            // Converte o nome da cor procurada para caixa baixa e remove espaços/acentos básicos
+                            const searchName = colorName.toLowerCase().trim()
+                            
+                            // Procura chave correspondente no mapa (ignora case)
+                            let hex = '#CCCCCC'
+                            const mapKeys = Object.keys(colorHexMap)
+                            const matchedKey = mapKeys.find(k => k.toLowerCase().trim() === searchName)
+                            
+                            if (matchedKey) {
+                                hex = colorHexMap[matchedKey]
+                            } else {
+                                // Se não achar correspondência exata, tenta encontrar por palavra-chave comum
+                                if (searchName.includes('verde')) hex = '#16A34A' // Verde padrão
+                                else if (searchName.includes('vermelho') || searchName.includes('veremelho')) hex = '#DC2626' // Vermelho padrão
+                                else if (searchName.includes('preto')) hex = '#000000'
+                                else if (searchName.includes('branco')) hex = '#FFFFFF'
+                                else if (searchName.includes('rosa') || searchName.includes('pink')) hex = '#F472B6'
+                                else if (searchName.includes('azul') || searchName.includes('marinho')) hex = '#1E3A8A'
+                                else if (searchName.includes('nude')) hex = '#EED9C4'
+                                else if (searchName.includes('bordô') || searchName.includes('bordo')) hex = '#800020'
+                            }
+
                             return (
                                 <span 
                                     key={cIdx} 

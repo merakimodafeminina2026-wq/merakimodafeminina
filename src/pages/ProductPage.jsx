@@ -366,7 +366,20 @@ export default function ProductPage() {
                                             'Branco/Renda': '#F5F5F5'
                                         }
                                         const customMap = JSON.parse(localStorage.getItem('meraki_custom_colors_map') || '{}')
-                                        const hex = COLOR_MAP[color] || customMap[color] || '#CCCCCC'
+                                        let hex = COLOR_MAP[color] || customMap[color] || '#CCCCCC'
+                                        
+                                        if (hex === '#CCCCCC') {
+                                            // Fallback inteligente baseada no nome
+                                            const lower = color.toLowerCase()
+                                            if (lower.includes('verde')) hex = '#16A34A'
+                                            else if (lower.includes('vermelho') || lower.includes('veremelho')) hex = '#DC2626'
+                                            else if (lower.includes('preto')) hex = '#000000'
+                                            else if (lower.includes('branco')) hex = '#FFFFFF'
+                                            else if (lower.includes('rosa') || lower.includes('pink')) hex = '#F472B6'
+                                            else if (lower.includes('azul') || lower.includes('marinho')) hex = '#1E3A8A'
+                                            else if (lower.includes('nude')) hex = '#EED9C4'
+                                            else if (lower.includes('bordô') || lower.includes('bordo')) hex = '#800020'
+                                        }
                                         return (
                                             <button
                                                 key={color}
