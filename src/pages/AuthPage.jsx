@@ -934,7 +934,7 @@ export default function AuthPage() {
                                     <img
                                         src={processedButterflySrc}
                                         alt="Borboleta líder"
-                                        className={`w-full h-full object-contain transition-opacity duration-300 ${processedButterflySrc.startsWith('data:') ? 'opacity-100' : 'opacity-0'}`}
+                                        className="w-full h-full object-contain opacity-100 transition-opacity duration-300"
                                         style={{ animation: 'butterfly-flutter 0.25s linear infinite' }}
                                     />
                                 </div>
@@ -970,7 +970,7 @@ export default function AuthPage() {
                                                 <img 
                                                     src={processedButterflySrc} 
                                                     alt="Borboleta" 
-                                                    className={`w-full h-full object-contain transition-opacity duration-300 ${processedButterflySrc.startsWith('data:') ? 'opacity-100' : 'opacity-0'}`} 
+                                                    className="w-full h-full object-contain opacity-100 transition-opacity duration-300"
                                                     style={{ animation: `butterfly-flutter ${b.flutter}s linear infinite` }} 
                                                 />
                                             </div>
