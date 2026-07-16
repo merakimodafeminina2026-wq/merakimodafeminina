@@ -83,6 +83,29 @@ function mapDbToFrontend(table, item) {
         if (item.customfeenumber !== undefined) mapped.customFeeNumber = item.customfeenumber
         if (item.customfeeemoji !== undefined) mapped.customFeeEmoji = item.customfeeemoji
         if (item.customizable_emojis !== undefined) mapped.customizableEmojis = item.customizable_emojis
+        
+        // Normaliza colors e sizes do banco de dados (PG text array ou string delimitada por vírgula)
+        if (item.colors) {
+            if (typeof item.colors === 'string') {
+                const clean = item.colors.replace(/[\{\}]/g, '')
+                mapped.colors = clean.split(',').map(c => c.trim()).filter(Boolean)
+            } else if (Array.isArray(item.colors)) {
+                mapped.colors = item.colors.map(c => String(c).trim()).filter(Boolean)
+            }
+        } else {
+            mapped.colors = []
+        }
+
+        if (item.sizes) {
+            if (typeof item.sizes === 'string') {
+                const clean = item.sizes.replace(/[\{\}]/g, '')
+                mapped.sizes = clean.split(',').map(s => s.trim()).filter(Boolean)
+            } else if (Array.isArray(item.sizes)) {
+                mapped.sizes = item.sizes.map(s => String(s).trim()).filter(Boolean)
+            }
+        } else {
+            mapped.sizes = []
+        }
     } else if (table === 'store_config') {
         if (item.topbarmessages !== undefined) mapped.topbarMessages = item.topbarmessages
         if (item.topbarstyle !== undefined) mapped.topbarStyle = item.topbarstyle
@@ -347,7 +370,8 @@ export async function getProducts() {
     try {
         const { data, error } = await supabase.from('products').select('*')
         if (error) throw error
-        return { data: data || [], error: null }
+        const mapped = (data || []).map(p => mapDbToFrontend('products', p))
+        return { data: mapped, error: null }
     } catch (e) {
         return { data: [], error: e }
     }
@@ -367,7 +391,7 @@ export async function getProductById(id) {
     try {
         const { data, error } = await supabase.from('products').select('*').eq('id', id).maybeSingle()
         if (error) throw error
-        return { data, error: null }
+        return { data: data ? mapDbToFrontend('products', data) : null, error: null }
     } catch (e) {
         return { data: null, error: e }
     }
@@ -377,7 +401,8 @@ export async function getProductsBySection(section) {
     try {
         const { data, error } = await supabase.from('products').select('*').eq('section', section)
         if (error) throw error
-        return { data: data || [], error: null }
+        const mapped = (data || []).map(p => mapDbToFrontend('products', p))
+        return { data: mapped, error: null }
     } catch (e) {
         return { data: [], error: e }
     }
@@ -389,12 +414,13 @@ export async function createProduct(product) {
         const { data, error } = await supabase.from('products').insert([payload]).select().single()
         if (error) throw error
         
+        const mapped = mapDbToFrontend('products', data)
         // Update local cache
         const current = JSON.parse(localStorage.getItem('meraki_products') || '[]')
-        current.unshift(data)
+        current.unshift(mapped)
         originalSetItem('meraki_products', JSON.stringify(current))
 
-        return { data, error: null }
+        return { data: mapped, error: null }
     } catch (e) {
         return { data: null, error: e }
     }
@@ -406,15 +432,16 @@ export async function updateProduct(id, updates) {
         const { data, error } = await supabase.from('products').update(payload).eq('id', id).select().single()
         if (error) throw error
 
+        const mapped = mapDbToFrontend('products', data)
         // Update local cache
         const current = JSON.parse(localStorage.getItem('meraki_products') || '[]')
         const idx = current.findIndex(p => p.id === id)
         if (idx !== -1) {
-            current[idx] = { ...current[idx], ...data }
+            current[idx] = { ...current[idx], ...mapped }
             originalSetItem('meraki_products', JSON.stringify(current))
         }
 
-        return { data, error: null }
+        return { data: mapped, error: null }
     } catch (e) {
         return { data: null, error: e }
     }
