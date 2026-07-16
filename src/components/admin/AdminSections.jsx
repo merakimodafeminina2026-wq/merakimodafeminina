@@ -846,12 +846,20 @@ export function CategoriesSection({
     setSaving,
     compressImage,
     uploadMultipleImages,
-    getAssetUrl
+    getAssetUrl,
+    homepageCategories = [],
+    setHomepageCategories,
+    saveHomepageCategoriesToConfig
 }) {
     const [editingIndex, setEditingIndex] = useState(null)
     const [catName, setCatName] = useState('')
     const [catGroup, setCatGroup] = useState('Lingerie')
     const [catDescription, setCatDescription] = useState('')
+
+    const [editingHomeIdx, setEditingHomeIdx] = useState(null)
+    const [homeCatName, setHomeCatName] = useState('')
+    const [homeCatDescription, setHomeCatDescription] = useState('')
+    const [homeCatLink, setHomeCatLink] = useState('')
 
     const [defaultCategoryImage, setDefaultCategoryImage] = useState(() => {
         const stored = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
@@ -1081,6 +1089,197 @@ export function CategoriesSection({
                         </div>
                     )
                 })}
+            </div>
+
+            {/* Divisor */}
+            <div className="h-px bg-[#EEEEEE] my-10" />
+
+            {/* Categorias da Home */}
+            <div className="space-y-5">
+                <div>
+                    <h2 className="text-sm font-black text-gray-900">Categorias em Destaque na Home</h2>
+                    <p className="text-[10px] text-gray-400 font-medium">Estes são os 4 cartões com foto exibidos logo no início da página inicial (ex: Home, Categorias, Trocas, Ofertas).</p>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                    {/* Formulário de Edição */}
+                    <div className="lg:col-span-2 bg-white rounded-2xl border border-[#EEEEEE] p-5">
+                        <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-4">
+                            {editingHomeIdx !== null ? 'Editar Cartão da Home' : 'Novo Cartão da Home'}
+                        </h3>
+                        <form 
+                            onSubmit={async (e) => {
+                                e.preventDefault()
+                                const form = e.target
+                                const name = homeCatName.trim()
+                                const description = homeCatDescription.trim()
+                                const link = homeCatLink.trim()
+                                const files = form.homeCatImage.files
+                                
+                                if (!name) return
+                                setSaving(true)
+                                
+                                let imageUrl = '/placeholder.jpg'
+                                if (editingHomeIdx !== null) {
+                                    imageUrl = homepageCategories[editingHomeIdx].image || '/placeholder.jpg'
+                                }
+                                
+                                if (files?.[0]) {
+                                    const compressedFile = await compressImage(files[0], 1200)
+                                    const { urls } = await uploadMultipleImages([compressedFile])
+                                    if (urls?.[0]) imageUrl = urls[0]
+                                } else if (form.homeCatImageUrl?.value) {
+                                    imageUrl = form.homeCatImageUrl.value.trim()
+                                }
+                                
+                                const cardObj = { name, description, image: imageUrl, link }
+                                
+                                let updated
+                                if (editingHomeIdx !== null) {
+                                    updated = homepageCategories.map((c, i) => i === editingHomeIdx ? cardObj : c)
+                                } else {
+                                    updated = [...homepageCategories, cardObj]
+                                }
+                                
+                                setHomepageCategories(updated)
+                                await saveHomepageCategoriesToConfig(updated)
+                                form.reset()
+                                setEditingHomeIdx(null)
+                                setHomeCatName('')
+                                setHomeCatDescription('')
+                                setHomeCatLink('')
+                                setSaving(false)
+                            }}
+                            className="space-y-4"
+                        >
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Título do Cartão</label>
+                                    <input 
+                                        type="text" 
+                                        name="homeCatName" 
+                                        required 
+                                        value={homeCatName}
+                                        onChange={e => setHomeCatName(e.target.value)}
+                                        placeholder="Ex: Lançamentos" 
+                                        className="w-full px-3 py-2 border border-[#EEEEEE] rounded-xl text-xs outline-none" 
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Link de Redirecionamento</label>
+                                    <input 
+                                        type="text" 
+                                        name="homeCatLink" 
+                                        required 
+                                        value={homeCatLink}
+                                        onChange={e => setHomeCatLink(e.target.value)}
+                                        placeholder="Ex: /category/novidades ou https://..." 
+                                        className="w-full px-3 py-2 border border-[#EEEEEE] rounded-xl text-xs outline-none" 
+                                    />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Fazer Upload da Imagem</label>
+                                    <input type="file" name="homeCatImage" accept="image/*" className="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#7A3E4A]/10 file:text-[#7A3E4A] hover:file:bg-[#7A3E4A]/20 cursor-pointer" />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Ou Link da Imagem (Opcional)</label>
+                                    <input 
+                                        type="text" 
+                                        name="homeCatImageUrl" 
+                                        placeholder="Ex: https://images.unsplash.com/..." 
+                                        className="w-full px-3 py-2 border border-[#EEEEEE] rounded-xl text-xs outline-none" 
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Descrição / Subtítulo</label>
+                                <input 
+                                    type="text" 
+                                    name="homeCatDescription" 
+                                    value={homeCatDescription}
+                                    onChange={e => setHomeCatDescription(e.target.value)}
+                                    placeholder="Ex: Curadoria exclusiva das melhores peças" 
+                                    className="w-full px-3 py-2 border border-[#EEEEEE] rounded-xl text-xs outline-none" 
+                                />
+                            </div>
+                            <div className="flex gap-2">
+                                <button type="submit" disabled={saving} className="px-5 py-3 bg-[#7A3E4A] hover:bg-[#603039] text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer disabled:opacity-50">
+                                    {editingHomeIdx !== null ? 'Salvar Alterações' : 'Cadastrar Cartão'}
+                                </button>
+                                {editingHomeIdx !== null && (
+                                    <button 
+                                        type="button" 
+                                        onClick={() => {
+                                            setEditingHomeIdx(null)
+                                            setHomeCatName('')
+                                            setHomeCatDescription('')
+                                            setHomeCatLink('')
+                                        }}
+                                        className="px-5 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+                                    >
+                                        Cancelar
+                                    </button>
+                                )}
+                            </div>
+                        </form>
+                    </div>
+
+                    <div className="bg-white rounded-2xl border border-[#EEEEEE] p-5">
+                        <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">Dica de Layout</h3>
+                        <p className="text-[10px] text-gray-400 font-semibold leading-relaxed">
+                            O design do site foi otimizado para exibir exatamente **4 cartões** alinhados. Para manter o visual harmônico das 4 colunas na Home, recomendamos manter exatamente 4 itens cadastrados na lista.
+                        </p>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                    {homepageCategories.map((card, idx) => (
+                        <div key={idx} className="bg-white rounded-2xl border border-[#EEEEEE] overflow-hidden hover:border-[#7A3E4A]/20 hover:shadow-lg transition-all group flex flex-col justify-between">
+                            <div className="flex gap-4 p-4">
+                                <div className="w-14 h-14 rounded-xl overflow-hidden border border-[#EEEEEE] shrink-0 bg-gray-50">
+                                    <img src={getAssetUrl(card.image)} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                </div>
+                                <div className="min-w-0">
+                                    <p className="text-xs font-bold text-gray-800 truncate">{card.name}</p>
+                                    <p className="text-[9px] text-[#7A3E4A] font-bold uppercase tracking-wider mb-1">{card.link}</p>
+                                    <p className="text-[10px] text-gray-400 leading-relaxed line-clamp-2">{card.description}</p>
+                                </div>
+                            </div>
+                            <div className="px-4 py-2 border-t border-[#F8F8F8] flex justify-end gap-2">
+                                <button 
+                                    onClick={() => {
+                                        setEditingHomeIdx(idx)
+                                        setHomeCatName(card.name)
+                                        setHomeCatDescription(card.description)
+                                        setHomeCatLink(card.link)
+                                        window.scrollTo({ top: document.body.scrollHeight / 2, behavior: 'smooth' })
+                                    }}
+                                    className="text-[9px] font-bold text-[#C6A76A] hover:text-[#b09054] uppercase tracking-widest cursor-pointer px-2 py-1 rounded-lg hover:bg-[#C6A76A]/10 transition-all"
+                                >
+                                    Editar
+                                </button>
+                                <button 
+                                    onClick={async () => {
+                                        const updated = homepageCategories.filter((_, i) => i !== idx)
+                                        setHomepageCategories(updated)
+                                        await saveHomepageCategoriesToConfig(updated)
+                                        if (editingHomeIdx === idx) {
+                                            setEditingHomeIdx(null)
+                                            setHomeCatName('')
+                                            setHomeCatDescription('')
+                                            setHomeCatLink('')
+                                        }
+                                    }}
+                                    className="text-[9px] font-bold text-red-400 hover:text-red-600 uppercase tracking-widest cursor-pointer px-2 py-1 rounded-lg hover:bg-red-50 transition-all"
+                                >
+                                    Excluir
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     )

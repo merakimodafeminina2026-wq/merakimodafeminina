@@ -132,6 +132,14 @@ export default function AdminPage() {
         ]
     })
 
+    const [homepageCategories, setHomepageCategories] = useState(() => {
+        try {
+            const stored = localStorage.getItem('meraki_homepage_categories')
+            if (stored) return JSON.parse(stored)
+        } catch {}
+        return []
+    })
+
     const [promoCombo, setPromoCombo] = useState(() => {
         const stored = localStorage.getItem('meraki_promo_combo')
         if (stored) {
@@ -212,6 +220,17 @@ export default function AdminPage() {
         try {
             const currentStyle = JSON.parse(localStorage.getItem('meraki_topbar_style') || '{"bgColor": "#C6A76A", "textColor": "#FFFFFF"}')
             const newStyle = { ...currentStyle, availableSections: list }
+            localStorage.setItem('meraki_topbar_style', JSON.stringify(newStyle))
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
+    const saveHomepageCategoriesToConfig = async (list) => {
+        localStorage.setItem('meraki_homepage_categories', JSON.stringify(list))
+        try {
+            const currentStyle = JSON.parse(localStorage.getItem('meraki_topbar_style') || '{"bgColor": "#C6A76A", "textColor": "#FFFFFF"}')
+            const newStyle = { ...currentStyle, homepageCategories: list }
             localStorage.setItem('meraki_topbar_style', JSON.stringify(newStyle))
         } catch (e) {
             console.error(e)
@@ -341,6 +360,9 @@ export default function AdminPage() {
             }
             if (config.topbarStyle && config.topbarStyle.availableSections) {
                 setSections(config.topbarStyle.availableSections)
+            }
+            if (config.topbarStyle && config.topbarStyle.homepageCategories) {
+                setHomepageCategories(config.topbarStyle.homepageCategories)
             }
         } catch (e) { console.error(e) }
 
@@ -945,6 +967,9 @@ export default function AdminPage() {
                             compressImage={compressImage}
                             uploadMultipleImages={uploadMultipleImages}
                             getAssetUrl={getAssetUrl}
+                            homepageCategories={homepageCategories}
+                            setHomepageCategories={setHomepageCategories}
+                            saveHomepageCategoriesToConfig={saveHomepageCategoriesToConfig}
                         />
                     )}
 

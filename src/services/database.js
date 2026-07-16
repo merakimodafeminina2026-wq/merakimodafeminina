@@ -182,6 +182,13 @@ export async function initSupabaseSync() {
                 if (dbConfig.topbarStyle.availableSections) {
                     localStorage.setItem('meraki_sections', JSON.stringify(dbConfig.topbarStyle.availableSections))
                 }
+                const homeCats = dbConfig.topbarStyle.homepageCategories || [
+                    { name: 'Home', description: 'Voltar para a página inicial', image: '/assets/categories/cat-conjuntos.jpg', link: '/' },
+                    { name: 'Categorias', description: 'Navegar pelas nossas coleções', image: '/assets/categories/cat-noite.jpg', link: '/category/conjuntos' },
+                    { name: 'Política de Troca', description: 'Regras e prazos para trocas de produtos', image: '/assets/categories/cat-sexy.jpg', link: '/returns' },
+                    { name: 'Ofertas', description: 'Confira nossos produtos com descontos', image: '/assets/categories/cat-plus.jpg', link: '/category/ofertas' }
+                ]
+                localStorage.setItem('meraki_homepage_categories', JSON.stringify(homeCats))
             }
             if (dbConfig.promoCombo) localStorage.setItem('meraki_promo_combo', JSON.stringify(dbConfig.promoCombo))
             if (dbConfig.editorial) localStorage.setItem('meraki_editorial', JSON.stringify(dbConfig.editorial))
@@ -226,6 +233,13 @@ export async function initSupabaseSync() {
             localStorage.setItem('meraki_promo_combo', JSON.stringify(defaultConfig.promoCombo))
             localStorage.setItem('meraki_editorial', JSON.stringify(defaultConfig.editorial))
             localStorage.setItem('meraki_shipping_message', defaultConfig.shippingMessage)
+            const defaultHomeCats = [
+                { name: 'Home', description: 'Voltar para a página inicial', image: '/assets/categories/cat-conjuntos.jpg', link: '/' },
+                { name: 'Categorias', description: 'Navegar pelas nossas coleções', image: '/assets/categories/cat-noite.jpg', link: '/category/conjuntos' },
+                { name: 'Política de Troca', description: 'Regras e prazos para trocas de produtos', image: '/assets/categories/cat-sexy.jpg', link: '/returns' },
+                { name: 'Ofertas', description: 'Confira nossos produtos com descontos', image: '/assets/categories/cat-plus.jpg', link: '/category/ofertas' }
+            ]
+            localStorage.setItem('meraki_homepage_categories', JSON.stringify(defaultHomeCats))
         }
 
         console.log('✅ Sincronização concluída com sucesso.')
@@ -238,6 +252,7 @@ export async function initSupabaseSync() {
         window.dispatchEvent(new Event('ordersUpdated'))
         window.dispatchEvent(new Event('returnsUpdated'))
         window.dispatchEvent(new Event('storeConfigUpdated'))
+        window.dispatchEvent(new Event('homepageCategoriesUpdated'))
         window.dispatchEvent(new Event('topbarMessagesUpdated'))
         window.dispatchEvent(new Event('topbarStyleUpdated'))
         window.dispatchEvent(new Event('promoComboUpdated'))

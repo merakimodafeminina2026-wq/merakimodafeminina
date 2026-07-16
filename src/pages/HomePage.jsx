@@ -24,6 +24,12 @@ export default function HomePage() {
     const [quickViewProduct, setQuickViewProduct] = useState(null)
     const [notification, setNotification] = useState({ message: '', visible: false })
     const [categories, setCategories] = useState(() => {
+        try {
+            const stored = localStorage.getItem('meraki_homepage_categories')
+            if (stored) return JSON.parse(stored)
+        } catch (e) {
+            console.error(e)
+        }
         return [
             { name: 'Home', description: 'Voltar para a página inicial', image: '/assets/categories/cat-conjuntos.jpg', link: '/' },
             { name: 'Categorias', description: 'Navegar pelas nossas coleções', image: '/assets/categories/cat-noite.jpg', link: '/category/conjuntos' },
@@ -97,19 +103,31 @@ export default function HomePage() {
                 if (config.installmentText) setInstallmentText(config.installmentText)
             } catch {}
         }
+        const updateHomepageCats = () => {
+            try {
+                const stored = localStorage.getItem('meraki_homepage_categories')
+                if (stored) setCategories(JSON.parse(stored))
+            } catch (e) {
+                console.error(e)
+            }
+        }
         window.addEventListener('storage', updatePromo)
         window.addEventListener('storage', updateEditorial)
         window.addEventListener('storage', updateInstallment)
+        window.addEventListener('storage', updateHomepageCats)
         window.addEventListener('promoComboUpdated', updatePromo)
         window.addEventListener('editorialUpdated', updateEditorial)
         window.addEventListener('storeConfigUpdated', updateInstallment)
+        window.addEventListener('homepageCategoriesUpdated', updateHomepageCats)
         return () => {
             window.removeEventListener('storage', updatePromo)
             window.removeEventListener('storage', updateEditorial)
             window.removeEventListener('storage', updateInstallment)
+            window.removeEventListener('storage', updateHomepageCats)
             window.removeEventListener('promoComboUpdated', updatePromo)
             window.removeEventListener('editorialUpdated', updateEditorial)
             window.removeEventListener('storeConfigUpdated', updateInstallment)
+            window.removeEventListener('homepageCategoriesUpdated', updateHomepageCats)
         }
     }, [])
 
