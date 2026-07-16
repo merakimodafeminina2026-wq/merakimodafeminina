@@ -58,75 +58,70 @@
     }
 }
 
-/* Global base styles */
-html {
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
-}
+/* ─── Global base styles ────────────────────────────────────────────────────
+   IMPORTANTE: ficam dentro de @layer base para que as classes utilitárias
+   do Tailwind (font-sans, font-bold etc.) possam sobrescrever quando necessário.
+   Estilos fora de @layer têm maior especificidade que os utilities no Tailwind v4.
+──────────────────────────────────────────────────────────────────────────── */
+@layer base {
+    html {
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+    }
 
-body {
-    font-family: var(--font-body);
-    color: var(--color-text);
-    background-color: var(--color-background);
-    margin: 0;
-    /* Font rendering: máxima nitidez em todas as plataformas */
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
-    font-synthesis: none;
-    font-optical-sizing: auto;
-    /* Peso mínimo para nitidez */
-    font-weight: 500;
-}
+    body {
+        font-family: var(--font-body);
+        color: var(--color-text);
+        background-color: var(--color-background);
+        margin: 0;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+        font-synthesis: none;
+        font-optical-sizing: auto;
+        font-weight: 500;
+    }
 
-h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-heading);
-    /* Cormorant Garamond precisa de 600+ para boa nitidez */
-    font-weight: 600;
-    font-style: normal;
-    letter-spacing: 0.01em;
-    text-rendering: geometricPrecision;
-}
+    /* Títulos usam Cormorant Garamond por padrão.
+       Pode ser sobrescrito com font-sans, font-manrope etc. nas classes */
+    h1, h2, h3, h4, h5, h6 {
+        font-family: var(--font-heading);
+        font-weight: 700;
+        font-style: normal;
+        text-rendering: geometricPrecision;
+    }
 
-/* Subtítulos em Manrope Semi-Bold */
-subtitle, .subtitle, [role="doc-subtitle"] {
-    font-family: var(--font-manrope);
-    font-weight: 600;
-    font-style: normal;
-}
+    /* Parágrafos simples: Manrope por padrão (legível em todos os tamanhos)
+       Classes individuais sobrescrevem quando necessário */
+    p, figcaption {
+        font-family: var(--font-manrope);
+        font-style: normal;
+        font-weight: 500;
+    }
 
-/* Parágrafos — Lora sem itálico forçado, peso aumentado para nitidez */
-p, .description, figcaption {
-    font-family: var(--font-lora);
-    font-style: normal;
-    font-weight: 500;
-}
+    a, nav a {
+        text-decoration: none;
+        color: inherit;
+        font-family: var(--font-manrope);
+        font-weight: 600;
+    }
 
-/* Menu em Manrope Semi-Bold */
-a, nav a, .menu-item, [role="link"] {
-    text-decoration: none;
-    color: inherit;
-    font-family: var(--font-manrope);
-    font-weight: 600;
-}
+    button, .btn, input[type="button"], input[type="submit"] {
+        cursor: pointer;
+        font-family: var(--font-manrope);
+        font-weight: 700;
+    }
 
-/* Botões em Manrope Bold */
-button, .btn, input[type="button"], input[type="submit"] {
-    cursor: pointer;
-    font-family: var(--font-manrope);
-    font-weight: 700;
-}
+    input, textarea, select {
+        font-family: var(--font-manrope);
+        font-weight: 500;
+        -webkit-font-smoothing: antialiased;
+    }
 
-/* Inputs — Manrope para consistência e nitidez */
-input, textarea, select {
-    font-family: var(--font-manrope);
-    font-weight: 500;
-    -webkit-font-smoothing: antialiased;
-}
-
-img {
-    max-width: 100%;
-    display: block;
+    img {
+        max-width: 100%;
+        display: block;
+    }
 }
 
 
