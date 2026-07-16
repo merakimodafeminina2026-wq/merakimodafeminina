@@ -134,6 +134,53 @@ export default function ProductPage() {
         return Array.isArray(imgs) ? imgs : (imgs ? [imgs] : [])
     }, [product])
 
+    const sizes = useMemo(() => {
+        if (!product || !product.sizes) return []
+        const parsed = typeof product.sizes === 'string' 
+            ? product.sizes.split(',').map(s => s.trim()) 
+            : product.sizes
+        const unique = []
+        const seen = new Set()
+        for (let s of parsed) {
+            let normalized = s.trim().toUpperCase()
+            if (normalized === 'U' || normalized === 'UNICO' || normalized === 'ÚNICO') {
+                if (seen.has('UNIQUE_SIZE_KEY')) continue
+                seen.add('UNIQUE_SIZE_KEY')
+                s = 'Único'
+            }
+            const key = s.toUpperCase()
+            if (!seen.has(key)) {
+                seen.add(key)
+                unique.push(s)
+            }
+        }
+        return unique
+    }, [product])
+
+    const activeEmojisList = useMemo(() => {
+        if (!product) return []
+        const raw = product.customizableEmojis || product.customizable_emojis
+        const emojiList = raw 
+            ? (typeof raw === 'string' ? raw.split(',').map(e => e.trim()) : raw)
+            : ['🍎', '💛', '👄', '🍒', '😍', '🌶️', '🐰', '🌟']
+        
+        const labelsMap = {
+            '🍎': 'Maçã',
+            '💛': 'Coração Dourado',
+            '👄': 'Boca/Lábios',
+            '🍒': 'Cereja',
+            '😍': 'Apaixonado',
+            '🌶️': 'Pimenta',
+            '🐰': 'Coelho Playboy Preto',
+            '🌟': 'Coelho Brilha no Escuro'
+        }
+        
+        return emojiList.map(emoji => ({
+            emoji,
+            label: labelsMap[emoji] || 'Emoji Especial'
+        }))
+    }, [product])
+
     if (loading) {
         return (
             <div className="bg-[#FCFAFA] min-h-screen flex items-center justify-center">
@@ -209,53 +256,6 @@ export default function ProductPage() {
     }
 
     const imageSrc = getAssetUrl(productImages[activeImageIndex] || '/placeholder.jpg')
-    const sizes = useMemo(() => {
-        if (!product || !product.sizes) return []
-        const parsed = typeof product.sizes === 'string' 
-            ? product.sizes.split(',').map(s => s.trim()) 
-            : product.sizes
-        const unique = []
-        const seen = new Set()
-        for (let s of parsed) {
-            let normalized = s.trim().toUpperCase()
-            if (normalized === 'U' || normalized === 'UNICO' || normalized === 'ÚNICO') {
-                if (seen.has('UNIQUE_SIZE_KEY')) continue
-                seen.add('UNIQUE_SIZE_KEY')
-                s = 'Único'
-            }
-            const key = s.toUpperCase()
-            if (!seen.has(key)) {
-                seen.add(key)
-                unique.push(s)
-            }
-        }
-        return unique
-    }, [product])
-
-    const activeEmojisList = useMemo(() => {
-        if (!product) return []
-        const raw = product.customizableEmojis || product.customizable_emojis
-        const emojiList = raw 
-            ? (typeof raw === 'string' ? raw.split(',').map(e => e.trim()) : raw)
-            : ['🍎', '💛', '👄', '🍒', '😍', '🌶️', '🐰', '🌟']
-        
-        const labelsMap = {
-            '🍎': 'Maçã',
-            '💛': 'Coração Dourado',
-            '👄': 'Boca/Lábios',
-            '🍒': 'Cereja',
-            '😍': 'Apaixonado',
-            '🌶️': 'Pimenta',
-            '🐰': 'Coelho Playboy Preto',
-            '🌟': 'Coelho Brilha no Escuro'
-        }
-        
-        return emojiList.map(emoji => ({
-            emoji,
-            label: labelsMap[emoji] || 'Emoji Especial'
-        }))
-    }, [product])
-
     const colors = product.colors ? (Array.isArray(product.colors) ? product.colors : (typeof product.colors === 'string' ? product.colors.split(',').map(c => c.trim()) : [])) : []
 
     return (
