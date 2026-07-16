@@ -1205,26 +1205,48 @@ export default function AdminPage() {
                                             }
                                             const customMap = JSON.parse(localStorage.getItem('meraki_custom_colors_map') || '{}')
                                             const hex = COLOR_MAP[color] || customMap[color] || '#CCCCCC'
+                                            const isCustom = customColorsList.includes(color)
                                             return (
-                                                <button
-                                                    key={color}
-                                                    type="button"
-                                                    onClick={() => {
-                                                        if (isSelected) {
-                                                            setSelectedModalColors(prev => prev.filter(c => c !== color))
-                                                        } else {
-                                                            setSelectedModalColors(prev => [...prev, color])
-                                                        }
-                                                    }}
-                                                    className={`px-3 py-1.5 rounded-lg border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                                                        isSelected
-                                                            ? 'bg-[#C6A76A] text-white border-[#C6A76A] shadow-xs'
-                                                            : 'bg-white text-gray-400 border-[#EEEEEE] hover:bg-gray-150'
-                                                    }`}
-                                                >
-                                                    <span className="w-3 h-3 rounded-full border border-gray-300 shrink-0" style={{ backgroundColor: hex }} />
-                                                    {color}
-                                                </button>
+                                                <div key={color} className="relative">
+                                                    <button
+                                                        key={color}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            if (isSelected) {
+                                                                setSelectedModalColors(prev => prev.filter(c => c !== color))
+                                                            } else {
+                                                                setSelectedModalColors(prev => [...prev, color])
+                                                            }
+                                                        }}
+                                                        className={`py-1.5 rounded-lg border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                                                            isCustom ? 'pl-3 pr-7.5' : 'px-3'
+                                                        } ${
+                                                            isSelected
+                                                                ? 'bg-[#C6A76A] text-white border-[#C6A76A] shadow-xs'
+                                                                : 'bg-white text-gray-400 border-[#EEEEEE] hover:bg-gray-150'
+                                                        }`}
+                                                    >
+                                                        <span className="w-3 h-3 rounded-full border border-gray-300 shrink-0" style={{ backgroundColor: hex }} />
+                                                        {color}
+                                                    </button>
+                                                    {isCustom && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation()
+                                                                setSelectedModalColors(prev => prev.filter(c => c !== color))
+                                                                setCustomColorsList(prev => prev.filter(c => c !== color))
+                                                                const currentMap = JSON.parse(localStorage.getItem('meraki_custom_colors_map') || '{}')
+                                                                delete currentMap[color]
+                                                                localStorage.setItem('meraki_custom_colors_map', JSON.stringify(currentMap))
+                                                            }}
+                                                            className="absolute top-1/2 -translate-y-1/2 right-1.5 w-4 h-4 rounded-full bg-red-500 hover:bg-red-650 text-white flex items-center justify-center text-[7px] font-black cursor-pointer shadow-xs"
+                                                            title="Excluir Cor"
+                                                        >
+                                                            ✕
+                                                        </button>
+                                                    )}
+                                                </div>
                                             )
                                         })}
                                     </div>
