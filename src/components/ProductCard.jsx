@@ -31,8 +31,45 @@ export default function ProductCard({ product, onQuickView, onToggleWishlist, is
         return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price)
     }
 
-    // Dynamic mock colors to emulate product options from the design
-    const mockColors = product.category === 'Conjuntos' ? ['#C2B0A3', '#1A1A1A'] : ['#E8DCC4', '#EAA2A2', '#1A1A1A']
+    // Carrega o mapeamento de cores reais cadastradas para pegar o tom hexadecimal correto
+    const colors = useMemo(() => {
+        if (!product || !product.colors) return []
+        return typeof product.colors === 'string' 
+            ? product.colors.split(',').map(c => c.trim()).filter(Boolean)
+            : (Array.isArray(product.colors) ? product.colors : [])
+    }, [product])
+
+    const colorHexMap = useMemo(() => {
+        const defaultMap = {
+            'Preto': '#000000',
+            'Branco': '#FFFFFF',
+            'Vermelho': '#DC2626',
+            'Nude': '#EED9C4',
+            'Rosa': '#F472B6',
+            'Bordô': '#800020',
+            'Azul': '#2563EB',
+            'Verde': '#16A34A',
+            'Amarelo': '#FBBF24',
+            'Lilás': '#C084FC',
+            'Marinho': '#1E3A8A',
+            'Pink': '#EC4899',
+            'Rubi': '#9B111E',
+            'Preto/Renda': '#1F1F1F',
+            'Branco/Renda': '#F5F5F5'
+        }
+        try {
+            const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+            if (config.availableColors) {
+                const map = { ...defaultMap }
+                config.availableColors.split(',').forEach(pair => {
+                    const [name, hex] = pair.split(':')
+                    if (name) map[name] = hex || '#CCCCCC'
+                })
+                return map
+            }
+        } catch {}
+        return defaultMap
+    }, [])
 
     const imageSrc = getAssetUrl(Array.isArray(product.image) ? (product.image[0] || '/placeholder.jpg') : (product.image || '/placeholder.jpg'))
 
@@ -107,13 +144,17 @@ export default function ProductCard({ product, onQuickView, onToggleWishlist, is
 
                     {/* Color Swatches */}
                     <div className="flex justify-center gap-1.5 py-1">
-                        {mockColors.map((color, cIdx) => (
-                            <span 
-                                key={cIdx} 
-                                className="w-2.5 h-2.5 rounded-full border border-gray-300/80 shadow-xs inline-block" 
-                                style={{ backgroundColor: color }} 
-                            />
-                        ))}
+                        {colors.map((colorName, cIdx) => {
+                            const hex = colorHexMap[colorName] || '#CCCCCC'
+                            return (
+                                <span 
+                                    key={cIdx} 
+                                    className="w-2.5 h-2.5 rounded-full border border-gray-300/80 shadow-xs inline-block" 
+                                    style={{ backgroundColor: hex }}
+                                    title={colorName}
+                                />
+                            )
+                        })}
                     </div>
 
                     <h3 className="font-sans text-base sm:text-lg font-bold text-[#1A1A1A] tracking-wide leading-snug line-clamp-2 h-14 overflow-hidden px-1">
