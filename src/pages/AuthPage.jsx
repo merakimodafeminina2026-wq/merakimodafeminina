@@ -939,33 +939,7 @@ export default function AuthPage() {
                                     />
                                 </div>
 
-                                {/* Pixie Dust Trail (Sparkles) saindo da cabeça da Borboleta Líder */}
-                                {[...Array(16)].map((_, i) => (
-                                    <div 
-                                        key={i} 
-                                        className="absolute z-9 pointer-events-none animate-fairy-flight" 
-                                        style={{ 
-                                            width: '12px', 
-                                            height: '12px', 
-                                            left: 0, 
-                                            top: 0, 
-                                            animationDelay: `${-0.12 * (i + 1)}s` 
-                                        }}
-                                    >
-                                        <div 
-                                            className="w-full h-full animate-pixie-dust flex items-center justify-center"
-                                            style={{ 
-                                                animationDelay: `${0.1 * i}s` 
-                                            }}
-                                        >
-                                            <svg viewBox="0 0 24 24" className="w-full h-full fill-current text-[#E5E5E5] drop-shadow-[0_0_6px_rgba(255,255,255,0.9)]">
-                                                <path d="M12 2l2.4 7.2 7.2 2.4-7.2 2.4-2.4 7.2-2.4-7.2-7.2-2.4 7.2-2.4z" />
-                                            </svg>
-                                        </div>
-                                    </div>
-                                ))}
-
-                                {/* Borboletas de Fundo com seus rastros de pó saindo da cabeça */}
+                                {/* Borboletas de Fundo */}
                                 {backgroundButterflies.map((b) => {
                                     const halfSize = b.size / 2;
                                     const topOffset = Math.round(b.size * 0.15);
@@ -979,30 +953,6 @@ export default function AuthPage() {
 
                                     return (
                                         <div key={b.id}>
-                                            {/* Rastro de Pó de cada borboleta de fundo (8 estrelas prata que saem da cabeça) */}
-                                            {[...Array(8)].map((_, starIndex) => (
-                                                <div
-                                                    key={starIndex}
-                                                    className="absolute z-7 pointer-events-none"
-                                                    style={{
-                                                        ...positionStyles,
-                                                        width: '8px',
-                                                        height: '8px',
-                                                        animation: `${b.drift} ${b.duration}s linear ${b.delay - 0.12 * (starIndex + 1)}s infinite`,
-                                                        opacity: 0.8
-                                                    }}
-                                                >
-                                                    <div 
-                                                        className="w-full h-full animate-pixie-dust flex items-center justify-center"
-                                                        style={{ animationDelay: `${0.08 * starIndex}s` }}
-                                                    >
-                                                        <svg viewBox="0 0 24 24" className="w-full h-full fill-current text-[#E5E5E5] drop-shadow-[0_0_5px_rgba(255,255,255,0.85)]">
-                                                            <path d="M12 2l2.4 7.2 7.2 2.4-7.2 2.4-2.4 7.2-2.4-7.2-7.2-2.4 7.2-2.4z" />
-                                                        </svg>
-                                                    </div>
-                                                </div>
-                                            ))}
-
                                             {/* Borboleta */}
                                             <div 
                                                 className="absolute z-8 pointer-events-none"
