@@ -1367,21 +1367,95 @@ export default function AdminPage() {
 
                                 <div>
                                     <label className={labelCls}>Seção da Loja</label>
-                                    <div className="flex flex-wrap gap-1.5 mb-2 bg-[#FAF9F5] p-3 rounded-xl border border-[#EEEEEE]">
-                                        {sections.map(sec => (
+                                    <div className="space-y-3">
+                                        <div className="flex flex-wrap gap-2 bg-[#FAF9F5] p-3 rounded-xl border border-[#EEEEEE]">
+                                            {sections.map(sec => {
+                                                const isSelected = selectedModalSection === sec.id
+                                                const isDefault = ['best-sellers', 'featured', 'new-collection'].includes(sec.id)
+                                                return (
+                                                    <div key={sec.id} className="flex items-center rounded-lg border border-[#EEEEEE] overflow-hidden">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setSelectedModalSection(sec.id)}
+                                                            className={`px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                                                                isSelected
+                                                                    ? 'bg-[#7A3E4A] text-white'
+                                                                    : 'bg-white text-gray-500 hover:bg-gray-50'
+                                                            }`}
+                                                        >
+                                                            {sec.label}
+                                                        </button>
+                                                        {!isDefault && (
+                                                            <>
+                                                                <div className="w-px h-4 bg-[#EEEEEE]" />
+                                                                <button
+                                                                    type="button"
+                                                                    title="Remover seção"
+                                                                    onClick={() => {
+                                                                        const updated = sections.filter(s => s.id !== sec.id)
+                                                                        setSections(updated)
+                                                                        localStorage.setItem('meraki_sections', JSON.stringify(updated))
+                                                                        if (selectedModalSection === sec.id) {
+                                                                            setSelectedModalSection(updated[0]?.id || 'best-sellers')
+                                                                        }
+                                                                    }}
+                                                                    className="px-2 py-1.5 text-[10px] text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer"
+                                                                >
+                                                                    ✕
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                )
+                                            })}
+                                        </div>
+                                        {/* Add new section */}
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                value={newSectionLabel}
+                                                onChange={e => setNewSectionLabel(e.target.value)}
+                                                onKeyDown={e => {
+                                                    if (e.key === 'Enter') {
+                                                        e.preventDefault()
+                                                        const label = newSectionLabel.trim()
+                                                        if (label) {
+                                                            const id = label.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+                                                            const alreadyExists = sections.some(s => s.id === id || s.label.toLowerCase() === label.toLowerCase())
+                                                            if (!alreadyExists) {
+                                                                const updated = [...sections, { id, label }]
+                                                                setSections(updated)
+                                                                localStorage.setItem('meraki_sections', JSON.stringify(updated))
+                                                                setSelectedModalSection(id)
+                                                                setNewSectionLabel('')
+                                                            }
+                                                        }
+                                                    }
+                                                }}
+                                                placeholder="Nova seção (ex: Promoções) + Enter"
+                                                className="flex-1 px-3 py-2 bg-white border border-[#EEEEEE] rounded-xl text-xs outline-none focus:border-[#7A3E4A] focus:ring-2 focus:ring-[#7A3E4A]/10 transition-all"
+                                            />
                                             <button
-                                                key={sec.id}
                                                 type="button"
-                                                onClick={() => setSelectedModalSection(sec.id)}
-                                                className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all cursor-pointer ${
-                                                    selectedModalSection === sec.id
-                                                        ? 'bg-[#7A3E4A] text-white border-[#7A3E4A] shadow-xs'
-                                                        : 'bg-white text-gray-500 border-[#EEEEEE] hover:bg-gray-150'
-                                                }`}
+                                                onClick={() => {
+                                                    const label = newSectionLabel.trim()
+                                                    if (label) {
+                                                        const id = label.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+                                                        const alreadyExists = sections.some(s => s.id === id || s.label.toLowerCase() === label.toLowerCase())
+                                                        if (!alreadyExists) {
+                                                            const updated = [...sections, { id, label }]
+                                                            setSections(updated)
+                                                            localStorage.setItem('meraki_sections', JSON.stringify(updated))
+                                                            setSelectedModalSection(id)
+                                                            setNewSectionLabel('')
+                                                        }
+                                                    }
+                                                }}
+                                                className="px-4 py-2 bg-[#7A3E4A] hover:bg-[#5A2E34] text-white text-xs font-bold rounded-xl transition-colors cursor-pointer"
                                             >
-                                                {sec.label}
+                                                + Adicionar
                                             </button>
-                                        ))}
+                                        </div>
                                     </div>
                                 </div>
 
