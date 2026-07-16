@@ -170,6 +170,22 @@ export default function AdminPage() {
     const [customFeeEmoji, setCustomFeeEmoji] = useState('3.00')
     const [customizableEmojis, setCustomizableEmojis] = useState(['🍎', '💛', '👄', '🍒', '😍', '🌶️', '🐰', '🌟'])
     const [newEmojiInput, setNewEmojiInput] = useState('')
+
+    // Badge (Etiqueta) states
+    const [selectedModalBadge, setSelectedModalBadge] = useState('')
+    const [newBadgeInput, setNewBadgeInput] = useState('')
+    const [masterBadgesList, setMasterBadgesList] = useState(() => {
+        try {
+            const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+            if (config.availableBadges) return config.availableBadges.split(',').map(b => b.trim()).filter(Boolean)
+        } catch {}
+        return ['NOVO', 'EXCLUSIVO', 'PROMOÇÃO', 'LIMITADO', 'MAIS VENDIDO', 'DESTAQUE', 'OFERTA', 'LANÇAMENTO']
+    })
+
+    const saveBadgesToConfig = async (list) => {
+        const serialized = list.join(',')
+        await updateStoreConfig({ available_badges: serialized })
+    }
     
     // Master Config lists
     const [colorsList, setColorsList] = useState(() => {
@@ -307,6 +323,18 @@ export default function AdminPage() {
             setSelectedModalSizes(product?.sizes || [])
             setSelectedModalSection(product?.section || 'best-sellers')
             setSelectedModalColors(product?.colors || [])
+
+            // Badge: se o produto já tem badge que não está na lista, adiciona
+            const prodBadge = product?.badge || ''
+            setSelectedModalBadge(prodBadge)
+            if (prodBadge) {
+                setMasterBadgesList(prev => {
+                    const upper = prodBadge.trim().toUpperCase()
+                    const alreadyIn = prev.some(b => b.toUpperCase() === upper)
+                    return alreadyIn ? prev : [...prev, upper]
+                })
+            }
+
             setIsCustomizable(product?.isCustomizable || product?.category?.toLowerCase() === 'personalizaveis' || product?.category?.toLowerCase() === 'personalizáveis' || false)
             setCustomPriceWith(product?.customPriceWith || '')
             setCustomPriceWithout(product?.customPriceWithout || '')
@@ -327,6 +355,7 @@ export default function AdminPage() {
             setSelectedModalSizes(['P', 'M', 'G', 'GG'])
             setSelectedModalSection(sections[0]?.id || 'best-sellers')
             setSelectedModalColors([])
+            setSelectedModalBadge('')
             setIsCustomizable(false)
             setCustomPriceWith('')
             setCustomPriceWithout('')
@@ -336,6 +365,7 @@ export default function AdminPage() {
             setCustomizableEmojis(masterEmojisList)
         }
     }, [modal.open, modal.editing, products, categories, sections])
+
 
     // ─── Auth Guards ───────────────────────────────────────────────────────────
     if (authLoading) return (
@@ -1232,8 +1262,107 @@ export default function AdminPage() {
                                 </div>
 
                                 <div>
-                                    <label className={labelCls}>Badge (Etiqueta)</label>
-                                    <input type="text" name="pBadge" placeholder="Ex: NOVO, 15% OFF" defaultValue={editingProduct?.badge || ''} className={inputCls} />
+                                    <label className={labelCls}>Tag / Etiqueta do Produto</label>
+                                    {/* Hidden input keeps form.pBadge working in handleSave */}
+                                    <input type="hidden" name="pBadge" value={selectedModalBadge} />
+                                    <div className="space-y-3">
+                                        {/* Chip selector */}
+                                        <div className="flex flex-wrap gap-2 bg-[#FAF9F5] p-3 rounded-xl border border-[#EEEEEE]">
+                                            {/* Indicador do badge atual do produto se não estiver na lista */}
+                                            {selectedModalBadge && !masterBadgesList.some(b => b.toLowerCase() === selectedModalBadge.toLowerCase()) && (
+                                                <div className="flex items-center rounded-lg border border-[#D11A6E] overflow-hidden bg-[#D11A6E]/5">
+                                                    <span className="px-3 py-1.5 text-xs font-bold text-[#D11A6E]">
+                                                        {selectedModalBadge} <span className="text-[9px] ml-1 opacity-60">(atual)</span>
+                                                    </span>
+                                                    <div className="w-px h-4 bg-[#D11A6E]/20" />
+                                                    <button type="button" onClick={() => setSelectedModalBadge('')} className="px-2 py-1.5 text-[10px] text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer">✕</button>
+                                                </div>
+                                            )}
+                                            {/* Option: no tag */}
+                                            <button
+                                                type="button"
+                                                onClick={() => setSelectedModalBadge('')}
+                                                className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all cursor-pointer ${
+                                                    selectedModalBadge === ''
+                                                        ? 'bg-gray-700 text-white border-gray-700 shadow-xs'
+                                                        : 'bg-white text-gray-400 border-[#EEEEEE] hover:bg-gray-50'
+                                                }`}
+                                            >
+                                                Sem etiqueta
+                                            </button>
+                                            {masterBadgesList.map(tag => {
+                                                const isSelected = selectedModalBadge.toLowerCase() === tag.toLowerCase()
+                                                return (
+                                                    <div key={tag} className="flex items-center rounded-lg border border-[#EEEEEE] overflow-hidden">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setSelectedModalBadge(isSelected ? '' : tag)}
+                                                            className={`px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                                                                isSelected
+                                                                    ? 'bg-[#D11A6E] text-white'
+                                                                    : 'bg-white text-[#D11A6E] hover:bg-pink-50'
+                                                            }`}
+                                                        >
+                                                            {tag}
+                                                        </button>
+                                                        <div className="w-px h-4 bg-[#EEEEEE]" />
+                                                        <button
+                                                            type="button"
+                                                            title="Remover tag"
+                                                            onClick={async () => {
+                                                                const updated = masterBadgesList.filter(b => b !== tag)
+                                                                setMasterBadgesList(updated)
+                                                                if (selectedModalBadge.toLowerCase() === tag.toLowerCase()) setSelectedModalBadge('')
+                                                                await saveBadgesToConfig(updated)
+                                                            }}
+                                                            className="px-2 py-1.5 text-[10px] text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer"
+                                                        >
+                                                            ✕
+                                                        </button>
+                                                    </div>
+                                                )
+                                            })}
+                                        </div>
+                                        {/* Add new badge */}
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                value={newBadgeInput}
+                                                onChange={e => setNewBadgeInput(e.target.value)}
+                                                onKeyDown={async e => {
+                                                    if (e.key === 'Enter') {
+                                                        e.preventDefault()
+                                                        const val = newBadgeInput.trim().toUpperCase()
+                                                        if (val && !masterBadgesList.includes(val)) {
+                                                            const updated = [...masterBadgesList, val]
+                                                            setMasterBadgesList(updated)
+                                                            setSelectedModalBadge(val)
+                                                            setNewBadgeInput('')
+                                                            await saveBadgesToConfig(updated)
+                                                        }
+                                                    }
+                                                }}
+                                                placeholder="Nova tag (ex: 10% OFF) + Enter"
+                                                className="flex-1 px-3 py-2 bg-white border border-[#EEEEEE] rounded-xl text-xs outline-none focus:border-[#7A3E4A] focus:ring-2 focus:ring-[#7A3E4A]/10 transition-all"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={async () => {
+                                                    const val = newBadgeInput.trim().toUpperCase()
+                                                    if (val && !masterBadgesList.includes(val)) {
+                                                        const updated = [...masterBadgesList, val]
+                                                        setMasterBadgesList(updated)
+                                                        setSelectedModalBadge(val)
+                                                        setNewBadgeInput('')
+                                                        await saveBadgesToConfig(updated)
+                                                    }
+                                                }}
+                                                className="px-4 py-2 bg-[#7A3E4A] hover:bg-[#5A2E34] text-white text-xs font-bold rounded-xl transition-colors cursor-pointer"
+                                            >
+                                                + Adicionar
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div>
