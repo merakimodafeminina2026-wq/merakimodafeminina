@@ -1385,25 +1385,40 @@ export default function AdminPage() {
                                                 <div className="flex flex-wrap gap-1.5 p-2 bg-white rounded-xl border border-[#EEEEEE]">
                                                     {Array.from(new Set(['🍎', '💛', '👄', '🍒', '😍', '🌶️', '🐰', '🌟', ...customizableEmojis])).map(emoji => {
                                                         const isSelected = customizableEmojis.includes(emoji)
+                                                        const isDefault = ['🍎', '💛', '👄', '🍒', '😍', '🌶️', '🐰', '🌟'].includes(emoji)
                                                         return (
-                                                            <button
-                                                                key={emoji}
-                                                                type="button"
-                                                                onClick={() => {
-                                                                    if (isSelected) {
-                                                                        setCustomizableEmojis(prev => prev.filter(e => e !== emoji))
-                                                                    } else {
-                                                                        setCustomizableEmojis(prev => [...prev, emoji])
-                                                                    }
-                                                                }}
-                                                                className={`w-9 h-9 rounded-lg border text-base flex items-center justify-center cursor-pointer transition-all ${
-                                                                    isSelected 
-                                                                        ? 'border-[#C6A76A] bg-[#C6A76A]/10 scale-105 shadow-2xs' 
-                                                                        : 'border-gray-200 opacity-40 hover:opacity-100 hover:bg-gray-50'
-                                                                }`}
-                                                            >
-                                                                 {emoji}
-                                                            </button>
+                                                            <div key={emoji} className="relative">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        if (isSelected) {
+                                                                            setCustomizableEmojis(prev => prev.filter(e => e !== emoji))
+                                                                        } else {
+                                                                            setCustomizableEmojis(prev => [...prev, emoji])
+                                                                        }
+                                                                    }}
+                                                                    className={`w-9 h-9 rounded-lg border text-base flex items-center justify-center cursor-pointer transition-all ${
+                                                                        isSelected 
+                                                                            ? 'border-[#C6A76A] bg-[#C6A76A]/10 scale-105 shadow-2xs' 
+                                                                            : 'border-gray-200 opacity-40 hover:opacity-100 hover:bg-gray-50'
+                                                                    }`}
+                                                                >
+                                                                     {emoji}
+                                                                </button>
+                                                                {!isDefault && (
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation()
+                                                                            setCustomizableEmojis(prev => prev.filter(e => e !== emoji))
+                                                                        }}
+                                                                        className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-red-500 hover:bg-red-650 text-white flex items-center justify-center text-[7px] font-black cursor-pointer shadow-xs"
+                                                                        title="Excluir Emoji"
+                                                                    >
+                                                                        ✕
+                                                                    </button>
+                                                                )}
+                                                            </div>
                                                         )
                                                     })}
                                                 </div>
