@@ -82,11 +82,10 @@
         font-weight: 500;
     }
 
-    /* Títulos usam Cormorant Garamond por padrão.
-       Pode ser sobrescrito com font-sans, font-manrope etc. nas classes */
+    /* Títulos principais usam a fonte sans-serif Manrope por padrão para manter a legibilidade máxima */
     h1, h2, h3, h4, h5, h6 {
-        font-family: var(--font-heading);
-        font-weight: 700;
+        font-family: var(--font-manrope);
+        font-weight: 755;
         font-style: normal;
         text-rendering: geometricPrecision;
     }
