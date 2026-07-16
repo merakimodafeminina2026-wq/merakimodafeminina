@@ -661,10 +661,22 @@ export default function ProductPage() {
                                 </button>
                             </div>
 
-                            <div className="text-xs text-gray-500 leading-relaxed space-y-3 font-light">
+                            <div className="text-xs text-gray-500 leading-relaxed space-y-4 font-light">
                                 {activeTab === 'description' ? (
                                     <>
                                         <p>{product.description || 'Design sensual e sofisticado projetado para abraçar suas curvas com naturalidade. Confeccionado em renda francesa de toque macio e acabamento de alta costura.'}</p>
+                                        
+                                        {/* Primeira imagem inserida na descrição */}
+                                        {productImages.length > 0 && (
+                                            <div className="my-4 rounded-xl overflow-hidden border border-gray-100/60 max-w-sm">
+                                                <img 
+                                                    src={getAssetUrl(productImages[0])} 
+                                                    alt={product.name} 
+                                                    className="w-full h-auto object-cover aspect-[3/4]"
+                                                />
+                                            </div>
+                                        )}
+
                                         <ul className="list-disc pl-4 space-y-1 mt-2">
                                             <li>Composição: 90% Poliamida, 10% Elastano.</li>
                                             <li>Forro do bojo e entretela de algodão premium.</li>
