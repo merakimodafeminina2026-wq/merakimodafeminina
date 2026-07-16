@@ -399,7 +399,21 @@ export default function AdminPage() {
             setSelectedModalCategory(product?.category || categories[0]?.name || '')
             setSelectedModalSizes(product?.sizes || [])
             setSelectedModalSection(product?.section || 'best-sellers')
-            setSelectedModalColors(product?.colors || [])
+            const prodColors = product?.colors || []
+            setSelectedModalColors(prodColors)
+            if (prodColors.length > 0) {
+                setColorsList(prev => {
+                    const updated = [...prev]
+                    let changed = false
+                    prodColors.forEach(c => {
+                        if (!updated.includes(c)) {
+                            updated.push(c)
+                            changed = true
+                        }
+                    })
+                    return changed ? updated : prev
+                })
+            }
 
             // Badge: se o produto já tem badge que não está na lista, adiciona
             const prodBadge = product?.badge || ''
