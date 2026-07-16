@@ -57,6 +57,12 @@ export default function AuthPage() {
                         const b = data[i+2]
                         if (r > 185 && g > 185 && b > 185) {
                             data[i+3] = 0
+                        } else {
+                            // Converte para escala de cinza de tom claro para todas as borboletas
+                            const gray = Math.round(0.299 * r + 0.587 * g + 0.114 * b)
+                            data[i] = gray
+                            data[i+1] = gray
+                            data[i+2] = gray
                         }
                     }
                     ctx.putImageData(imgData, 0, 0)
@@ -899,10 +905,17 @@ export default function AuthPage() {
                         {/* Borboletas de fundo (sombras translúcidas voando) */}
                         {showButterflyBg && (
                             <div className="absolute inset-0 pointer-events-none overflow-hidden select-none z-6">
-                                {/* Borboleta Líder (Tinkerbell) - usa a imagem real da logo voando na frente */}
+                                {/* Borboleta Líder (Tinkerbell) - usa a imagem real da logo voando na frente com tom cinza claro */}
                                 <div 
                                     className="absolute z-10 pointer-events-none animate-fairy-flight" 
-                                    style={{ width: '52px', height: '52px', left: 0, top: 0, filter: 'drop-shadow(0 0 10px rgba(198,167,106,0.9))' }}
+                                    style={{ 
+                                        width: '52px', 
+                                        height: '52px', 
+                                        left: '-26px', // Desloca para que a cabeça (centro horizontal) fique no ponto (0,0)
+                                        top: '-8px',   // Desloca para alinhar verticalmente o topo da borboleta com a origem
+                                        filter: 'grayscale(100%) contrast(0.65) brightness(1.35) drop-shadow(0 0 8px rgba(160, 160, 160, 0.75))',
+                                        transformOrigin: '50% 15%' // Rotação pivota próximo à cabeça
+                                    }}
                                 >
                                     <img
                                         src={processedButterflySrc}
@@ -912,7 +925,7 @@ export default function AuthPage() {
                                     />
                                 </div>
 
-                                {/* Pixie Dust Trail (Sparkles) */}
+                                {/* Pixie Dust Trail (Sparkles) saindo da cabeça */}
                                 {[...Array(16)].map((_, i) => (
                                     <div 
                                         key={i} 
@@ -931,7 +944,7 @@ export default function AuthPage() {
                                                 animationDelay: `${0.1 * i}s` 
                                             }}
                                         >
-                                            <svg viewBox="0 0 24 24" className="w-full h-full fill-current text-[#C6A76A] drop-shadow-[0_0_6px_rgba(255,223,120,0.9)]">
+                                            <svg viewBox="0 0 24 24" className="w-full h-full fill-current text-[#E5E5E5] drop-shadow-[0_0_6px_rgba(255,255,255,0.9)]">
                                                 <path d="M12 2l2.4 7.2 7.2 2.4-7.2 2.4-2.4 7.2-2.4-7.2-7.2-2.4 7.2-2.4z" />
                                             </svg>
                                         </div>
