@@ -990,7 +990,7 @@ export default function AuthPage() {
                                                         height: '8px',
                                                         animation: `${b.drift} ${b.duration}s linear infinite`,
                                                         animationDelay: `${b.delay - 0.15 * (starIndex + 1)}s`,
-                                                        opacity: b.opacity * 0.95
+                                                        opacity: 0.8
                                                     }}
                                                 >
                                                     <div 
