@@ -174,6 +174,9 @@ export async function initSupabaseSync() {
         const dbConfig = dbConfigRaw ? mapDbToFrontend('store_config', dbConfigRaw) : null
         
         if (dbConfig) {
+            if (dbConfig.topbarStyle && dbConfig.topbarStyle.default_category_image) {
+                dbConfig.default_category_image = dbConfig.topbarStyle.default_category_image
+            }
             localStorage.setItem('meraki_store_config', JSON.stringify(dbConfig))
             // Extract and sync visual keys to individual localStorage items
             if (dbConfig.topbarMessages) localStorage.setItem('meraki_topbar_messages', JSON.stringify(dbConfig.topbarMessages))

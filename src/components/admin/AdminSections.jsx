@@ -1019,6 +1019,15 @@ export function CategoriesSection({
                                         const stored = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
                                         const newConfig = { ...stored, id: 'default', default_category_image: urls[0] }
                                         localStorage.setItem('meraki_store_config', JSON.stringify(newConfig))
+                                        
+                                        try {
+                                            const currentStyle = JSON.parse(localStorage.getItem('meraki_topbar_style') || '{"bgColor": "#C6A76A", "textColor": "#FFFFFF"}')
+                                            const newStyle = { ...currentStyle, default_category_image: urls[0] }
+                                            localStorage.setItem('meraki_topbar_style', JSON.stringify(newStyle))
+                                        } catch (err) {
+                                            console.error(err)
+                                        }
+                                        
                                         window.dispatchEvent(new Event('storeConfigUpdated'))
                                         setDefaultCategoryImage(urls[0])
                                     }
