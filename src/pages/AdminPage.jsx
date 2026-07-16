@@ -162,6 +162,7 @@ export default function AdminPage() {
     const [customFeeLetter, setCustomFeeLetter] = useState('2.50')
     const [customFeeNumber, setCustomFeeNumber] = useState('2.50')
     const [customFeeEmoji, setCustomFeeEmoji] = useState('3.00')
+    const [customizableEmojis, setCustomizableEmojis] = useState(['🍎', '💛', '👄', '🍒', '😍', '🌶️', '🐰', '🌟'])
 
     // Form inputs
     const [couponForm, setCouponForm] = useState({ code: '', type: 'percentage', value: '', minPurchase: '' })
@@ -230,6 +231,13 @@ export default function AdminPage() {
             setCustomFeeLetter(product?.customFeeLetter !== undefined ? String(product.customFeeLetter) : '2.50')
             setCustomFeeNumber(product?.customFeeNumber !== undefined ? String(product.customFeeNumber) : '2.50')
             setCustomFeeEmoji(product?.customFeeEmoji !== undefined ? String(product.customFeeEmoji) : '3.00')
+            
+            const rawEmojis = product?.customizableEmojis || product?.customizable_emojis
+            setCustomizableEmojis(
+                rawEmojis 
+                    ? (typeof rawEmojis === 'string' ? rawEmojis.split(',').map(e => e.trim()) : rawEmojis)
+                    : ['🍎', '💛', '👄', '🍒', '😍', '🌶️', '🐰', '🌟']
+            )
         } else if (modal.open && !modal.editing) {
             setExistingImages([])
             setImageFiles([])
@@ -243,6 +251,7 @@ export default function AdminPage() {
             setCustomFeeLetter('2.50')
             setCustomFeeNumber('2.50')
             setCustomFeeEmoji('3.00')
+            setCustomizableEmojis(['🍎', '💛', '👄', '🍒', '😍', '🌶️', '🐰', '🌟'])
         }
     }, [modal.open, modal.editing, products, categories, sections])
 
@@ -424,6 +433,7 @@ export default function AdminPage() {
             customFeeLetter: parseFloat(form.pCustomFeeLetter?.value || '2.50') || 2.50,
             customFeeNumber: parseFloat(form.pCustomFeeNumber?.value || '2.50') || 2.50,
             customFeeEmoji: parseFloat(form.pCustomFeeEmoji?.value || '3.00') || 3.00,
+            customizable_emojis: customizableEmojis.join(','),
         }
         if (modal.editing) {
             const { data, error } = await updateProduct(modal.editing, productData)
@@ -1074,33 +1084,7 @@ export default function AdminPage() {
                             <form onSubmit={handleSave} className="p-6 space-y-4">
                                 <div>
                                     <label className={labelCls}>Nome do Produto</label>
-                                    <div className="relative">
-                                        <input type="text" id="adminProdNameInput" name="pName" required defaultValue={editingProduct?.name || ''} className={inputCls} />
-                                        {/* Inseridor Rápido de Emojis */}
-                                        <div className="flex gap-1 mt-1.5 flex-wrap">
-                                            {['🍎', '💛', '👄', '🍒', '😍', '🌶️', '🐰', '🌟'].map(emoji => (
-                                                <button
-                                                    key={emoji}
-                                                    type="button"
-                                                    onClick={() => {
-                                                        const el = document.getElementById('adminProdNameInput')
-                                                        if (el) {
-                                                            const start = el.selectionStart
-                                                            const end = el.selectionEnd
-                                                            const text = el.value
-                                                            el.value = text.slice(0, start) + emoji + text.slice(end)
-                                                            el.dispatchEvent(new Event('input', { bubbles: true }))
-                                                            el.focus()
-                                                            el.setSelectionRange(start + emoji.length, start + emoji.length)
-                                                        }
-                                                    }}
-                                                    className="w-6 h-6 flex items-center justify-center bg-gray-50 hover:bg-gray-200 rounded border border-[#EEEEEE] text-[13px] cursor-pointer"
-                                                >
-                                                    {emoji}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
+                                    <input type="text" name="pName" required defaultValue={editingProduct?.name || ''} className={inputCls} />
                                 </div>
                                 
                                 <div>
@@ -1319,38 +1303,40 @@ export default function AdminPage() {
                                                     className={inputCls} 
                                                 />
                                             </div>
+                                            <div className="col-span-2">
+                                                <label className={labelCls}>Emojis Disponíveis para Personalização</label>
+                                                <div className="flex flex-wrap gap-1.5 p-2 bg-white rounded-xl border border-[#EEEEEE]">
+                                                    {['🍎', '💛', '👄', '🍒', '😍', '🌶️', '🐰', '🌟'].map(emoji => {
+                                                        const isSelected = customizableEmojis.includes(emoji)
+                                                        return (
+                                                            <button
+                                                                key={emoji}
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    if (isSelected) {
+                                                                        setCustomizableEmojis(prev => prev.filter(e => e !== emoji))
+                                                                    } else {
+                                                                        setCustomizableEmojis(prev => [...prev, emoji])
+                                                                    }
+                                                                }}
+                                                                className={`w-9 h-9 rounded-lg border text-base flex items-center justify-center cursor-pointer transition-all ${
+                                                                    isSelected 
+                                                                        ? 'border-[#C6A76A] bg-[#C6A76A]/10 scale-105 shadow-2xs' 
+                                                                        : 'border-gray-200 opacity-40 hover:opacity-100 hover:bg-gray-50'
+                                                                }`}
+                                                            >
+                                                                 {emoji}
+                                                            </button>
+                                                        )
+                                                    })}
+                                                </div>
+                                                <p className="text-[9px] text-gray-400 mt-1">Marque os emojis que estarão disponíveis para o cliente escolher ao personalizar este produto.</p>
+                                            </div>
                                         </div>
                                     )}
                                 </div>
 
-                                <div>
-                                    <label className={labelCls}>Descrição</label>
-                                    <textarea id="adminProdDescInput" name="pDescription" rows="3" defaultValue={editingProduct?.description || ''} className={`${inputCls} resize-none`} />
-                                    {/* Inseridor Rápido de Emojis */}
-                                    <div className="flex gap-1 mt-1.5 flex-wrap">
-                                        {['🍎', '💛', '👄', '🍒', '😍', '🌶️', '🐰', '🌟'].map(emoji => (
-                                            <button
-                                                key={emoji}
-                                                type="button"
-                                                onClick={() => {
-                                                    const el = document.getElementById('adminProdDescInput')
-                                                    if (el) {
-                                                        const start = el.selectionStart
-                                                        const end = el.selectionEnd
-                                                        const text = el.value
-                                                        el.value = text.slice(0, start) + emoji + text.slice(end)
-                                                        el.dispatchEvent(new Event('input', { bubbles: true }))
-                                                        el.focus()
-                                                        el.setSelectionRange(start + emoji.length, start + emoji.length)
-                                                    }
-                                                }}
-                                                className="w-6 h-6 flex items-center justify-center bg-gray-50 hover:bg-gray-200 rounded border border-[#EEEEEE] text-[13px] cursor-pointer"
-                                            >
-                                                {emoji}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
+                                <div><label className={labelCls}>Descrição</label><textarea name="pDescription" rows="3" defaultValue={editingProduct?.description || ''} className={`${inputCls} resize-none`} /></div>
 
                                 {/* Image Upload */}
                                 <div>

@@ -232,6 +232,30 @@ export default function ProductPage() {
         return unique
     }, [product])
 
+    const activeEmojisList = useMemo(() => {
+        if (!product) return []
+        const raw = product.customizableEmojis || product.customizable_emojis
+        const emojiList = raw 
+            ? (typeof raw === 'string' ? raw.split(',').map(e => e.trim()) : raw)
+            : ['🍎', '💛', '👄', '🍒', '😍', '🌶️', '🐰', '🌟']
+        
+        const labelsMap = {
+            '🍎': 'Maçã',
+            '💛': 'Coração Dourado',
+            '👄': 'Boca/Lábios',
+            '🍒': 'Cereja',
+            '😍': 'Apaixonado',
+            '🌶️': 'Pimenta',
+            '🐰': 'Coelho Playboy Preto',
+            '🌟': 'Coelho Brilha no Escuro'
+        }
+        
+        return emojiList.map(emoji => ({
+            emoji,
+            label: labelsMap[emoji] || 'Emoji Especial'
+        }))
+    }, [product])
+
     const colors = product.colors ? (Array.isArray(product.colors) ? product.colors : (typeof product.colors === 'string' ? product.colors.split(',').map(c => c.trim()) : [])) : []
 
     return (
@@ -520,36 +544,29 @@ export default function ProductPage() {
                                                 </div>
 
                                                 {/* Emojis */}
-                                                <div className="flex flex-wrap items-center gap-1">
-                                                    {[
-                                                        { emoji: '🍎', label: 'Maçã' },
-                                                        { emoji: '💛', label: 'Coração Dourado' },
-                                                        { emoji: '👄', label: 'Boca/Lábios' },
-                                                        { emoji: '🍒', label: 'Cereja' },
-                                                        { emoji: '😍', label: 'Apaixonado' },
-                                                        { emoji: '🌶️', label: 'Pimenta' },
-                                                        { emoji: '🐰', label: 'Coelho Playboy Preto' },
-                                                        { emoji: '🌟', label: 'Coelho Brilha no Escuro' }
-                                                    ].map(item => (
-                                                        <button 
-                                                            key={item.emoji} 
-                                                            type="button" 
-                                                            title={item.label}
-                                                            onClick={() => {
-                                                                if (customText.length < 20) {
-                                                                    setCustomText(prev => prev + item.emoji)
-                                                                }
-                                                            }}
-                                                            className="w-8 h-8 flex items-center justify-center bg-gray-50 hover:bg-gray-100 text-base rounded-lg border border-[#EEEEEE] transition-all cursor-pointer relative group"
-                                                        >
-                                                            {item.emoji}
-                                                            {/* Tooltip */}
-                                                            <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[8px] font-bold px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 whitespace-nowrap z-50">
-                                                                {item.label}
-                                                            </span>
-                                                        </button>
-                                                    ))}
-                                                </div>
+                                                {activeEmojisList.length > 0 && (
+                                                    <div className="flex flex-wrap items-center gap-1">
+                                                        {activeEmojisList.map(item => (
+                                                            <button 
+                                                                key={item.emoji} 
+                                                                type="button" 
+                                                                title={item.label}
+                                                                onClick={() => {
+                                                                    if (customText.length < 20) {
+                                                                        setCustomText(prev => prev + item.emoji)
+                                                                    }
+                                                                }}
+                                                                className="w-8 h-8 flex items-center justify-center bg-gray-50 hover:bg-gray-100 text-base rounded-lg border border-[#EEEEEE] transition-all cursor-pointer relative group"
+                                                            >
+                                                                {item.emoji}
+                                                                {/* Tooltip */}
+                                                                <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[8px] font-bold px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 whitespace-nowrap z-50">
+                                                                    {item.label}
+                                                                </span>
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                )}
                                             </div>
                                             <p className="text-[9px] text-gray-400">Dica: Você também pode digitar letras normais (A-Z) para personalizar com nomes.</p>
                                         </div>

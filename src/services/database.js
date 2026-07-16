@@ -12,7 +12,7 @@ const TABLE_COLUMNS = {
     categories: ['id', 'name', 'group', 'description', 'image', 'created_at'],
     products: [
         'id', 'name', 'category', 'price', 'original_price', 'image', 'badge', 'section', 'sizes', 'description', 'stock', 'created_at',
-        'colors', 'inPromoCombo', 'isCustomizable', 'customPriceWith', 'customPriceWithout', 'customFeeLetter', 'customFeeNumber', 'customFeeEmoji'
+        'colors', 'inPromoCombo', 'isCustomizable', 'customPriceWith', 'customPriceWithout', 'customFeeLetter', 'customFeeNumber', 'customFeeEmoji', 'customizable_emojis'
     ],
     store_config: [
         'id', 'whatsapp', 'sac_phone', 'address', 'cnpj', 'infinitepay_handle',
@@ -35,6 +35,7 @@ const FIELD_MAPPING = {
     customfeeletter: ['customFeeLetter', 'customfeeletter'],
     customfeenumber: ['customFeeNumber', 'customfeenumber'],
     customfeeemoji: ['customFeeEmoji', 'customfeeemoji'],
+    customizable_emojis: ['customizableEmojis', 'customizable_emojis'],
     topbarmessages: ['topbarMessages', 'topbarmessages'],
     topbarstyle: ['topbarStyle', 'topbarstyle'],
     promocombo: ['promoCombo', 'promocombo'],
@@ -75,6 +76,7 @@ function mapDbToFrontend(table, item) {
         if (item.customfeeletter !== undefined) mapped.customFeeLetter = item.customfeeletter
         if (item.customfeenumber !== undefined) mapped.customFeeNumber = item.customfeenumber
         if (item.customfeeemoji !== undefined) mapped.customFeeEmoji = item.customfeeemoji
+        if (item.customizable_emojis !== undefined) mapped.customizableEmojis = item.customizable_emojis
     } else if (table === 'store_config') {
         if (item.topbarmessages !== undefined) mapped.topbarMessages = item.topbarmessages
         if (item.topbarstyle !== undefined) mapped.topbarStyle = item.topbarstyle
