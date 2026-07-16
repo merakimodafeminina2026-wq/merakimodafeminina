@@ -79,7 +79,10 @@ export default function Footer() {
                                 butterflySrc.startsWith('data:') ? 'opacity-100' : 'opacity-0'
                             }`}
                         />
-                        <span className="font-heading tracking-[0.3em]">MERAKI</span>
+                        <div className="flex flex-col items-start leading-none text-left">
+                            <span className="font-heading tracking-[0.25em] text-[15px] md:text-lg lg:text-xl font-black">MERAKI</span>
+                            <span className="text-[7px] md:text-[8px] uppercase tracking-[0.45em] text-[#7A3E4A] font-bold mt-0.5 ml-0.5">FEMME</span>
+                        </div>
                     </a>
                 </div>
 

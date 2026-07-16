@@ -67,10 +67,15 @@ function SplashLoader() {
                         style={{ animationDuration: '2s' }}
                     />
                     {/* Logo Text */}
-                    <h1 className="font-heading text-3xl md:text-4.5xl font-bold tracking-[0.3em] text-[#1A1A1A] animate-pulse">
-                        MERAKI
-                    </h1>
-                    <p className="text-[10px] uppercase tracking-[0.4em] text-[#7A3E4A] mt-2 font-medium opacity-80">
+                    <div className="flex flex-col items-center leading-none animate-pulse">
+                        <h1 className="font-heading text-3xl md:text-4.5xl font-bold tracking-[0.3em] text-[#1A1A1A]">
+                            MERAKI
+                        </h1>
+                        <span className="text-xs md:text-sm uppercase tracking-[0.55em] text-[#7A3E4A] font-bold mt-1.5 ml-1">
+                            FEMME
+                        </span>
+                    </div>
+                    <p className="text-[9px] uppercase tracking-[0.4em] text-[#7A3E4A]/60 mt-4 font-medium text-center">
                         Carregando a melhor experiência...
                     </p>
                 </div>
