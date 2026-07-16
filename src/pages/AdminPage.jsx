@@ -163,6 +163,7 @@ export default function AdminPage() {
     const [customFeeNumber, setCustomFeeNumber] = useState('2.50')
     const [customFeeEmoji, setCustomFeeEmoji] = useState('3.00')
     const [customizableEmojis, setCustomizableEmojis] = useState(['🍎', '💛', '👄', '🍒', '😍', '🌶️', '🐰', '🌟'])
+    const [newEmojiInput, setNewEmojiInput] = useState('')
 
     // Form inputs
     const [couponForm, setCouponForm] = useState({ code: '', type: 'percentage', value: '', minPurchase: '' })
@@ -1303,10 +1304,11 @@ export default function AdminPage() {
                                                     className={inputCls} 
                                                 />
                                             </div>
-                                            <div className="col-span-2">
+                                            <div className="col-span-2 space-y-3">
                                                 <label className={labelCls}>Emojis Disponíveis para Personalização</label>
+                                                
                                                 <div className="flex flex-wrap gap-1.5 p-2 bg-white rounded-xl border border-[#EEEEEE]">
-                                                    {['🍎', '💛', '👄', '🍒', '😍', '🌶️', '🐰', '🌟'].map(emoji => {
+                                                    {Array.from(new Set(['🍎', '💛', '👄', '🍒', '😍', '🌶️', '🐰', '🌟', ...customizableEmojis])).map(emoji => {
                                                         const isSelected = customizableEmojis.includes(emoji)
                                                         return (
                                                             <button
@@ -1330,7 +1332,33 @@ export default function AdminPage() {
                                                         )
                                                     })}
                                                 </div>
-                                                <p className="text-[9px] text-gray-400 mt-1">Marque os emojis que estarão disponíveis para o cliente escolher ao personalizar este produto.</p>
+
+                                                {/* Inseridor de Novo Emoji */}
+                                                <div className="flex gap-2">
+                                                    <input 
+                                                        type="text" 
+                                                        value={newEmojiInput}
+                                                        onChange={e => setNewEmojiInput(e.target.value.trim())}
+                                                        placeholder="Cole ou digite um novo emoji (Ex: 🔥)" 
+                                                        className={`${inputCls} max-w-[240px] !py-2 !px-3 text-xs`}
+                                                        maxLength={4}
+                                                    />
+                                                    <button 
+                                                        type="button" 
+                                                        onClick={() => {
+                                                            const val = newEmojiInput.trim()
+                                                            if (val && !customizableEmojis.includes(val)) {
+                                                                setCustomizableEmojis(prev => [...prev, val])
+                                                                setNewEmojiInput('')
+                                                            }
+                                                        }}
+                                                        className="px-4 py-2 bg-[#7A3E4A] hover:bg-[#6b3540] text-white text-xs font-black uppercase rounded-xl transition-all cursor-pointer shadow-2xs active:scale-98 shrink-0"
+                                                    >
+                                                        + Adicionar
+                                                    </button>
+                                                </div>
+
+                                                <p className="text-[9px] text-gray-400">Marque os emojis que estarão disponíveis para o cliente escolher ao personalizar este produto. Use o campo acima para adicionar qualquer emoji novo que desejar.</p>
                                             </div>
                                         </div>
                                     )}
