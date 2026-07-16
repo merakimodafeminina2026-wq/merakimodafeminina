@@ -76,6 +76,12 @@ export default function AdminPage() {
             return config.shippingMessage || 'Frete grátis para a região Centro-Oeste nas compras acima de R$ 299,90.'
         } catch { return 'Frete grátis para a região Centro-Oeste nas compras acima de R$ 299,90.' }
     })
+    const [installmentText, setInstallmentText] = useState(() => {
+        try {
+            const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+            return config.installmentText || 'Em até 2x sem juros'
+        } catch { return 'Em até 2x sem juros' }
+    })
     const [topbarStyle, setTopbarStyle] = useState(() => {
         try {
             const stored = localStorage.getItem('meraki_topbar_style')
@@ -980,6 +986,41 @@ export default function AdminPage() {
                                             className="px-5 py-2.5 bg-[#7A3E4A] hover:bg-[#5A2E34] text-white text-xs font-bold uppercase rounded-xl transition-colors cursor-pointer active:scale-98 shadow-xs"
                                         >
                                             Salvar Frete
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Installment text config */}
+                            <div className="bg-white p-6 rounded-2xl border border-[#EEEEEE] space-y-4">
+                                <div>
+                                    <h4 className="text-[10px] font-bold text-[#7A3E4A] uppercase tracking-widest">Texto de Parcelamento (Cards de Produto)</h4>
+                                    <p className="text-xs text-gray-400 mt-1">Defina o texto que aparece abaixo do preço em todos os cards de produto. Ex: "Em até 6x sem juros".</p>
+                                </div>
+                                <div className="space-y-2">
+                                    <input
+                                        type="text"
+                                        value={installmentText}
+                                        onChange={(e) => setInstallmentText(e.target.value)}
+                                        placeholder="Ex: Em até 6x sem juros"
+                                        className={inputCls}
+                                    />
+                                    <div className="flex justify-end pt-1">
+                                        <button
+                                            type="button"
+                                            onClick={async () => {
+                                                const txt = installmentText.trim()
+                                                if (txt) {
+                                                    const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+                                                    const updated = { ...config, installmentText: txt }
+                                                    localStorage.setItem('meraki_store_config', JSON.stringify(updated))
+                                                    window.dispatchEvent(new Event('storeConfigUpdated'))
+                                                    await updateStoreConfig({ installment_text: txt })
+                                                }
+                                            }}
+                                            className="px-5 py-2.5 bg-[#7A3E4A] hover:bg-[#5A2E34] text-white text-xs font-bold uppercase rounded-xl transition-colors cursor-pointer active:scale-98 shadow-xs"
+                                        >
+                                            Salvar Parcelamento
                                         </button>
                                     </div>
                                 </div>

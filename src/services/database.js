@@ -43,7 +43,8 @@ const FIELD_MAPPING = {
     available_colors: ['availableColors', 'available_colors'],
     available_emojis: ['availableEmojis', 'available_emojis'],
     shipping_message: ['shippingMessage', 'shipping_message'],
-    available_badges: ['availableBadges', 'available_badges']
+    available_badges: ['availableBadges', 'available_badges'],
+    installment_text: ['installmentText', 'installment_text']
 }
 
 // Normalize a category value (object or string) to its name string

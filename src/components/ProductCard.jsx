@@ -1,22 +1,40 @@
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getAssetUrl } from '../utils/assets.js'
 
 export default function ProductCard({ product, onQuickView, onToggleWishlist, isWishlisted }) {
     const navigate = useNavigate()
 
+    const [installmentText, setInstallmentText] = useState(() => {
+        try {
+            const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+            return config.installmentText || 'Em até 6x sem juros'
+        } catch { return 'Em até 6x sem juros' }
+    })
+
+    useEffect(() => {
+        const update = () => {
+            try {
+                const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+                if (config.installmentText) setInstallmentText(config.installmentText)
+            } catch {}
+        }
+        window.addEventListener('storeConfigUpdated', update)
+        window.addEventListener('storage', update)
+        return () => {
+            window.removeEventListener('storeConfigUpdated', update)
+            window.removeEventListener('storage', update)
+        }
+    }, [])
+
     const formatPrice = (price) => {
         return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price)
     }
 
-    const installment = (price) => {
-        const value = price / 6
-        return `6x de ${formatPrice(value)} sem juros`
-    }
-
-    const imageSrc = getAssetUrl(Array.isArray(product.image) ? (product.image[0] || '/placeholder.jpg') : (product.image || '/placeholder.jpg'))
-
     // Dynamic mock colors to emulate product options from the design
     const mockColors = product.category === 'Conjuntos' ? ['#C2B0A3', '#1A1A1A'] : ['#E8DCC4', '#EAA2A2', '#1A1A1A']
+
+    const imageSrc = getAssetUrl(Array.isArray(product.image) ? (product.image[0] || '/placeholder.jpg') : (product.image || '/placeholder.jpg'))
 
     const handleCardClick = (e) => {
         if (e.target.closest('button')) return
@@ -112,7 +130,7 @@ export default function ProductCard({ product, onQuickView, onToggleWishlist, is
                             )}
                             <span className="text-base sm:text-lg font-extrabold text-[#7A3E4A]">{formatPrice(product.price)}</span>
                         </div>
-                        <p className="text-[10px] text-gray-400 font-medium tracking-wide">{installment(product.price)}</p>
+                        <p className="text-[10px] text-gray-400 font-medium tracking-wide">{installmentText}</p>
                     </div>
                 </div>
             </div>

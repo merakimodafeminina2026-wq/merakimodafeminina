@@ -64,6 +64,13 @@ export default function HomePage() {
         }
     })
 
+    const [installmentText, setInstallmentText] = useState(() => {
+        try {
+            const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+            return config.installmentText || 'Em até 2x sem juros'
+        } catch { return 'Em até 2x sem juros' }
+    })
+
     // Auto-generate display texts from numeric price fields
     const promoPrice2 = Number(promoCombo.price2Items) || 139
     const promoPrice3 = Number(promoCombo.price3Items) || 169
@@ -84,15 +91,25 @@ export default function HomePage() {
                 try { setEditorial(JSON.parse(stored)) } catch (e) { console.error(e) }
             }
         }
+        const updateInstallment = () => {
+            try {
+                const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+                if (config.installmentText) setInstallmentText(config.installmentText)
+            } catch {}
+        }
         window.addEventListener('storage', updatePromo)
         window.addEventListener('storage', updateEditorial)
+        window.addEventListener('storage', updateInstallment)
         window.addEventListener('promoComboUpdated', updatePromo)
         window.addEventListener('editorialUpdated', updateEditorial)
+        window.addEventListener('storeConfigUpdated', updateInstallment)
         return () => {
             window.removeEventListener('storage', updatePromo)
             window.removeEventListener('storage', updateEditorial)
+            window.removeEventListener('storage', updateInstallment)
             window.removeEventListener('promoComboUpdated', updatePromo)
             window.removeEventListener('editorialUpdated', updateEditorial)
+            window.removeEventListener('storeConfigUpdated', updateInstallment)
         }
     }, [])
 
@@ -449,7 +466,7 @@ export default function HomePage() {
                                                             {discountPercent}% OFF
                                                         </span>
                                                     </div>
-                                                    <p className="text-[10px] text-gray-400">Em até 2x sem juros</p>
+                                                    <p className="text-[10px] text-gray-400">{installmentText}</p>
                                                 </div>
                                             </div>
                                         </div>
