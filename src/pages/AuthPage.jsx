@@ -905,7 +905,7 @@ export default function AuthPage() {
                         {/* Borboletas de fundo (sombras translúcidas voando) */}
                         {showButterflyBg && (
                             <div className="absolute inset-0 pointer-events-none overflow-hidden select-none z-6">
-                                {/* Borboleta Líder (Tinkerbell) - usa a imagem real da logo voando na frente com tom cinza claro */}
+                                {/* Borboleta Líder (Tinkerbell) - imagem da logo com tom cinza claro (v2.1) */}
                                 <div 
                                     className="absolute z-10 pointer-events-none animate-fairy-flight" 
                                     style={{ 
