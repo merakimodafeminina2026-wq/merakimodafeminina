@@ -349,7 +349,7 @@ export default function AdminPage() {
             } catch {}
         }
 
-        // Sincroniza as etiquetas, seções e parcelamento a partir do banco (store_config)
+        // Sincroniza as etiquetas, seções, cores e parcelamento a partir do banco (store_config)
         try {
             const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
             if (config.availableBadges) {
@@ -363,6 +363,16 @@ export default function AdminPage() {
             }
             if (config.topbarStyle && config.topbarStyle.homepageCategories) {
                 setHomepageCategories(config.topbarStyle.homepageCategories)
+            }
+            if (config.availableColors) {
+                const colors = config.availableColors.split(',').map(pair => pair.split(':')[0])
+                setColorsList(colors)
+                const map = {}
+                config.availableColors.split(',').forEach(pair => {
+                    const [name, hex] = pair.split(':')
+                    if (name) map[name] = hex || '#CCCCCC'
+                })
+                setColorHexMap(map)
             }
         } catch (e) { console.error(e) }
 
