@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.js'
 import { getAssetUrl } from '../utils/assets.js'
 import { useProducts } from '../hooks/useProducts.js'
-import { createProduct, updateProduct, deleteProduct, uploadMultipleImages, deleteImage, createCategory, getProfiles } from '../services/database.js'
+import { createProduct, updateProduct, deleteProduct, uploadMultipleImages, deleteImage, createCategory, getProfiles, updateStoreConfig } from '../services/database.js'
 import { signOut } from '../services/auth.js'
 import AdminSidebar from '../components/admin/AdminSidebar.jsx'
 import DashboardSection from '../components/admin/DashboardSection.jsx'
@@ -165,15 +165,70 @@ export default function AdminPage() {
     const [customizableEmojis, setCustomizableEmojis] = useState(['🍎', '💛', '👄', '🍒', '😍', '🌶️', '🐰', '🌟'])
     const [newEmojiInput, setNewEmojiInput] = useState('')
     
-    // Custom colors states
-    const [customColorsList, setCustomColorsList] = useState(() => {
+    // Master Config lists
+    const [colorsList, setColorsList] = useState(() => {
         try {
-            const stored = localStorage.getItem('meraki_custom_colors_map')
-            return stored ? Object.keys(JSON.parse(stored)) : []
-        } catch { return [] }
+            const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+            if (config.availableColors) {
+                return config.availableColors.split(',').map(pair => pair.split(':')[0])
+            }
+        } catch {}
+        return ['Preto', 'Branco', 'Vermelho', 'Nude', 'Rosa', 'Bordô', 'Azul', 'Verde', 'Amarelo', 'Lilás', 'Marinho', 'Pink', 'Rubi', 'Preto/Renda', 'Branco/Renda']
     })
+
+    const [colorHexMap, setColorHexMap] = useState(() => {
+        try {
+            const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+            if (config.availableColors) {
+                const map = {}
+                config.availableColors.split(',').forEach(pair => {
+                    const [name, hex] = pair.split(':')
+                    if (name) map[name] = hex || '#CCCCCC'
+                })
+                return map
+            }
+        } catch {}
+        return {
+            'Preto': '#000000',
+            'Branco': '#FFFFFF',
+            'Vermelho': '#DC2626',
+            'Nude': '#EED9C4',
+            'Rosa': '#F472B6',
+            'Bordô': '#800020',
+            'Azul': '#2563EB',
+            'Verde': '#16A34A',
+            'Amarelo': '#FBBF24',
+            'Lilás': '#C084FC',
+            'Marinho': '#1E3A8A',
+            'Pink': '#EC4899',
+            'Rubi': '#9B111E',
+            'Preto/Renda': '#1F1F1F',
+            'Branco/Renda': '#F5F5F5'
+        }
+    })
+
+    const [masterEmojisList, setMasterEmojisList] = useState(() => {
+        try {
+            const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+            if (config.availableEmojis) {
+                return config.availableEmojis.split(',').map(e => e.trim())
+            }
+        } catch {}
+        return ['🍎', '💛', '👄', '🍒', '😍', '🌶️', '🐰', '🌟']
+    })
+
     const [newColorName, setNewColorName] = useState('')
     const [newColorHex, setNewColorHex] = useState('#7A3E4A')
+
+    const saveColorsToConfig = async (newColorsList, newHexMap) => {
+        const serialized = newColorsList.map(name => `${name}:${newHexMap[name] || '#CCCCCC'}`).join(',')
+        await updateStoreConfig({ available_colors: serialized })
+    }
+
+    const saveEmojisToConfig = async (newEmojisList) => {
+        const serialized = newEmojisList.join(',')
+        await updateStoreConfig({ available_emojis: serialized })
+    }
 
     // Form inputs
     const [couponForm, setCouponForm] = useState({ code: '', type: 'percentage', value: '', minPurchase: '' })
@@ -247,7 +302,7 @@ export default function AdminPage() {
             setCustomizableEmojis(
                 rawEmojis 
                     ? (typeof rawEmojis === 'string' ? rawEmojis.split(',').map(e => e.trim()) : rawEmojis)
-                    : ['🍎', '💛', '👄', '🍒', '😍', '🌶️', '🐰', '🌟']
+                    : masterEmojisList
             )
         } else if (modal.open && !modal.editing) {
             setExistingImages([])
@@ -262,7 +317,7 @@ export default function AdminPage() {
             setCustomFeeLetter('2.50')
             setCustomFeeNumber('2.50')
             setCustomFeeEmoji('3.00')
-            setCustomizableEmojis(['🍎', '💛', '👄', '🍒', '😍', '🌶️', '🐰', '🌟'])
+            setCustomizableEmojis(masterEmojisList)
         }
     }, [modal.open, modal.editing, products, categories, sections])
 
@@ -1184,32 +1239,19 @@ export default function AdminPage() {
                                 <div>
                                     <label className={labelCls}>Cores Disponíveis</label>
                                     <div className="flex flex-wrap gap-1.5 bg-[#FAF9F5] p-3 rounded-xl border border-[#EEEEEE]">
-                                        {['Preto', 'Branco', 'Vermelho', 'Nude', 'Rosa', 'Bordô', 'Azul', 'Verde', 'Amarelo', 'Lilás', 'Marinho', 'Pink', 'Rubi', 'Preto/Renda', 'Branco/Renda', ...customColorsList].map(color => {
+                                        {colorsList.map(color => {
                                             const isSelected = selectedModalColors.includes(color)
-                                            const COLOR_MAP = {
-                                                'Preto': '#000000',
-                                                'Branco': '#FFFFFF',
-                                                'Vermelho': '#DC2626',
-                                                'Nude': '#EED9C4',
-                                                'Rosa': '#F472B6',
-                                                'Bordô': '#800020',
-                                                'Azul': '#2563EB',
-                                                'Verde': '#16A34A',
-                                                'Amarelo': '#FBBF24',
-                                                'Lilás': '#C084FC',
-                                                'Marinho': '#1E3A8A',
-                                                'Pink': '#EC4899',
-                                                'Rubi': '#9B111E',
-                                                'Preto/Renda': '#1F1F1F',
-                                                'Branco/Renda': '#F5F5F5'
-                                            }
-                                            const customMap = JSON.parse(localStorage.getItem('meraki_custom_colors_map') || '{}')
-                                            const hex = COLOR_MAP[color] || customMap[color] || '#CCCCCC'
-                                            const isCustom = customColorsList.includes(color)
+                                            const hex = colorHexMap[color] || '#CCCCCC'
                                             return (
-                                                <div key={color} className="relative">
+                                                <div 
+                                                    key={color} 
+                                                    className={`inline-flex items-center gap-1 pl-2.5 pr-1.5 py-1 rounded-xl border text-xs font-bold transition-all ${
+                                                        isSelected 
+                                                            ? 'bg-[#C6A76A]/10 text-[#C6A76A] border-[#C6A76A]' 
+                                                            : 'bg-white text-gray-500 border-[#EEEEEE] hover:border-gray-300'
+                                                    }`}
+                                                >
                                                     <button
-                                                        key={color}
                                                         type="button"
                                                         onClick={() => {
                                                             if (isSelected) {
@@ -1218,34 +1260,29 @@ export default function AdminPage() {
                                                                 setSelectedModalColors(prev => [...prev, color])
                                                             }
                                                         }}
-                                                        className={`py-1.5 rounded-lg border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                                                            isCustom ? 'pl-3 pr-7.5' : 'px-3'
-                                                        } ${
-                                                            isSelected
-                                                                ? 'bg-[#C6A76A] text-white border-[#C6A76A] shadow-xs'
-                                                                : 'bg-white text-gray-400 border-[#EEEEEE] hover:bg-gray-150'
-                                                        }`}
+                                                        className="flex items-center gap-1.5 cursor-pointer text-left focus:outline-none"
                                                     >
-                                                        <span className="w-3 h-3 rounded-full border border-gray-300 shrink-0" style={{ backgroundColor: hex }} />
-                                                        {color}
+                                                        <span className="w-3 h-3 rounded-full border border-gray-300/40 shrink-0" style={{ backgroundColor: hex }} />
+                                                        <span>{color}</span>
                                                     </button>
-                                                    {isCustom && (
-                                                        <button
-                                                            type="button"
-                                                            onClick={(e) => {
-                                                                e.stopPropagation()
-                                                                setSelectedModalColors(prev => prev.filter(c => c !== color))
-                                                                setCustomColorsList(prev => prev.filter(c => c !== color))
-                                                                const currentMap = JSON.parse(localStorage.getItem('meraki_custom_colors_map') || '{}')
-                                                                delete currentMap[color]
-                                                                localStorage.setItem('meraki_custom_colors_map', JSON.stringify(currentMap))
-                                                            }}
-                                                            className="absolute top-1/2 -translate-y-1/2 right-1.5 w-4 h-4 rounded-full bg-red-500 hover:bg-red-650 text-white flex items-center justify-center text-[7px] font-black cursor-pointer shadow-xs"
-                                                            title="Excluir Cor"
-                                                        >
-                                                            ✕
-                                                        </button>
-                                                    )}
+                                                    <span className="w-[1px] h-3 bg-gray-200 mx-1 shrink-0" />
+                                                    <button
+                                                        type="button"
+                                                        onClick={async (e) => {
+                                                            e.stopPropagation()
+                                                            setSelectedModalColors(prev => prev.filter(c => c !== color))
+                                                            const updatedList = colorsList.filter(c => c !== color)
+                                                            setColorsList(updatedList)
+                                                            const updatedHexMap = { ...colorHexMap }
+                                                            delete updatedHexMap[color]
+                                                            setColorHexMap(updatedHexMap)
+                                                            await saveColorsToConfig(updatedList, updatedHexMap)
+                                                        }}
+                                                        className="w-4 h-4 rounded-md hover:bg-red-50 hover:text-red-500 text-gray-405 flex items-center justify-center text-[9px] cursor-pointer transition-colors"
+                                                        title="Excluir Cor"
+                                                    >
+                                                        ✕
+                                                    </button>
                                                 </div>
                                             )
                                         })}
@@ -1271,20 +1308,23 @@ export default function AdminPage() {
                                         </div>
                                         <button 
                                             type="button" 
-                                            onClick={() => {
+                                            onClick={async () => {
                                                 const name = newColorName.trim()
                                                 if (name) {
-                                                    const currentMap = JSON.parse(localStorage.getItem('meraki_custom_colors_map') || '{}')
-                                                    currentMap[name] = newColorHex
-                                                    localStorage.setItem('meraki_custom_colors_map', JSON.stringify(currentMap))
-                                                    if (!customColorsList.includes(name)) {
-                                                        setCustomColorsList(prev => [...prev, name])
+                                                    const updatedMap = { ...colorHexMap, [name]: newColorHex }
+                                                    const updatedList = [...colorsList]
+                                                    if (!updatedList.includes(name)) {
+                                                        updatedList.push(name)
                                                     }
+                                                    setColorsList(updatedList)
+                                                    setColorHexMap(updatedMap)
+                                                    
                                                     if (!selectedModalColors.includes(name)) {
                                                         setSelectedModalColors(prev => [...prev, name])
                                                     }
                                                     setNewColorName('')
                                                     setNewColorHex('#7A3E4A')
+                                                    await saveColorsToConfig(updatedList, updatedMap)
                                                 }
                                             }}
                                             className="px-3.5 py-2 bg-[#7A3E4A] hover:bg-[#6b3540] text-white text-xs font-black uppercase rounded-lg transition-all cursor-pointer shadow-2xs active:scale-98"
@@ -1383,11 +1423,17 @@ export default function AdminPage() {
                                                 <label className={labelCls}>Emojis Disponíveis para Personalização</label>
                                                 
                                                 <div className="flex flex-wrap gap-1.5 p-2 bg-white rounded-xl border border-[#EEEEEE]">
-                                                    {Array.from(new Set(['🍎', '💛', '👄', '🍒', '😍', '🌶️', '🐰', '🌟', ...customizableEmojis])).map(emoji => {
+                                                    {masterEmojisList.map(emoji => {
                                                         const isSelected = customizableEmojis.includes(emoji)
-                                                        const isDefault = ['🍎', '💛', '👄', '🍒', '😍', '🌶️', '🐰', '🌟'].includes(emoji)
                                                         return (
-                                                            <div key={emoji} className="relative">
+                                                            <div 
+                                                                key={emoji} 
+                                                                className={`inline-flex items-center gap-1 pl-2.5 pr-1.5 py-1 rounded-xl border text-sm transition-all ${
+                                                                    isSelected 
+                                                                        ? 'bg-[#C6A76A]/10 border-[#C6A76A] scale-105 shadow-2xs' 
+                                                                        : 'bg-white border-gray-205 hover:border-gray-300'
+                                                                }`}
+                                                            >
                                                                 <button
                                                                     type="button"
                                                                     onClick={() => {
@@ -1397,27 +1443,25 @@ export default function AdminPage() {
                                                                             setCustomizableEmojis(prev => [...prev, emoji])
                                                                         }
                                                                     }}
-                                                                    className={`w-9 h-9 rounded-lg border text-base flex items-center justify-center cursor-pointer transition-all ${
-                                                                        isSelected 
-                                                                            ? 'border-[#C6A76A] bg-[#C6A76A]/10 scale-105 shadow-2xs' 
-                                                                            : 'border-gray-200 opacity-40 hover:opacity-100 hover:bg-gray-50'
-                                                                    }`}
+                                                                    className={`cursor-pointer transition-opacity ${isSelected ? 'opacity-100' : 'opacity-40 hover:opacity-100'}`}
                                                                 >
                                                                      {emoji}
                                                                 </button>
-                                                                {!isDefault && (
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={(e) => {
-                                                                            e.stopPropagation()
-                                                                            setCustomizableEmojis(prev => prev.filter(e => e !== emoji))
-                                                                        }}
-                                                                        className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-red-500 hover:bg-red-650 text-white flex items-center justify-center text-[7px] font-black cursor-pointer shadow-xs"
-                                                                        title="Excluir Emoji"
-                                                                    >
-                                                                        ✕
-                                                                    </button>
-                                                                )}
+                                                                <span className="w-[1px] h-3 bg-gray-200 mx-1 shrink-0" />
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={async (e) => {
+                                                                        e.stopPropagation()
+                                                                        setCustomizableEmojis(prev => prev.filter(e => e !== emoji))
+                                                                        const updatedList = masterEmojisList.filter(e => e !== emoji)
+                                                                        setMasterEmojisList(updatedList)
+                                                                        await saveEmojisToConfig(updatedList)
+                                                                    }}
+                                                                    className="w-4 h-4 rounded-md hover:bg-red-50 hover:text-red-500 text-gray-400 flex items-center justify-center text-[9px] cursor-pointer transition-colors"
+                                                                    title="Excluir Emoji"
+                                                                >
+                                                                    ✕
+                                                                </button>
                                                             </div>
                                                         )
                                                     })}
@@ -1435,11 +1479,19 @@ export default function AdminPage() {
                                                     />
                                                     <button 
                                                         type="button" 
-                                                        onClick={() => {
+                                                        onClick={async () => {
                                                             const val = newEmojiInput.trim()
-                                                            if (val && !customizableEmojis.includes(val)) {
-                                                                setCustomizableEmojis(prev => [...prev, val])
+                                                            if (val) {
+                                                                const updatedList = [...masterEmojisList]
+                                                                if (!updatedList.includes(val)) {
+                                                                    updatedList.push(val)
+                                                                }
+                                                                setMasterEmojisList(updatedList)
+                                                                if (!customizableEmojis.includes(val)) {
+                                                                    setCustomizableEmojis(prev => [...prev, val])
+                                                                }
                                                                 setNewEmojiInput('')
+                                                                await saveEmojisToConfig(updatedList)
                                                             }
                                                         }}
                                                         className="px-4 py-2 bg-[#7A3E4A] hover:bg-[#6b3540] text-white text-xs font-black uppercase rounded-xl transition-all cursor-pointer shadow-2xs active:scale-98 shrink-0"
@@ -1448,7 +1500,7 @@ export default function AdminPage() {
                                                     </button>
                                                 </div>
 
-                                                <p className="text-[9px] text-gray-400">Marque os emojis que estarão disponíveis para o cliente escolher ao personalizar este produto. Use o campo acima para adicionar qualquer emoji novo que desejar.</p>
+                                                <p className="text-[9px] text-gray-400">Marque os emojis que estarão disponíveis para o cliente escolher ao personalizar este produto. Use o campo acima para adicionar qualquer emoji novo ou excluir os existentes clicando no ✕.</p>
                                             </div>
                                         </div>
                                     )}

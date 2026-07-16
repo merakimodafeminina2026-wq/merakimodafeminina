@@ -16,7 +16,7 @@ const TABLE_COLUMNS = {
     ],
     store_config: [
         'id', 'whatsapp', 'sac_phone', 'address', 'cnpj', 'infinitepay_handle',
-        'topbarMessages', 'topbarStyle', 'promoCombo', 'editorial'
+        'topbarMessages', 'topbarStyle', 'promoCombo', 'editorial', 'available_colors', 'available_emojis'
     ]
 }
 
@@ -39,7 +39,9 @@ const FIELD_MAPPING = {
     topbarmessages: ['topbarMessages', 'topbarmessages'],
     topbarstyle: ['topbarStyle', 'topbarstyle'],
     promocombo: ['promoCombo', 'promocombo'],
-    editorial: ['editorial', 'editorial']
+    editorial: ['editorial', 'editorial'],
+    available_colors: ['availableColors', 'available_colors'],
+    available_emojis: ['availableEmojis', 'available_emojis']
 }
 
 // Normalize a category value (object or string) to its name string
@@ -82,6 +84,8 @@ function mapDbToFrontend(table, item) {
         if (item.topbarstyle !== undefined) mapped.topbarStyle = item.topbarstyle
         if (item.promocombo !== undefined) mapped.promoCombo = item.promocombo
         if (item.editorial !== undefined) mapped.editorial = item.editorial
+        if (item.available_colors !== undefined) mapped.availableColors = item.available_colors
+        if (item.available_emojis !== undefined) mapped.availableEmojis = item.available_emojis
     }
     return mapped
 }
@@ -500,6 +504,20 @@ export async function createCategory(category) {
         originalSetItem('meraki_categories', JSON.stringify(current))
 
         return { data, error: null }
+    } catch (e) {
+        return { data: null, error: e }
+    }
+}
+
+export async function updateStoreConfig(config) {
+    try {
+        const payload = filterPayloadForTable('store_config', config)
+        const { data, error } = await supabase.from('store_config').update(payload).eq('id', 'default').select().single()
+        if (error) throw error
+
+        const mapped = mapDbToFrontend('store_config', data)
+        originalSetItem('meraki_store_config', JSON.stringify(mapped))
+        return { data: mapped, error: null }
     } catch (e) {
         return { data: null, error: e }
     }
