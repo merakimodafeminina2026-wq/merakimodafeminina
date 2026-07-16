@@ -58,8 +58,9 @@ export default function AuthPage() {
                         if (r > 185 && g > 185 && b > 185) {
                             data[i+3] = 0
                         } else {
-                            // Converte para escala de cinza de tom claro para todas as borboletas
-                            const gray = Math.round(0.299 * r + 0.587 * g + 0.114 * b)
+                            // Converte para uma escala de cinza bem clara (prateado/cinza claro), evitando tons escuros ou pretos
+                            const intensity = (0.299 * r + 0.587 * g + 0.114 * b)
+                            const gray = Math.round(180 + (intensity * 0.15))
                             data[i] = gray
                             data[i+1] = gray
                             data[i+2] = gray
@@ -913,7 +914,7 @@ export default function AuthPage() {
                                         height: '52px', 
                                         left: '-26px', // Desloca para que a cabeça (centro horizontal) fique no ponto (0,0)
                                         top: '-8px',   // Desloca para alinhar verticalmente o topo da borboleta com a origem
-                                        filter: 'grayscale(100%) contrast(0.65) brightness(1.35) drop-shadow(0 0 8px rgba(160, 160, 160, 0.75))',
+                                        filter: 'drop-shadow(0 0 8px rgba(180, 180, 180, 0.75))',
                                         transformOrigin: '50% 15%' // Rotação pivota próximo à cabeça
                                     }}
                                 >
