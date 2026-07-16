@@ -16,7 +16,8 @@ const TABLE_COLUMNS = {
     ],
     store_config: [
         'id', 'whatsapp', 'sac_phone', 'address', 'cnpj', 'infinitepay_handle',
-        'topbarMessages', 'topbarStyle', 'promoCombo', 'editorial', 'available_colors', 'available_emojis', 'shipping_message'
+        'topbarMessages', 'topbarStyle', 'promoCombo', 'editorial', 'available_colors', 'available_emojis', 'shipping_message',
+        'available_badges', 'installment_text', 'banner_transition'
     ]
 }
 
@@ -114,6 +115,9 @@ function mapDbToFrontend(table, item) {
         if (item.available_colors !== undefined) mapped.availableColors = item.available_colors
         if (item.available_emojis !== undefined) mapped.availableEmojis = item.available_emojis
         if (item.shipping_message !== undefined) mapped.shippingMessage = item.shipping_message
+        if (item.available_badges !== undefined) mapped.availableBadges = item.available_badges
+        if (item.installment_text !== undefined) mapped.installmentText = item.installment_text
+        if (item.banner_transition !== undefined) mapped.bannerTransition = item.banner_transition
     }
     return mapped
 }
@@ -173,7 +177,12 @@ export async function initSupabaseSync() {
             localStorage.setItem('meraki_store_config', JSON.stringify(dbConfig))
             // Extract and sync visual keys to individual localStorage items
             if (dbConfig.topbarMessages) localStorage.setItem('meraki_topbar_messages', JSON.stringify(dbConfig.topbarMessages))
-            if (dbConfig.topbarStyle) localStorage.setItem('meraki_topbar_style', JSON.stringify(dbConfig.topbarStyle))
+            if (dbConfig.topbarStyle) {
+                localStorage.setItem('meraki_topbar_style', JSON.stringify(dbConfig.topbarStyle))
+                if (dbConfig.topbarStyle.availableSections) {
+                    localStorage.setItem('meraki_sections', JSON.stringify(dbConfig.topbarStyle.availableSections))
+                }
+            }
             if (dbConfig.promoCombo) localStorage.setItem('meraki_promo_combo', JSON.stringify(dbConfig.promoCombo))
             if (dbConfig.editorial) localStorage.setItem('meraki_editorial', JSON.stringify(dbConfig.editorial))
             localStorage.setItem('meraki_shipping_message', dbConfig.shippingMessage || 'Frete grátis para a região Centro-Oeste nas compras acima de R$ 299,90.')
@@ -555,5 +564,35 @@ export async function updateStoreConfig(config) {
         return { data: mapped, error: null }
     } catch (e) {
         return { data: null, error: e }
+    }
+}
+
+export async function clearProductBadges(badgeList) {
+    try {
+        const uppercaseList = badgeList.map(b => b.toUpperCase())
+        
+        // Fetch all products to check their badges
+        const { data: products, error: fetchError } = await supabase.from('products').select('id, badge')
+        if (fetchError) throw fetchError
+        
+        const productsToUpdate = (products || []).filter(p => p.badge && !uppercaseList.includes(p.badge.toUpperCase()))
+        if (productsToUpdate.length === 0) return { success: true }
+        
+        const ids = productsToUpdate.map(p => p.id)
+        const { error: updateError } = await supabase.from('products').update({ badge: '' }).in('id', ids)
+        if (updateError) throw updateError
+        
+        // Update local cache
+        const localProds = JSON.parse(localStorage.getItem('meraki_products') || '[]')
+        const updatedLocal = localProds.map(p => {
+            if (ids.includes(p.id)) return { ...p, badge: '' }
+            return p
+        })
+        originalSetItem('meraki_products', JSON.stringify(updatedLocal))
+        
+        return { success: true, updatedIds: ids }
+    } catch (e) {
+        console.error('Error clearing product badges:', e)
+        return { success: false, error: e }
     }
 }

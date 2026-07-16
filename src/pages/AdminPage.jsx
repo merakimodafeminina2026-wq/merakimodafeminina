@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.js'
 import { getAssetUrl } from '../utils/assets.js'
 import { useProducts } from '../hooks/useProducts.js'
-import { createProduct, updateProduct, deleteProduct, uploadMultipleImages, deleteImage, createCategory, getProfiles, updateStoreConfig } from '../services/database.js'
+import { createProduct, updateProduct, deleteProduct, uploadMultipleImages, deleteImage, createCategory, getProfiles, updateStoreConfig, clearProductBadges } from '../services/database.js'
 import { signOut } from '../services/auth.js'
 import AdminSidebar from '../components/admin/AdminSidebar.jsx'
 import DashboardSection from '../components/admin/DashboardSection.jsx'
@@ -191,6 +191,31 @@ export default function AdminPage() {
     const saveBadgesToConfig = async (list) => {
         const serialized = list.join(',')
         await updateStoreConfig({ available_badges: serialized })
+        
+        // Remove a tag excluída de todos os produtos no banco de dados e localmente
+        if (products && products.length > 0) {
+            const { success, updatedIds } = await clearProductBadges(list)
+            if (success && updatedIds && updatedIds.length > 0) {
+                const updatedProds = products.map(p => {
+                    if (updatedIds.includes(p.id)) {
+                        return { ...p, badge: '' }
+                    }
+                    return p
+                })
+                setProducts(updatedProds)
+            }
+        }
+    }
+
+    const saveSectionsToConfig = async (list) => {
+        localStorage.setItem('meraki_sections', JSON.stringify(list))
+        try {
+            const currentStyle = JSON.parse(localStorage.getItem('meraki_topbar_style') || '{"bgColor": "#C6A76A", "textColor": "#FFFFFF"}')
+            const newStyle = { ...currentStyle, availableSections: list }
+            localStorage.setItem('meraki_topbar_style', JSON.stringify(newStyle))
+        } catch (e) {
+            console.error(e)
+        }
     }
     
     // Master Config lists
@@ -304,6 +329,20 @@ export default function AdminPage() {
                 if (config.shippingMessage) setShippingMessage(config.shippingMessage)
             } catch {}
         }
+
+        // Sincroniza as etiquetas, seções e parcelamento a partir do banco (store_config)
+        try {
+            const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+            if (config.availableBadges) {
+                setMasterBadgesList(config.availableBadges.split(',').map(b => b.trim()).filter(Boolean))
+            }
+            if (config.installmentText) {
+                setInstallmentText(config.installmentText)
+            }
+            if (config.topbarStyle && config.topbarStyle.availableSections) {
+                setSections(config.topbarStyle.availableSections)
+            }
+        } catch (e) { console.error(e) }
 
         const loadedReturns = []
         for (let i = 0; i < localStorage.length; i++) {
@@ -1436,7 +1475,7 @@ export default function AdminPage() {
                                                                     onClick={() => {
                                                                         const updated = sections.filter(s => s.id !== sec.id)
                                                                         setSections(updated)
-                                                                        localStorage.setItem('meraki_sections', JSON.stringify(updated))
+                                                                        saveSectionsToConfig(updated)
                                                                         if (selectedModalSection === sec.id) {
                                                                             setSelectedModalSection(updated[0]?.id || 'best-sellers')
                                                                         }
@@ -1467,7 +1506,7 @@ export default function AdminPage() {
                                                             if (!alreadyExists) {
                                                                 const updated = [...sections, { id, label }]
                                                                 setSections(updated)
-                                                                localStorage.setItem('meraki_sections', JSON.stringify(updated))
+                                                                saveSectionsToConfig(updated)
                                                                 setSelectedModalSection(id)
                                                                 setNewSectionLabel('')
                                                             }
@@ -1487,7 +1526,7 @@ export default function AdminPage() {
                                                         if (!alreadyExists) {
                                                             const updated = [...sections, { id, label }]
                                                             setSections(updated)
-                                                            localStorage.setItem('meraki_sections', JSON.stringify(updated))
+                                                            saveSectionsToConfig(updated)
                                                             setSelectedModalSection(id)
                                                             setNewSectionLabel('')
                                                         }
