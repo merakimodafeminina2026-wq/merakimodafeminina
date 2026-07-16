@@ -70,6 +70,12 @@ export default function AdminPage() {
     const [selectedReturn, setSelectedReturn] = useState(null)
     const [topbarMessages, setTopbarMessages] = useState([])
     const [newTopbarMsg, setNewTopbarMsg] = useState('')
+    const [shippingMessage, setShippingMessage] = useState(() => {
+        try {
+            const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+            return config.shippingMessage || 'Frete grátis para a região Centro-Oeste nas compras acima de R$ 299,90.'
+        } catch { return 'Frete grátis para a região Centro-Oeste nas compras acima de R$ 299,90.' }
+    })
     const [topbarStyle, setTopbarStyle] = useState(() => {
         try {
             const stored = localStorage.getItem('meraki_topbar_style')
@@ -266,6 +272,16 @@ export default function AdminPage() {
             "Ganhe 5% de desconto pagando no PIX!"
         ]
         setTopbarMessages(loadedTopbar)
+
+        const storedShipping = localStorage.getItem('meraki_shipping_message')
+        if (storedShipping) {
+            setShippingMessage(storedShipping)
+        } else {
+            try {
+                const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+                if (config.shippingMessage) setShippingMessage(config.shippingMessage)
+            } catch {}
+        }
 
         const loadedReturns = []
         for (let i = 0; i < localStorage.length; i++) {
@@ -903,6 +919,39 @@ export default function AdminPage() {
                                 <div>
                                     <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider mb-1">Frases Rotativas do Topo</h3>
                                     <p className="text-xs text-gray-400">Configure as mensagens promocionais que aparecem na barra no topo do site.</p>
+                                </div>
+                            </div>
+
+                            {/* Shipping message banner config */}
+                            <div className="bg-white p-6 rounded-2xl border border-[#EEEEEE] space-y-4">
+                                <div>
+                                    <h4 className="text-[10px] font-bold text-[#7A3E4A] uppercase tracking-widest">Informações de Frete (Barra de Benefícios)</h4>
+                                    <p className="text-xs text-gray-400 mt-1">Defina a mensagem de frete grátis que aparece na faixa de benefícios logo abaixo/acima do topo do site.</p>
+                                </div>
+                                <div className="space-y-2">
+                                    <input
+                                        type="text"
+                                        value={shippingMessage}
+                                        onChange={(e) => setShippingMessage(e.target.value)}
+                                        placeholder="Ex: Frete grátis para a região Centro-Oeste nas compras acima de R$ 299,90."
+                                        className={inputCls}
+                                    />
+                                    <div className="flex justify-end pt-1">
+                                        <button
+                                            type="button"
+                                            onClick={async () => {
+                                                const msg = shippingMessage.trim()
+                                                if (msg) {
+                                                    localStorage.setItem('meraki_shipping_message', msg)
+                                                    window.dispatchEvent(new Event('shippingMessageUpdated'))
+                                                    await updateStoreConfig({ shipping_message: msg })
+                                                }
+                                            }}
+                                            className="px-5 py-2.5 bg-[#7A3E4A] hover:bg-[#5A2E34] text-white text-xs font-bold uppercase rounded-xl transition-colors cursor-pointer active:scale-98 shadow-xs"
+                                        >
+                                            Salvar Frete
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 

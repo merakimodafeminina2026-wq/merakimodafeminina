@@ -16,7 +16,7 @@ const TABLE_COLUMNS = {
     ],
     store_config: [
         'id', 'whatsapp', 'sac_phone', 'address', 'cnpj', 'infinitepay_handle',
-        'topbarMessages', 'topbarStyle', 'promoCombo', 'editorial', 'available_colors', 'available_emojis'
+        'topbarMessages', 'topbarStyle', 'promoCombo', 'editorial', 'available_colors', 'available_emojis', 'shipping_message'
     ]
 }
 
@@ -41,7 +41,8 @@ const FIELD_MAPPING = {
     promocombo: ['promoCombo', 'promocombo'],
     editorial: ['editorial', 'editorial'],
     available_colors: ['availableColors', 'available_colors'],
-    available_emojis: ['availableEmojis', 'available_emojis']
+    available_emojis: ['availableEmojis', 'available_emojis'],
+    shipping_message: ['shippingMessage', 'shipping_message']
 }
 
 // Normalize a category value (object or string) to its name string
@@ -86,6 +87,7 @@ function mapDbToFrontend(table, item) {
         if (item.editorial !== undefined) mapped.editorial = item.editorial
         if (item.available_colors !== undefined) mapped.availableColors = item.available_colors
         if (item.available_emojis !== undefined) mapped.availableEmojis = item.available_emojis
+        if (item.shipping_message !== undefined) mapped.shippingMessage = item.shipping_message
     }
     return mapped
 }
@@ -148,6 +150,7 @@ export async function initSupabaseSync() {
             if (dbConfig.topbarStyle) localStorage.setItem('meraki_topbar_style', JSON.stringify(dbConfig.topbarStyle))
             if (dbConfig.promoCombo) localStorage.setItem('meraki_promo_combo', JSON.stringify(dbConfig.promoCombo))
             if (dbConfig.editorial) localStorage.setItem('meraki_editorial', JSON.stringify(dbConfig.editorial))
+            localStorage.setItem('meraki_shipping_message', dbConfig.shippingMessage || 'Frete grátis para a região Centro-Oeste nas compras acima de R$ 299,90.')
         } else {
             const defaultConfig = {
                 id: 'default',
@@ -179,13 +182,15 @@ export async function initSupabaseSync() {
                     buttonText: 'Ver Manifesto',
                     buttonLink: '/story',
                     image: '/assets/banners/banner-2.jpg'
-                }
+                },
+                shippingMessage: 'Frete grátis para a região Centro-Oeste nas compras acima de R$ 299,90.'
             }
             localStorage.setItem('meraki_store_config', JSON.stringify(defaultConfig))
             localStorage.setItem('meraki_topbar_messages', JSON.stringify(defaultConfig.topbarMessages))
             localStorage.setItem('meraki_topbar_style', JSON.stringify(defaultConfig.topbarStyle))
             localStorage.setItem('meraki_promo_combo', JSON.stringify(defaultConfig.promoCombo))
             localStorage.setItem('meraki_editorial', JSON.stringify(defaultConfig.editorial))
+            localStorage.setItem('meraki_shipping_message', defaultConfig.shippingMessage)
         }
 
         console.log('✅ Sincronização concluída com sucesso.')
