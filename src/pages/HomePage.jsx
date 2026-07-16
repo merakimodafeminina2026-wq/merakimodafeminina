@@ -456,17 +456,17 @@ export default function HomePage() {
                                                         ))}
                                                         <span className="text-[10px] text-gray-400 font-semibold ml-1">(5)</span>
                                                     </div>
-                                                    <h4 className="font-sans text-sm sm:text-base font-semibold text-[#1A1A1A] tracking-wide line-clamp-2 leading-snug">{product.name}</h4>
+                                                    <h4 className="font-sans text-sm sm:text-base font-bold text-[#1A1A1A] tracking-wide line-clamp-2 leading-snug">{product.name}</h4>
                                                 </div>
                                                 <div className="w-full mt-auto">
                                                     <div className="flex items-center gap-2 flex-wrap mb-1">
-                                                        <span className="text-xs text-gray-400 line-through">R$ {product.original_price.toFixed(2).replace('.', ',')}</span>
+                                                        <span className="text-xs text-gray-400 line-through font-medium">R$ {product.original_price.toFixed(2).replace('.', ',')}</span>
                                                         <span className="text-sm sm:text-base font-extrabold text-[#7A3E4A]">R$ {product.price.toFixed(2).replace('.', ',')}</span>
-                                                        <span className="bg-[#FEF08A] text-[#854D0E] text-[9px] font-extrabold px-2 py-0.5 rounded-sm uppercase">
+                                                        <span className="bg-[#FEF08A] text-[#854D0E] text-[10px] font-extrabold px-2 py-0.5 rounded-sm uppercase">
                                                             {discountPercent}% OFF
                                                         </span>
                                                     </div>
-                                                    <p className="text-[10px] text-gray-400">{installmentText}</p>
+                                                    <p className="text-[11px] text-gray-400 font-semibold">{installmentText}</p>
                                                 </div>
                                             </div>
                                         </div>

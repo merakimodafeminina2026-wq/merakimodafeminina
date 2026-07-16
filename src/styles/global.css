@@ -59,55 +59,76 @@
 }
 
 /* Global base styles */
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
 body {
     font-family: var(--font-body);
     color: var(--color-text);
     background-color: var(--color-background);
     margin: 0;
+    /* Font rendering: máxima nitidez em todas as plataformas */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    font-synthesis: none;
+    font-optical-sizing: auto;
+    /* Peso mínimo para nitidez */
+    font-weight: 500;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
+    /* Cormorant Garamond precisa de 600+ para boa nitidez */
+    font-weight: 600;
+    font-style: normal;
+    letter-spacing: 0.01em;
+    text-rendering: geometricPrecision;
 }
 
-/* Subtítulos default to Manrope */
+/* Subtítulos em Manrope Semi-Bold */
 subtitle, .subtitle, [role="doc-subtitle"] {
     font-family: var(--font-manrope);
+    font-weight: 600;
+    font-style: normal;
 }
 
-/* Descrições in Lora Italic */
+/* Parágrafos — Lora sem itálico forçado, peso aumentado para nitidez */
 p, .description, figcaption {
     font-family: var(--font-lora);
-    font-style: italic;
+    font-style: normal;
+    font-weight: 500;
 }
 
-/* Menu items in Manrope Medium (500) */
+/* Menu em Manrope Semi-Bold */
 a, nav a, .menu-item, [role="link"] {
     text-decoration: none;
     color: inherit;
     font-family: var(--font-manrope);
-    font-weight: 500;
+    font-weight: 600;
 }
 
-/* Buttons in Manrope SemiBold (600) */
+/* Botões em Manrope Bold */
 button, .btn, input[type="button"], input[type="submit"] {
     cursor: pointer;
     font-family: var(--font-manrope);
-    font-weight: 600;
+    font-weight: 700;
+}
+
+/* Inputs — Manrope para consistência e nitidez */
+input, textarea, select {
+    font-family: var(--font-manrope);
+    font-weight: 500;
+    -webkit-font-smoothing: antialiased;
 }
 
 img {
     max-width: 100%;
     display: block;
 }
+
 
 /* Animations */
 @keyframes fadeIn {

@@ -96,11 +96,11 @@ export default function ProductCard({ product, onQuickView, onToggleWishlist, is
                 <div className="w-full space-y-1.5 mb-2">
                     {/* Pink bordered badge for promotion / exclusivity */}
                     {product.badge ? (
-                        <div className="inline-block border border-[#D11A6E] text-[#D11A6E] text-[9px] uppercase font-extrabold tracking-wider px-2 py-0.5 rounded">
+                        <div className="inline-block border border-[#D11A6E] text-[#D11A6E] text-[10px] uppercase font-extrabold tracking-wider px-2 py-0.5 rounded">
                             {product.badge}
                         </div>
                     ) : (
-                        <div className="inline-block border border-[#C6A76A] text-[#C6A76A] text-[9px] uppercase font-extrabold tracking-wider px-2 py-0.5 rounded">
+                        <div className="inline-block border border-[#C6A76A] text-[#C6A76A] text-[10px] uppercase font-extrabold tracking-wider px-2 py-0.5 rounded">
                             Exclusivo Site
                         </div>
                     )}
@@ -116,7 +116,7 @@ export default function ProductCard({ product, onQuickView, onToggleWishlist, is
                         ))}
                     </div>
 
-                    <h3 className="font-sans text-base sm:text-lg font-semibold text-[#1A1A1A] tracking-wide leading-snug line-clamp-2 h-12 sm:h-14 overflow-hidden px-1">
+                    <h3 className="font-sans text-base sm:text-lg font-bold text-[#1A1A1A] tracking-wide leading-snug line-clamp-2 h-12 sm:h-14 overflow-hidden px-1">
                         {product.name}
                     </h3>
                 </div>
@@ -126,11 +126,11 @@ export default function ProductCard({ product, onQuickView, onToggleWishlist, is
                     <div className="flex flex-col items-center gap-0.5">
                         <div className="flex items-center justify-center gap-2 flex-wrap">
                             {product.original_price > 0 && product.original_price > product.price && (
-                                <span className="text-[11px] sm:text-xs text-gray-400 line-through font-light">{formatPrice(product.original_price)}</span>
+                                <span className="text-xs text-gray-400 line-through font-medium">{formatPrice(product.original_price)}</span>
                             )}
                             <span className="text-base sm:text-lg font-extrabold text-[#7A3E4A]">{formatPrice(product.price)}</span>
                         </div>
-                        <p className="text-[10px] text-gray-400 font-medium tracking-wide">{installmentText}</p>
+                        <p className="text-[11px] text-gray-400 font-semibold tracking-wide">{installmentText}</p>
                     </div>
                 </div>
             </div>
