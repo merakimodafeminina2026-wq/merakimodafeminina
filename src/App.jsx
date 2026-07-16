@@ -72,7 +72,7 @@ function SplashLoader() {
                             MERAKI
                         </h1>
                         <span className="text-xs md:text-sm uppercase tracking-[0.55em] text-[#7A3E4A] font-bold mt-1.5 ml-1">
-                            FEMME
+                            ---- FEMME ----
                         </span>
                     </div>
                     <p className="text-[9px] uppercase tracking-[0.4em] text-[#7A3E4A]/60 mt-4 font-medium text-center">

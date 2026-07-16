@@ -258,7 +258,7 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onSearchOpen 
                             />
                             <div className="flex flex-col items-center leading-none text-center">
                                 <span className="font-heading tracking-[0.25em] text-[20px] md:text-[25px] lg:text-[28px] font-black uppercase antialiased">MERAKI</span>
-                                <span className="text-[9px] md:text-[10px] lg:text-[11px] uppercase tracking-[0.48em] text-[#7A3E4A] font-extrabold mt-1 ml-[0.48em] antialiased">FEMME</span>
+                                <span className="text-[9px] md:text-[10px] lg:text-[11px] uppercase tracking-[0.48em] text-[#7A3E4A] font-extrabold mt-1 ml-[0.48em] antialiased">---- FEMME ----</span>
                             </div>
                         </Link>
                     </div>
