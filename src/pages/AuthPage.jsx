@@ -988,8 +988,7 @@ export default function AuthPage() {
                                                         ...positionStyles,
                                                         width: '8px',
                                                         height: '8px',
-                                                        animation: `${b.drift} ${b.duration}s linear infinite`,
-                                                        animationDelay: `${b.delay - 0.15 * (starIndex + 1)}s`,
+                                                        animation: `${b.drift} ${b.duration}s linear ${b.delay - 0.12 * (starIndex + 1)}s infinite`,
                                                         opacity: 0.8
                                                     }}
                                                 >
@@ -1013,8 +1012,7 @@ export default function AuthPage() {
                                                     height: `${b.size}px`,
                                                     marginLeft: `-${halfSize}px`,
                                                     marginTop: `-${topOffset}px`,
-                                                    animation: `${b.drift} ${b.duration}s linear infinite`,
-                                                    animationDelay: `${b.delay}s`,
+                                                    animation: `${b.drift} ${b.duration}s linear ${b.delay}s infinite`,
                                                     opacity: b.opacity,
                                                     transformOrigin: '50% 15%'
                                                 }}
