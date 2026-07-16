@@ -860,6 +860,7 @@ export default function AdminPage() {
                             handleUpdateBannerImage={handleUpdateBannerImage}
                             handleUpdateBannerMobileImage={handleUpdateBannerMobileImage}
                             handleDeleteBanner={handleDeleteBanner}
+                            updateStoreConfig={updateStoreConfig}
                         />
                     )}
 

@@ -322,8 +322,107 @@ export function BannersSection({
     uploadMultipleImages,
     handleUpdateBannerImage,
     handleUpdateBannerMobileImage,
-    handleDeleteBanner
+    handleDeleteBanner,
+    updateStoreConfig
 }) {
+    const [activeTransition, setActiveTransition] = React.useState(() => {
+        try {
+            const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+            return config.bannerTransition || 'shatter'
+        } catch { return 'shatter' }
+    })
+
+    const TRANSITIONS = [
+        {
+            id: 'shatter',
+            label: 'Estilhaçar',
+            description: 'Pedaços voam para fora',
+            preview: (
+                <div className="relative w-full h-full overflow-hidden rounded-lg bg-gradient-to-br from-[#7A3E4A]/20 to-[#C6A76A]/20 flex items-center justify-center">
+                    <div className="grid grid-cols-4 grid-rows-3 gap-0.5 w-10 h-8 opacity-70">
+                        {Array.from({length:12}).map((_,i) => (
+                            <div key={i} className="bg-[#7A3E4A] rounded-[1px]" style={{animation:`shatterPreview${i % 4} 2s ease-in-out infinite`, animationDelay:`${i*0.08}s`}} />
+                        ))}
+                    </div>
+                    <span className="absolute bottom-1 left-0 right-0 text-center text-[8px] font-black text-[#7A3E4A] uppercase tracking-wider">💥 Estilhaçar</span>
+                </div>
+            )
+        },
+        {
+            id: 'fade',
+            label: 'Fade',
+            description: 'Dissolve suavemente',
+            preview: (
+                <div className="relative w-full h-full overflow-hidden rounded-lg flex items-center justify-center">
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#7A3E4A]/80 to-[#C6A76A]/80" style={{animation:'fadePrev 2s ease-in-out infinite'}} />
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#C6A76A]/80 to-[#7A3E4A]/80" style={{animation:'fadeNext 2s ease-in-out infinite'}} />
+                    <span className="relative z-10 text-[8px] font-black text-white uppercase tracking-wider drop-shadow">🌫️ Fade</span>
+                </div>
+            )
+        },
+        {
+            id: 'slideLeft',
+            label: 'Deslizar →',
+            description: 'Desliza horizontalmente',
+            preview: (
+                <div className="relative w-full h-full overflow-hidden rounded-lg flex items-center justify-center bg-gray-100">
+                    <div className="absolute inset-0 flex">
+                        <div className="w-1/2 h-full bg-gradient-to-r from-[#7A3E4A] to-[#9A5060]" style={{animation:'slideLeftPrev 2s ease-in-out infinite'}} />
+                        <div className="w-1/2 h-full bg-gradient-to-r from-[#C6A76A] to-[#D4B878]" style={{animation:'slideLeftNext 2s ease-in-out infinite'}} />
+                    </div>
+                    <span className="relative z-10 text-[8px] font-black text-white uppercase tracking-wider drop-shadow">➡️ Deslizar</span>
+                </div>
+            )
+        },
+        {
+            id: 'slideUp',
+            label: 'Deslizar ↑',
+            description: 'Sobe de baixo para cima',
+            preview: (
+                <div className="relative w-full h-full overflow-hidden rounded-lg flex items-center justify-center bg-gray-100">
+                    <div className="absolute inset-0 flex flex-col">
+                        <div className="h-1/2 w-full bg-gradient-to-b from-[#7A3E4A] to-[#9A5060]" style={{animation:'slideUpPrev 2s ease-in-out infinite'}} />
+                        <div className="h-1/2 w-full bg-gradient-to-b from-[#C6A76A] to-[#D4B878]" style={{animation:'slideUpNext 2s ease-in-out infinite'}} />
+                    </div>
+                    <span className="relative z-10 text-[8px] font-black text-white uppercase tracking-wider drop-shadow">⬆️ Deslizar Cima</span>
+                </div>
+            )
+        },
+        {
+            id: 'zoom',
+            label: 'Zoom',
+            description: 'Zoom de entrada suave',
+            preview: (
+                <div className="relative w-full h-full overflow-hidden rounded-lg flex items-center justify-center bg-gradient-to-br from-[#7A3E4A] to-[#C6A76A]">
+                    <div className="w-8 h-6 rounded bg-white/30" style={{animation:'zoomPrev 2s ease-in-out infinite'}} />
+                    <span className="absolute bottom-1 left-0 right-0 text-center text-[8px] font-black text-white uppercase tracking-wider">🔍 Zoom</span>
+                </div>
+            )
+        },
+        {
+            id: 'flip',
+            label: 'Virar',
+            description: 'Vira como uma página',
+            preview: (
+                <div className="relative w-full h-full overflow-hidden rounded-lg flex items-center justify-center" style={{perspective:'200px'}}>
+                    <div className="w-10 h-7 rounded bg-gradient-to-r from-[#7A3E4A] to-[#C6A76A]" style={{animation:'flipPrev 2s ease-in-out infinite', transformStyle:'preserve-3d'}} />
+                    <span className="absolute bottom-1 left-0 right-0 text-center text-[8px] font-black text-[#7A3E4A] uppercase tracking-wider">🔄 Virar</span>
+                </div>
+            )
+        }
+    ]
+
+    const saveTransition = async (id) => {
+        setActiveTransition(id)
+        const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+        const updated = { ...config, bannerTransition: id }
+        localStorage.setItem('meraki_store_config', JSON.stringify(updated))
+        window.dispatchEvent(new Event('storeConfigUpdated'))
+        if (updateStoreConfig) {
+            await updateStoreConfig({ banner_transition: id })
+        }
+    }
+
     return (
         <div className="space-y-5">
             <div className="flex items-center justify-between">
@@ -336,6 +435,60 @@ export function BannersSection({
                 <button onClick={() => setBannerModal(true)} className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-[#7A3E4A] to-[#9A5060] text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:shadow-lg hover:shadow-[#7A3E4A]/30 transition-all cursor-pointer">
                     <Icon path="M12 4v16m8-8H4" className="w-4 h-4" /> Adicionar Banner
                 </button>
+            </div>
+
+            {/* ─── Transition Selector ──────────────────────────────────────────── */}
+            <style>{`
+                @keyframes fadePrev { 0%,100%{opacity:1} 50%{opacity:0} }
+                @keyframes fadeNext { 0%,100%{opacity:0} 50%{opacity:1} }
+                @keyframes slideLeftPrev { 0%,100%{transform:translateX(0)} 50%{transform:translateX(-100%)} }
+                @keyframes slideLeftNext { 0%,100%{transform:translateX(100%)} 50%{transform:translateX(0)} }
+                @keyframes slideUpPrev { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-100%)} }
+                @keyframes slideUpNext { 0%,100%{transform:translateY(100%)} 50%{transform:translateY(0)} }
+                @keyframes zoomPrev { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.4);opacity:0} }
+                @keyframes flipPrev { 0%,100%{transform:rotateY(0deg)} 50%{transform:rotateY(90deg)} }
+            `}</style>
+            <div className="bg-white p-5 rounded-2xl border border-[#EEEEEE] space-y-4">
+                <div>
+                    <h4 className="text-[10px] font-black text-[#7A3E4A] uppercase tracking-widest">Efeito de Transição do Banner</h4>
+                    <p className="text-[10px] text-gray-400 mt-0.5">Escolha como os banners mudam entre si. Clique para selecionar.</p>
+                </div>
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+                    {TRANSITIONS.map(t => (
+                        <button
+                            key={t.id}
+                            type="button"
+                            onClick={() => saveTransition(t.id)}
+                            className={`relative flex flex-col rounded-xl overflow-hidden border-2 transition-all duration-200 cursor-pointer group ${
+                                activeTransition === t.id
+                                    ? 'border-[#7A3E4A] shadow-lg shadow-[#7A3E4A]/20 scale-[1.03]'
+                                    : 'border-[#EEEEEE] hover:border-[#7A3E4A]/40 hover:scale-[1.02]'
+                            }`}
+                        >
+                            {/* Animated preview */}
+                            <div className="aspect-[4/3] w-full bg-gray-50 relative">
+                                {t.preview}
+                            </div>
+                            {/* Label */}
+                            <div className={`py-2 px-1 text-center text-[9px] font-black uppercase tracking-wider transition-colors ${
+                                activeTransition === t.id ? 'bg-[#7A3E4A] text-white' : 'bg-white text-gray-500'
+                            }`}>
+                                {t.label}
+                            </div>
+                            {/* Active checkmark */}
+                            {activeTransition === t.id && (
+                                <div className="absolute top-1.5 right-1.5 w-4 h-4 bg-[#7A3E4A] rounded-full flex items-center justify-center">
+                                    <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                            )}
+                        </button>
+                    ))}
+                </div>
+                <p className="text-[10px] text-[#7A3E4A] font-semibold">
+                    ✓ Ativo: <span className="font-black">{TRANSITIONS.find(t => t.id === activeTransition)?.label}</span> — {TRANSITIONS.find(t => t.id === activeTransition)?.description}
+                </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -447,6 +600,7 @@ export function BannersSection({
         </div>
     )
 }
+
 
 // ─── SECTION 6: PROMO COMBO CONFIG ────────────────────────────────────────────
 export function PromoComboSection({
