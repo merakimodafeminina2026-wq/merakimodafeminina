@@ -537,6 +537,7 @@ export function BannersSection({
                                     >
                                         Foto Desktop
                                     </button>
+                                    <p className="text-[8px] text-gray-400 text-center mt-1">(1920x800px)</p>
                                     <input 
                                         id={`change-banner-desk-${bn.id}`}
                                         type="file" 
@@ -561,6 +562,7 @@ export function BannersSection({
                                     >
                                         Foto Mobile
                                     </button>
+                                    <p className="text-[8px] text-[#7A3E4A] text-center mt-1">(800x1000px)</p>
                                     <input 
                                         id={`change-banner-mob-${bn.id}`}
                                         type="file" 
