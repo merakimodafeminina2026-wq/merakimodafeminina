@@ -927,7 +927,8 @@ export default function AuthPage() {
                                         left: '-26px', // Desloca para que a cabeça (centro horizontal) fique no ponto (0,0)
                                         top: '-8px',   // Desloca para alinhar verticalmente o topo da borboleta com a origem
                                         filter: 'grayscale(100%) brightness(1.65) contrast(0.65) drop-shadow(0 0 8px rgba(180, 180, 180, 0.75))',
-                                        transformOrigin: '50% 15%' // Rotação pivota próximo à cabeça
+                                        transformOrigin: '50% 15%', // Rotação pivota próximo à cabeça
+                                        opacity: 0.14 // Deixa na mesma opacidade e cor das outras borboletas de fundo
                                     }}
                                 >
                                     <img
@@ -978,8 +979,8 @@ export default function AuthPage() {
 
                                     return (
                                         <div key={b.id}>
-                                            {/* Rastro de Pó de cada borboleta de fundo (2 estrelas que saem da cabeça) */}
-                                            {[...Array(2)].map((_, starIndex) => (
+                                            {/* Rastro de Pó de cada borboleta de fundo (8 estrelas prata que saem da cabeça) */}
+                                            {[...Array(8)].map((_, starIndex) => (
                                                 <div
                                                     key={starIndex}
                                                     className="absolute z-7 pointer-events-none"
@@ -988,15 +989,15 @@ export default function AuthPage() {
                                                         width: '8px',
                                                         height: '8px',
                                                         animation: `${b.drift} ${b.duration}s linear infinite`,
-                                                        animationDelay: `${b.delay - 0.25 * (starIndex + 1)}s`,
-                                                        opacity: b.opacity * 0.85
+                                                        animationDelay: `${b.delay - 0.15 * (starIndex + 1)}s`,
+                                                        opacity: b.opacity * 0.95
                                                     }}
                                                 >
                                                     <div 
                                                         className="w-full h-full animate-pixie-dust flex items-center justify-center"
-                                                        style={{ animationDelay: `${0.1 * starIndex}s` }}
+                                                        style={{ animationDelay: `${0.08 * starIndex}s` }}
                                                     >
-                                                        <svg viewBox="0 0 24 24" className="w-full h-full fill-current text-[#C6A76A] drop-shadow-[0_0_4px_rgba(255,223,120,0.8)]">
+                                                        <svg viewBox="0 0 24 24" className="w-full h-full fill-current text-[#E5E5E5] drop-shadow-[0_0_5px_rgba(255,255,255,0.85)]">
                                                             <path d="M12 2l2.4 7.2 7.2 2.4-7.2 2.4-2.4 7.2-2.4-7.2-7.2-2.4 7.2-2.4z" />
                                                         </svg>
                                                     </div>
