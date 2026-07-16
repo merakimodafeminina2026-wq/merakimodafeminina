@@ -256,9 +256,9 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onSearchOpen 
                                     butterflySrc.startsWith('data:') ? 'opacity-100' : 'opacity-0'
                                 }`}
                             />
-                            <div className="flex flex-col items-start leading-none text-left">
+                            <div className="flex flex-col items-center leading-none text-center">
                                 <span className="font-heading tracking-[0.25em] text-[15px] md:text-lg lg:text-xl font-black">MERAKI</span>
-                                <span className="text-[7px] md:text-[8px] uppercase tracking-[0.45em] text-[#7A3E4A] font-bold mt-0.5 ml-0.5">FEMME</span>
+                                <span className="text-[7px] md:text-[8px] uppercase tracking-[0.45em] text-[#7A3E4A] font-bold mt-0.5 ml-[0.45em]">FEMME</span>
                             </div>
                         </Link>
                     </div>
