@@ -312,53 +312,13 @@ export default function HomePage() {
                                     return displayProducts.map(product => {
                                         const isWish = isWishlisted(product.id)
                                         return (
-                                            <div 
-                                                key={product.id} 
-                                                onClick={() => navigate(`/product/${product.id}`)}
-                                                className="group bg-white border border-gray-100 rounded-2xl p-3 flex flex-col shadow-xs hover:shadow-md transition-all cursor-pointer relative"
-                                            >
-                                                <div className="relative w-full h-[220px] sm:h-[260px] lg:h-[350px] rounded-xl overflow-hidden bg-[#F9F9F9] mb-4">
-                                                    <img 
-                                                        src={getAssetUrl(product.image)} 
-                                                        alt={product.name} 
-                                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
-                                                    />
-                                                </div>
-                                                    {/* Heart Button */}
-                                                    <button 
-                                                        onClick={(e) => { e.stopPropagation(); toggleWishlist(product.id); }} 
-                                                        className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-xs"
-                                                    >
-                                                        <svg className={`w-4 h-4 ${isWish ? 'text-primary fill-primary' : 'text-gray-500 hover:text-primary'}`} fill={isWish ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                                        </svg>
-                                                    </button>
-                                                <div className="space-y-3 mt-1">
-                                                    <div>
-                                                        <span className="inline-block bg-[#FDF0F6] text-[#D11A6E] text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-sm mb-1.5">
-                                                            {promoBadgeText}
-                                                        </span>
-                                                        <div className="flex gap-1 mb-1">
-                                                            <span className="w-2.5 h-2.5 rounded-full bg-[#E8DCC4] border border-gray-300"></span>
-                                                            <span className="w-2.5 h-2.5 rounded-full bg-[#EAA2A2] border border-gray-300"></span>
-                                                            <span className="w-2.5 h-2.5 rounded-full bg-black border border-gray-300"></span>
-                                                        </div>
-                                                        <h4 className="font-sans text-sm sm:text-base font-semibold text-[#1A1A1A] tracking-wide line-clamp-2 leading-snug">{product.name}</h4>
-                                                    </div>
-                                                    <div className="pt-2">
-                                                        <p className="text-xs sm:text-sm font-bold text-[#7A3E4A]">R$ {product.price.toFixed(2).replace('.', ',')}</p>
-                                                        <p className="text-[10px] text-gray-400">Em até 1x R$ {product.price.toFixed(2).replace('.', ',')} sem juros</p>
-                                                        <button 
-                                                            onClick={(e) => { e.stopPropagation(); handleAddToCart(product, 'M'); }}
-                                                            className="w-full mt-3 py-2.5 bg-[#7A3E4A] hover:bg-[#63303a] text-white text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
-                                                        >
-                                                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                                                            </svg>
-                                                            Comprar
-                                                        </button>
-                                                    </div>
-                                                </div>
+                                            <div key={product.id}>
+                                                <ProductCard 
+                                                    product={product}
+                                                    onQuickView={setQuickViewProduct}
+                                                    onToggleWishlist={toggleWishlist}
+                                                    isWishlisted={isWish}
+                                                />
                                             </div>
                                         )
                                     })
