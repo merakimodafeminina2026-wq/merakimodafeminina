@@ -247,18 +247,18 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onSearchOpen 
                         <Link 
                             to="/" 
                             onClick={() => { smoothScrollToTop(1200); setMobileMenuOpen(false); }}
-                            className="text-2xl md:text-2.5xl lg:text-3xl font-bold text-[#1A1A1A] hover:text-[#7A3E4A] transition-all duration-500 inline-flex items-center gap-2 animate-logo-breath"
+                            className="text-2xl md:text-3xl lg:text-4xl font-bold text-[#1A1A1A] hover:text-[#7A3E4A] transition-all duration-500 inline-flex items-center gap-2.5 animate-logo-breath"
                         >
                             <img 
                                 src={butterflySrc} 
                                 alt="Borboleta Meraki" 
-                                className={`w-10 h-10 md:w-12 md:h-12 object-contain animate-butterfly-flight transition-opacity duration-200 ${
+                                className={`w-11 h-11 md:w-14 md:h-14 object-contain animate-butterfly-flight transition-opacity duration-200 ${
                                     butterflySrc.startsWith('data:') ? 'opacity-100' : 'opacity-0'
                                 }`}
                             />
                             <div className="flex flex-col items-center leading-none text-center">
-                                <span className="font-heading tracking-[0.25em] text-[15px] md:text-lg lg:text-xl font-black">MERAKI</span>
-                                <span className="text-[7px] md:text-[8px] uppercase tracking-[0.45em] text-[#7A3E4A] font-bold mt-0.5 ml-[0.45em]">FEMME</span>
+                                <span className="font-heading tracking-[0.25em] text-[20px] md:text-[25px] lg:text-[28px] font-black uppercase antialiased">MERAKI</span>
+                                <span className="text-[9px] md:text-[10px] lg:text-[11px] uppercase tracking-[0.48em] text-[#7A3E4A] font-extrabold mt-1 ml-[0.48em] antialiased">FEMME</span>
                             </div>
                         </Link>
                     </div>
