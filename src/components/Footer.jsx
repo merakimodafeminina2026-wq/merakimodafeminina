@@ -70,7 +70,7 @@ export default function Footer() {
                 <div className="flex justify-center mb-10">
                     <a 
                         href="#/" 
-                        className="font-heading text-2xl md:text-3xl font-bold tracking-[0.3em] text-[#1A1A1A] hover:text-[#7A3E4A] transition-colors inline-flex items-center gap-2"
+                        className="text-2xl md:text-3xl font-bold text-[#1A1A1A] hover:text-[#7A3E4A] transition-colors inline-flex items-center gap-2"
                     >
                         <img 
                             src={butterflySrc} 
@@ -79,7 +79,7 @@ export default function Footer() {
                                 butterflySrc.startsWith('data:') ? 'opacity-100' : 'opacity-0'
                             }`}
                         />
-                        <span>MERAKI</span>
+                        <span className="font-heading tracking-[0.3em]">MERAKI</span>
                     </a>
                 </div>
 
