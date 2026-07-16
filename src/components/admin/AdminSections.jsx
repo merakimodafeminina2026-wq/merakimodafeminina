@@ -694,6 +694,11 @@ export function CategoriesSection({
     uploadMultipleImages,
     getAssetUrl
 }) {
+    const [editingIndex, setEditingIndex] = useState(null)
+    const [catName, setCatName] = useState('')
+    const [catGroup, setCatGroup] = useState('Lingerie')
+    const [catDescription, setCatDescription] = useState('')
+
     const [defaultCategoryImage, setDefaultCategoryImage] = useState(() => {
         const stored = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
         return stored.default_category_image || 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=400&q=80'
