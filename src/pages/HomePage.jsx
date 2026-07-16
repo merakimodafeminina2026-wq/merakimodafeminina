@@ -456,7 +456,7 @@ export default function HomePage() {
                                                         ))}
                                                         <span className="text-[10px] text-gray-400 font-semibold ml-1">(5)</span>
                                                     </div>
-                                                    <h4 className="font-sans text-sm sm:text-base font-bold text-[#1A1A1A] tracking-wide line-clamp-2 leading-snug">{product.name}</h4>
+                                                    <h4 className="font-sans text-sm sm:text-base font-bold text-[#1A1A1A] tracking-wide line-clamp-2 leading-snug h-12 overflow-hidden">{product.name}</h4>
                                                 </div>
                                                 <div className="w-full mt-auto">
                                                     <div className="flex items-center gap-2 flex-wrap mb-1">
