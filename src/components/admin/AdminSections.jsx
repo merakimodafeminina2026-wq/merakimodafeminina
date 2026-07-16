@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '../../services/supabase.js'
 
 function Icon({ path, className = 'w-5 h-5' }) {
@@ -325,7 +325,7 @@ export function BannersSection({
     handleDeleteBanner,
     updateStoreConfig
 }) {
-    const [activeTransition, setActiveTransition] = React.useState(() => {
+    const [activeTransition, setActiveTransition] = useState(() => {
         try {
             const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
             return config.bannerTransition || 'shatter'
