@@ -324,7 +324,7 @@ export default function ProductPage() {
                         </div>
 
                         {/* Title */}
-                        <h1 className="font-heading text-3xl md:text-4xl text-gray-900 leading-tight mb-4">{product.name}</h1>
+                        <h1 className="font-sans text-2xl md:text-3xl font-bold text-gray-900 leading-tight mb-4">{product.name}</h1>
 
                         {/* Pricing and payments */}
                         <div className="mb-6 pb-6 border-b border-gray-100">

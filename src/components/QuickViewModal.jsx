@@ -151,7 +151,7 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
                         </div>
 
                         {/* Title */}
-                        <h3 className="font-heading text-xl font-bold text-gray-900 leading-tight mb-1">{product.name}</h3>
+                        <h3 className="font-sans text-lg font-bold text-gray-900 leading-tight mb-1">{product.name}</h3>
                         
                         {/* Seller */}
                         <p className="text-[10px] text-gray-400 mb-4 font-sans">
