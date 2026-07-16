@@ -33,10 +33,18 @@ export default function ProductCard({ product, onQuickView, onToggleWishlist, is
 
     // Carrega o mapeamento de cores reais cadastradas para pegar o tom hexadecimal correto
     const colors = useMemo(() => {
-        if (!product || !product.colors) return []
-        return typeof product.colors === 'string' 
-            ? product.colors.split(',').map(c => c.trim()).filter(Boolean)
-            : (Array.isArray(product.colors) ? product.colors : [])
+        if (!product) return []
+        const rawColors = product.colors
+        if (!rawColors) return []
+        if (typeof rawColors === 'string') {
+            // Pode vir como string serializada de array do PG (ex: '{Preto,Branco}' ou 'Preto,Branco')
+            const cleanStr = rawColors.replace(/[\{\}]/g, '')
+            return cleanStr.split(',').map(c => c.trim()).filter(Boolean)
+        }
+        if (Array.isArray(rawColors)) {
+            return rawColors.map(c => String(c).trim()).filter(Boolean)
+        }
+        return []
     }, [product])
 
     const colorHexMap = useMemo(() => {
