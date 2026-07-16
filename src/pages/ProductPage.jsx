@@ -438,7 +438,7 @@ export default function ProductPage() {
                                     >
                                         Com Personalização
                                         <span className="block text-[10px] text-gray-400 font-medium mt-0.5">
-                                            {product.customPriceWith ? formatPrice(product.customPriceWith) : formatPrice(product.price)}
+                                            {formatPrice((product.customPriceWith ? parseFloat(product.customPriceWith) : product.price) + customPrice)}
                                         </span>
                                     </button>
                                 </div>

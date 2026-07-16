@@ -1074,7 +1074,33 @@ export default function AdminPage() {
                             <form onSubmit={handleSave} className="p-6 space-y-4">
                                 <div>
                                     <label className={labelCls}>Nome do Produto</label>
-                                    <input type="text" name="pName" required defaultValue={editingProduct?.name || ''} className={inputCls} />
+                                    <div className="relative">
+                                        <input type="text" id="adminProdNameInput" name="pName" required defaultValue={editingProduct?.name || ''} className={inputCls} />
+                                        {/* Inseridor Rápido de Emojis */}
+                                        <div className="flex gap-1 mt-1.5 flex-wrap">
+                                            {['🍎', '💛', '👄', '🍒', '😍', '🌶️', '🐰', '🌟'].map(emoji => (
+                                                <button
+                                                    key={emoji}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const el = document.getElementById('adminProdNameInput')
+                                                        if (el) {
+                                                            const start = el.selectionStart
+                                                            const end = el.selectionEnd
+                                                            const text = el.value
+                                                            el.value = text.slice(0, start) + emoji + text.slice(end)
+                                                            el.dispatchEvent(new Event('input', { bubbles: true }))
+                                                            el.focus()
+                                                            el.setSelectionRange(start + emoji.length, start + emoji.length)
+                                                        }
+                                                    }}
+                                                    className="w-6 h-6 flex items-center justify-center bg-gray-50 hover:bg-gray-200 rounded border border-[#EEEEEE] text-[13px] cursor-pointer"
+                                                >
+                                                    {emoji}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
                                 </div>
                                 
                                 <div>
@@ -1297,7 +1323,34 @@ export default function AdminPage() {
                                     )}
                                 </div>
 
-                                <div><label className={labelCls}>Descrição</label><textarea name="pDescription" rows="3" defaultValue={editingProduct?.description || ''} className={`${inputCls} resize-none`} /></div>
+                                <div>
+                                    <label className={labelCls}>Descrição</label>
+                                    <textarea id="adminProdDescInput" name="pDescription" rows="3" defaultValue={editingProduct?.description || ''} className={`${inputCls} resize-none`} />
+                                    {/* Inseridor Rápido de Emojis */}
+                                    <div className="flex gap-1 mt-1.5 flex-wrap">
+                                        {['🍎', '💛', '👄', '🍒', '😍', '🌶️', '🐰', '🌟'].map(emoji => (
+                                            <button
+                                                key={emoji}
+                                                type="button"
+                                                onClick={() => {
+                                                    const el = document.getElementById('adminProdDescInput')
+                                                    if (el) {
+                                                        const start = el.selectionStart
+                                                        const end = el.selectionEnd
+                                                        const text = el.value
+                                                        el.value = text.slice(0, start) + emoji + text.slice(end)
+                                                        el.dispatchEvent(new Event('input', { bubbles: true }))
+                                                        el.focus()
+                                                        el.setSelectionRange(start + emoji.length, start + emoji.length)
+                                                    }
+                                                }}
+                                                className="w-6 h-6 flex items-center justify-center bg-gray-50 hover:bg-gray-200 rounded border border-[#EEEEEE] text-[13px] cursor-pointer"
+                                            >
+                                                {emoji}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
 
                                 {/* Image Upload */}
                                 <div>
