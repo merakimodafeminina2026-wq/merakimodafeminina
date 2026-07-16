@@ -142,16 +142,10 @@ export default function ProductPage() {
         const unique = []
         const seen = new Set()
         for (let s of parsed) {
-            let normalized = s.trim().toUpperCase()
-            if (normalized === 'U' || normalized === 'UNICO' || normalized === 'ÚNICO') {
-                if (seen.has('UNIQUE_SIZE_KEY')) continue
-                seen.add('UNIQUE_SIZE_KEY')
-                s = 'Único'
-            }
-            const key = s.toUpperCase()
-            if (!seen.has(key)) {
+            const key = s.trim().toUpperCase()
+            if (key && !seen.has(key)) {
                 seen.add(key)
-                unique.push(s)
+                unique.push(s.trim())
             }
         }
         return unique
