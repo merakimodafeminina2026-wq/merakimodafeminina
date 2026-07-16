@@ -209,7 +209,29 @@ export default function ProductPage() {
     }
 
     const imageSrc = getAssetUrl(productImages[activeImageIndex] || '/placeholder.jpg')
-    const sizes = product.sizes ? (typeof product.sizes === 'string' ? product.sizes.split(',').map(s => s.trim()) : product.sizes) : []
+    const sizes = useMemo(() => {
+        if (!product || !product.sizes) return []
+        const parsed = typeof product.sizes === 'string' 
+            ? product.sizes.split(',').map(s => s.trim()) 
+            : product.sizes
+        const unique = []
+        const seen = new Set()
+        for (let s of parsed) {
+            let normalized = s.trim().toUpperCase()
+            if (normalized === 'U' || normalized === 'UNICO' || normalized === 'ÚNICO') {
+                if (seen.has('UNIQUE_SIZE_KEY')) continue
+                seen.add('UNIQUE_SIZE_KEY')
+                s = 'Único'
+            }
+            const key = s.toUpperCase()
+            if (!seen.has(key)) {
+                seen.add(key)
+                unique.push(s)
+            }
+        }
+        return unique
+    }, [product])
+
     const colors = product.colors ? (Array.isArray(product.colors) ? product.colors : (typeof product.colors === 'string' ? product.colors.split(',').map(c => c.trim()) : [])) : []
 
     return (

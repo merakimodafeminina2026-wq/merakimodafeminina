@@ -1160,7 +1160,7 @@ export default function AdminPage() {
                                 <div>
                                     <label className={labelCls}>Tamanhos Disponíveis</label>
                                     <div className="flex flex-wrap gap-1.5 bg-[#FAF9F5] p-3 rounded-xl border border-[#EEEEEE]">
-                                        {['P', 'M', 'G', 'GG', 'EGG', 'XG', 'Único', '34', '36', '38', '40', '42', '44', '46', '48', '50'].map(size => {
+                                        {['U', 'Único', 'P', 'M', 'G', 'GG', 'EGG', 'XG', '34', '36', '38', '40', '42', '44', '46', '48', '50'].map(size => {
                                             const isSelected = selectedModalSizes.includes(size)
                                             return (
                                                 <button

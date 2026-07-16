@@ -28,7 +28,25 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
     const formatPrice = (price) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price)
     
     // Parse sizes safely
-    const sizes = product.sizes ? (typeof product.sizes === 'string' ? product.sizes.split(',').map(s => s.trim()) : product.sizes) : []
+    const rawSizes = product.sizes ? (typeof product.sizes === 'string' ? product.sizes.split(',').map(s => s.trim()) : product.sizes) : []
+    const sizes = (() => {
+        const unique = []
+        const seen = new Set()
+        for (let s of rawSizes) {
+            let normalized = s.trim().toUpperCase()
+            if (normalized === 'U' || normalized === 'UNICO' || normalized === 'ÚNICO') {
+                if (seen.has('UNIQUE_SIZE_KEY')) continue
+                seen.add('UNIQUE_SIZE_KEY')
+                s = 'Único'
+            }
+            const key = s.toUpperCase()
+            if (!seen.has(key)) {
+                seen.add(key)
+                unique.push(s)
+            }
+        }
+        return unique
+    })()
     
     // Gather all images safely
     const images = Array.isArray(product.image) ? product.image : [product.image].filter(Boolean)
