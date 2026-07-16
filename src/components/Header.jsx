@@ -379,18 +379,15 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onSearchOpen 
 
                                             {/* Promo Banner Column */}
                                             <div className="w-48 bg-[#FAF9F5] border border-[#E8E0D8] rounded-xl p-4 flex flex-col justify-between relative overflow-hidden shrink-0 text-left min-h-[220px]">
-                                                {hoveredCategory && hoveredCategory.image ? (
-                                                    <div className="absolute inset-0 z-0 animate-[fadeIn_200ms_ease-out]">
-                                                        <img 
-                                                            src={hoveredCategory.image} 
-                                                            alt={hoveredCategory.name} 
-                                                            className="w-full h-full object-cover brightness-[0.7]" 
-                                                        />
-                                                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
-                                                    </div>
-                                                ) : (
-                                                    <div className="absolute -right-8 -bottom-8 w-20 h-20 rounded-full border border-[#C6A76A]/15 z-0" />
-                                                )}
+                                                {/* Imagem de Fundo - usa a da categoria ou uma imagem padrão premium para não ficar em branco */}
+                                                <div className="absolute inset-0 z-0 animate-[fadeIn_200ms_ease-out]">
+                                                    <img 
+                                                        src={hoveredCategory && hoveredCategory.image ? hoveredCategory.image : 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=400&q=80'} 
+                                                        alt={hoveredCategory ? hoveredCategory.name : 'Default'} 
+                                                        className="w-full h-full object-cover brightness-[0.65]" 
+                                                    />
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
+                                                </div>
 
                                                 <div className="relative z-10 space-y-1.5 mt-auto">
                                                     <span className={`text-[8px] font-bold uppercase tracking-widest ${hoveredCategory ? 'text-white/80' : 'text-[#C6A76A]'}`}>

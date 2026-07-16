@@ -694,6 +694,18 @@ export function CategoriesSection({
     uploadMultipleImages,
     getAssetUrl
 }) {
+    const [editingIndex, setEditingIndex] = useState(null)
+    const [catName, setCatName] = useState('')
+    const [catGroup, setCatGroup] = useState('Lingerie')
+    const [catDescription, setCatDescription] = useState('')
+
+    const resetForm = () => {
+        setEditingIndex(null)
+        setCatName('')
+        setCatGroup('Lingerie')
+        setCatDescription('')
+    }
+
     return (
         <div className="space-y-5">
             <div>
@@ -702,32 +714,46 @@ export function CategoriesSection({
             </div>
 
             <div className="bg-white rounded-2xl border border-[#EEEEEE] p-5">
-                <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-4">Nova Categoria</h3>
+                <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-4">
+                    {editingIndex !== null ? 'Editar Categoria' : 'Nova Categoria'}
+                </h3>
                 <form 
                     onSubmit={async (e) => {
                         e.preventDefault()
                         const form = e.target
-                        const name = form.catName.value.trim()
-                        const group = form.catGroup.value
-                        const description = form.catDescription.value.trim()
+                        const name = catName.trim()
+                        const group = catGroup
+                        const description = catDescription.trim()
                         const files = form.catImage.files
                         
                         if (!name) return
                         setSaving(true)
                         
                         let imageUrl = '/placeholder.jpg'
+                        if (editingIndex !== null) {
+                            imageUrl = categories[editingIndex].image || '/placeholder.jpg'
+                        }
+                        
                         if (files?.[0]) {
                             const compressedFile = await compressImage(files[0], 1200)
                             const { urls } = await uploadMultipleImages([compressedFile])
                             if (urls?.[0]) imageUrl = urls[0]
                         }
 
-                        const newCatObj = { name, group, description, image: imageUrl }
-                        const updated = [...categories, newCatObj]
+                        const catObj = { name, group, description, image: imageUrl }
+                        
+                        let updated
+                        if (editingIndex !== null) {
+                            updated = categories.map((c, i) => i === editingIndex ? catObj : c)
+                        } else {
+                            updated = [...categories, catObj]
+                        }
+                        
                         setCategories(updated)
                         localStorage.setItem('meraki_categories', JSON.stringify(updated))
                         window.dispatchEvent(new Event('categoriesUpdated'))
                         form.reset()
+                        resetForm()
                         setSaving(false)
                     }}
                     className="space-y-4"
@@ -735,11 +761,24 @@ export function CategoriesSection({
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
                             <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Nome da Categoria</label>
-                            <input type="text" name="catName" required placeholder="Ex: Lingerie Luxo" className="w-full px-3 py-2 border border-[#EEEEEE] rounded-xl text-xs outline-none" />
+                            <input 
+                                type="text" 
+                                name="catName" 
+                                required 
+                                value={catName}
+                                onChange={e => setCatName(e.target.value)}
+                                placeholder="Ex: Lingerie Luxo" 
+                                className="w-full px-3 py-2 border border-[#EEEEEE] rounded-xl text-xs outline-none" 
+                            />
                         </div>
                         <div>
                             <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Grupo do Mega Menu</label>
-                            <select name="catGroup" className="w-full px-3 py-2 border border-[#EEEEEE] rounded-xl text-xs outline-none bg-white">
+                            <select 
+                                name="catGroup" 
+                                value={catGroup}
+                                onChange={e => setCatGroup(e.target.value)}
+                                className="w-full px-3 py-2 border border-[#EEEEEE] rounded-xl text-xs outline-none bg-white"
+                            >
                                 <option value="Lingerie">Lingerie</option>
                                 <option value="Noite & Especiais">Noite & Especiais</option>
                                 <option value="Destaques">Destaques</option>
@@ -749,15 +788,36 @@ export function CategoriesSection({
                         <div>
                             <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Imagem de Capa</label>
                             <input type="file" name="catImage" accept="image/*" className="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#7A3E4A]/10 file:text-[#7A3E4A] hover:file:bg-[#7A3E4A]/20 cursor-pointer" />
+                            {editingIndex !== null && (
+                                <p className="text-[9px] text-gray-400 mt-1">Deixe em branco para manter a imagem atual</p>
+                            )}
                         </div>
                     </div>
                     <div>
                         <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Descrição</label>
-                        <input type="text" name="catDescription" placeholder="Breve descrição da categoria..." className="w-full px-3 py-2 border border-[#EEEEEE] rounded-xl text-xs outline-none" />
+                        <input 
+                            type="text" 
+                            name="catDescription" 
+                            value={catDescription}
+                            onChange={e => setCatDescription(e.target.value)}
+                            placeholder="Breve descrição da categoria..." 
+                            className="w-full px-3 py-2 border border-[#EEEEEE] rounded-xl text-xs outline-none" 
+                        />
                     </div>
-                    <button type="submit" disabled={saving} className="px-5 py-3 bg-[#7A3E4A] hover:bg-[#603039] text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer disabled:opacity-50">
-                        Cadastrar Categoria
-                    </button>
+                    <div className="flex gap-2">
+                        <button type="submit" disabled={saving} className="px-5 py-3 bg-[#7A3E4A] hover:bg-[#603039] text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer disabled:opacity-50">
+                            {editingIndex !== null ? 'Salvar Alterações' : 'Cadastrar Categoria'}
+                        </button>
+                        {editingIndex !== null && (
+                            <button 
+                                type="button" 
+                                onClick={resetForm}
+                                className="px-5 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+                            >
+                                Cancelar
+                            </button>
+                        )}
+                    </div>
                 </form>
             </div>
 
@@ -780,13 +840,26 @@ export function CategoriesSection({
                                     <p className="text-[10px] text-gray-400 leading-relaxed line-clamp-2">{cDesc}</p>
                                 </div>
                             </div>
-                            <div className="px-4 py-2 border-t border-[#F8F8F8] flex justify-end">
+                            <div className="px-4 py-2 border-t border-[#F8F8F8] flex justify-end gap-2">
+                                <button 
+                                    onClick={() => {
+                                        setEditingIndex(idx)
+                                        setCatName(cName)
+                                        setCatGroup(cGroup)
+                                        setCatDescription(cDesc)
+                                        window.scrollTo({ top: 0, behavior: 'smooth' })
+                                    }}
+                                    className="text-[9px] font-bold text-[#C6A76A] hover:text-[#b09054] uppercase tracking-widest cursor-pointer px-2 py-1 rounded-lg hover:bg-[#C6A76A]/10 transition-all"
+                                >
+                                    Editar
+                                </button>
                                 <button 
                                     onClick={() => {
                                         const updated = categories.filter((_, i) => i !== idx)
                                         setCategories(updated)
                                         localStorage.setItem('meraki_categories', JSON.stringify(updated))
                                         window.dispatchEvent(new Event('categoriesUpdated'))
+                                        if (editingIndex === idx) resetForm()
                                     }}
                                     className="text-[9px] font-bold text-red-400 hover:text-red-600 uppercase tracking-widest cursor-pointer px-2 py-1 rounded-lg hover:bg-red-50 transition-all"
                                 >
