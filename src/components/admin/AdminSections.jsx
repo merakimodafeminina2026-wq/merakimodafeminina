@@ -694,10 +694,10 @@ export function CategoriesSection({
     uploadMultipleImages,
     getAssetUrl
 }) {
-    const [editingIndex, setEditingIndex] = useState(null)
-    const [catName, setCatName] = useState('')
-    const [catGroup, setCatGroup] = useState('Lingerie')
-    const [catDescription, setCatDescription] = useState('')
+    const [defaultCategoryImage, setDefaultCategoryImage] = useState(() => {
+        const stored = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+        return stored.default_category_image || 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=400&q=80'
+    })
 
     const resetForm = () => {
         setEditingIndex(null)
@@ -713,112 +713,165 @@ export function CategoriesSection({
                 <p className="text-[10px] text-gray-400 font-medium">{categories.length} categoria{categories.length !== 1 ? 's' : ''} cadastrada{categories.length !== 1 ? 's' : ''}</p>
             </div>
 
-            <div className="bg-white rounded-2xl border border-[#EEEEEE] p-5">
-                <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-4">
-                    {editingIndex !== null ? 'Editar Categoria' : 'Nova Categoria'}
-                </h3>
-                <form 
-                    onSubmit={async (e) => {
-                        e.preventDefault()
-                        const form = e.target
-                        const name = catName.trim()
-                        const group = catGroup
-                        const description = catDescription.trim()
-                        const files = form.catImage.files
-                        
-                        if (!name) return
-                        setSaving(true)
-                        
-                        let imageUrl = '/placeholder.jpg'
-                        if (editingIndex !== null) {
-                            imageUrl = categories[editingIndex].image || '/placeholder.jpg'
-                        }
-                        
-                        if (files?.[0]) {
-                            const compressedFile = await compressImage(files[0], 1200)
-                            const { urls } = await uploadMultipleImages([compressedFile])
-                            if (urls?.[0]) imageUrl = urls[0]
-                        }
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                {/* Formulário de Cadastro/Edição */}
+                <div className="lg:col-span-2 bg-white rounded-2xl border border-[#EEEEEE] p-5">
+                    <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-4">
+                        {editingIndex !== null ? 'Editar Categoria' : 'Nova Categoria'}
+                    </h3>
+                    <form 
+                        onSubmit={async (e) => {
+                            e.preventDefault()
+                            const form = e.target
+                            const name = catName.trim()
+                            const group = catGroup
+                            const description = catDescription.trim()
+                            const files = form.catImage.files
+                            
+                            if (!name) return
+                            setSaving(true)
+                            
+                            let imageUrl = '/placeholder.jpg'
+                            if (editingIndex !== null) {
+                                imageUrl = categories[editingIndex].image || '/placeholder.jpg'
+                            }
+                            
+                            if (files?.[0]) {
+                                const compressedFile = await compressImage(files[0], 1200)
+                                const { urls } = await uploadMultipleImages([compressedFile])
+                                if (urls?.[0]) imageUrl = urls[0]
+                            }
 
-                        const catObj = { name, group, description, image: imageUrl }
-                        
-                        let updated
-                        if (editingIndex !== null) {
-                            updated = categories.map((c, i) => i === editingIndex ? catObj : c)
-                        } else {
-                            updated = [...categories, catObj]
-                        }
-                        
-                        setCategories(updated)
-                        localStorage.setItem('meraki_categories', JSON.stringify(updated))
-                        window.dispatchEvent(new Event('categoriesUpdated'))
-                        form.reset()
-                        resetForm()
-                        setSaving(false)
-                    }}
-                    className="space-y-4"
-                >
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            const catObj = { name, group, description, image: imageUrl }
+                            
+                            let updated
+                            if (editingIndex !== null) {
+                                updated = categories.map((c, i) => i === editingIndex ? catObj : c)
+                            } else {
+                                updated = [...categories, catObj]
+                            }
+                            
+                            setCategories(updated)
+                            localStorage.setItem('meraki_categories', JSON.stringify(updated))
+                            window.dispatchEvent(new Event('categoriesUpdated'))
+                            form.reset()
+                            resetForm()
+                            setSaving(false)
+                        }}
+                        className="space-y-4"
+                    >
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Nome da Categoria</label>
+                                <input 
+                                    type="text" 
+                                    name="catName" 
+                                    required 
+                                    value={catName}
+                                    onChange={e => setCatName(e.target.value)}
+                                    placeholder="Ex: Lingerie Luxo" 
+                                    className="w-full px-3 py-2 border border-[#EEEEEE] rounded-xl text-xs outline-none" 
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Grupo do Mega Menu</label>
+                                <select 
+                                    name="catGroup" 
+                                    value={catGroup}
+                                    onChange={e => setCatGroup(e.target.value)}
+                                    className="w-full px-3 py-2 border border-[#EEEEEE] rounded-xl text-xs outline-none bg-white"
+                                >
+                                    <option value="Lingerie">Lingerie</option>
+                                    <option value="Noite & Especiais">Noite & Especiais</option>
+                                    <option value="Destaques">Destaques</option>
+                                    <option value="Sensual">Sensual</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Imagem de Capa</label>
+                                <input type="file" name="catImage" accept="image/*" className="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#7A3E4A]/10 file:text-[#7A3E4A] hover:file:bg-[#7A3E4A]/20 cursor-pointer" />
+                                {editingIndex !== null && (
+                                    <p className="text-[9px] text-gray-400 mt-1">Deixe em branco para manter a imagem atual</p>
+                                )}
+                            </div>
+                        </div>
                         <div>
-                            <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Nome da Categoria</label>
+                            <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Descrição</label>
                             <input 
                                 type="text" 
-                                name="catName" 
-                                required 
-                                value={catName}
-                                onChange={e => setCatName(e.target.value)}
-                                placeholder="Ex: Lingerie Luxo" 
+                                name="catDescription" 
+                                value={catDescription}
+                                onChange={e => setCatDescription(e.target.value)}
+                                placeholder="Breve descrição da categoria..." 
                                 className="w-full px-3 py-2 border border-[#EEEEEE] rounded-xl text-xs outline-none" 
                             />
                         </div>
-                        <div>
-                            <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Grupo do Mega Menu</label>
-                            <select 
-                                name="catGroup" 
-                                value={catGroup}
-                                onChange={e => setCatGroup(e.target.value)}
-                                className="w-full px-3 py-2 border border-[#EEEEEE] rounded-xl text-xs outline-none bg-white"
-                            >
-                                <option value="Lingerie">Lingerie</option>
-                                <option value="Noite & Especiais">Noite & Especiais</option>
-                                <option value="Destaques">Destaques</option>
-                                <option value="Sensual">Sensual</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Imagem de Capa</label>
-                            <input type="file" name="catImage" accept="image/*" className="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#7A3E4A]/10 file:text-[#7A3E4A] hover:file:bg-[#7A3E4A]/20 cursor-pointer" />
+                        <div className="flex gap-2">
+                            <button type="submit" disabled={saving} className="px-5 py-3 bg-[#7A3E4A] hover:bg-[#603039] text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer disabled:opacity-50">
+                                {editingIndex !== null ? 'Salvar Alterações' : 'Cadastrar Categoria'}
+                            </button>
                             {editingIndex !== null && (
-                                <p className="text-[9px] text-gray-400 mt-1">Deixe em branco para manter a imagem atual</p>
+                                <button 
+                                    type="button" 
+                                    onClick={resetForm}
+                                    className="px-5 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+                                >
+                                    Cancelar
+                                </button>
                             )}
                         </div>
-                    </div>
+                    </form>
+                </div>
+
+                {/* Imagem Padrão do Menu */}
+                <div className="bg-white rounded-2xl border border-[#EEEEEE] p-5 flex flex-col justify-between">
                     <div>
-                        <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Descrição</label>
+                        <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">Imagem Padrão do Menu</h3>
+                        <p className="text-[10px] text-gray-400 font-semibold mb-4 leading-relaxed">
+                            Esta imagem será exibida no painel do Mega Menu quando nenhuma categoria estiver sendo selecionada com o cursor.
+                        </p>
+                        
+                        <div className="w-full h-32 rounded-xl overflow-hidden border border-[#EEEEEE] bg-gray-50 mb-4 relative group">
+                            <img src={defaultCategoryImage} alt="Imagem Padrão" className="w-full h-full object-cover" />
+                        </div>
+                    </div>
+
+                    <div className="space-y-3">
                         <input 
-                            type="text" 
-                            name="catDescription" 
-                            value={catDescription}
-                            onChange={e => setCatDescription(e.target.value)}
-                            placeholder="Breve descrição da categoria..." 
-                            className="w-full px-3 py-2 border border-[#EEEEEE] rounded-xl text-xs outline-none" 
+                            type="file" 
+                            accept="image/*" 
+                            id="defaultCatImageInput"
+                            onChange={async (e) => {
+                                const file = e.target.files?.[0]
+                                if (!file) return
+                                setSaving(true)
+                                try {
+                                    const compressed = await compressImage(file, 1200)
+                                    const { urls } = await uploadMultipleImages([compressed])
+                                    if (urls?.[0]) {
+                                        const stored = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+                                        const newConfig = { ...stored, id: 'default', default_category_image: urls[0] }
+                                        localStorage.setItem('meraki_store_config', JSON.stringify(newConfig))
+                                        window.dispatchEvent(new Event('storeConfigUpdated'))
+                                        setDefaultCategoryImage(urls[0])
+                                    }
+                                } catch (err) {
+                                    console.error(err)
+                                }
+                                setSaving(false)
+                            }}
+                            className="hidden" 
                         />
-                    </div>
-                    <div className="flex gap-2">
-                        <button type="submit" disabled={saving} className="px-5 py-3 bg-[#7A3E4A] hover:bg-[#603039] text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer disabled:opacity-50">
-                            {editingIndex !== null ? 'Salvar Alterações' : 'Cadastrar Categoria'}
+                        <button 
+                            type="button" 
+                            disabled={saving}
+                            onClick={() => document.getElementById('defaultCatImageInput').click()}
+                            className="w-full py-3 bg-[#7A3E4A]/10 hover:bg-[#7A3E4A]/15 text-[#7A3E4A] text-[10px] font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer text-center disabled:opacity-50"
+                        >
+                            Alterar Imagem Padrão
                         </button>
-                        {editingIndex !== null && (
-                            <button 
-                                type="button" 
-                                onClick={resetForm}
-                                className="px-5 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer"
-                            >
-                                Cancelar
-                            </button>
-                        )}
                     </div>
-                </form>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">

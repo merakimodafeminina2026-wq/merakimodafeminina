@@ -47,6 +47,28 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onSearchOpen 
             return stored ? JSON.parse(stored) : { bgColor: '#C6A76A', textColor: '#FFFFFF' }
         } catch { return { bgColor: '#C6A76A', textColor: '#FFFFFF' } }
     })
+
+    const [defaultCategoryImage, setDefaultCategoryImage] = useState(() => {
+        try {
+            const stored = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+            return stored?.default_category_image || 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=400&q=80'
+        } catch {
+            return 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=400&q=80'
+        }
+    })
+
+    useEffect(() => {
+        const updateDefaultImage = () => {
+            try {
+                const stored = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+                if (stored?.default_category_image) {
+                    setDefaultCategoryImage(stored.default_category_image)
+                }
+            } catch {}
+        }
+        window.addEventListener('storeConfigUpdated', updateDefaultImage)
+        return () => window.removeEventListener('storeConfigUpdated', updateDefaultImage)
+    }, [])
     
     const [categories, setCategories] = useState(() => {
         const stored = localStorage.getItem('meraki_categories')
@@ -382,7 +404,7 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onSearchOpen 
                                                 {/* Imagem de Fundo - usa a da categoria ou uma imagem padrão premium para não ficar em branco */}
                                                 <div className="absolute inset-0 z-0 animate-[fadeIn_200ms_ease-out]">
                                                     <img 
-                                                        src={hoveredCategory && hoveredCategory.image ? hoveredCategory.image : 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=400&q=80'} 
+                                                        src={hoveredCategory && hoveredCategory.image ? hoveredCategory.image : defaultCategoryImage} 
                                                         alt={hoveredCategory ? hoveredCategory.name : 'Default'} 
                                                         className="w-full h-full object-cover brightness-[0.65]" 
                                                     />
