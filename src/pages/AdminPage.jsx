@@ -164,6 +164,16 @@ export default function AdminPage() {
     const [customFeeEmoji, setCustomFeeEmoji] = useState('3.00')
     const [customizableEmojis, setCustomizableEmojis] = useState(['🍎', '💛', '👄', '🍒', '😍', '🌶️', '🐰', '🌟'])
     const [newEmojiInput, setNewEmojiInput] = useState('')
+    
+    // Custom colors states
+    const [customColorsList, setCustomColorsList] = useState(() => {
+        try {
+            const stored = localStorage.getItem('meraki_custom_colors_map')
+            return stored ? Object.keys(JSON.parse(stored)) : []
+        } catch { return [] }
+    })
+    const [newColorName, setNewColorName] = useState('')
+    const [newColorHex, setNewColorHex] = useState('#7A3E4A')
 
     // Form inputs
     const [couponForm, setCouponForm] = useState({ code: '', type: 'percentage', value: '', minPurchase: '' })
@@ -1174,7 +1184,7 @@ export default function AdminPage() {
                                 <div>
                                     <label className={labelCls}>Cores Disponíveis</label>
                                     <div className="flex flex-wrap gap-1.5 bg-[#FAF9F5] p-3 rounded-xl border border-[#EEEEEE]">
-                                        {['Preto', 'Branco', 'Vermelho', 'Nude', 'Rosa', 'Bordô', 'Azul', 'Verde', 'Amarelo', 'Lilás', 'Marinho', 'Pink', 'Rubi', 'Preto/Renda', 'Branco/Renda'].map(color => {
+                                        {['Preto', 'Branco', 'Vermelho', 'Nude', 'Rosa', 'Bordô', 'Azul', 'Verde', 'Amarelo', 'Lilás', 'Marinho', 'Pink', 'Rubi', 'Preto/Renda', 'Branco/Renda', ...customColorsList].map(color => {
                                             const isSelected = selectedModalColors.includes(color)
                                             const COLOR_MAP = {
                                                 'Preto': '#000000',
@@ -1193,7 +1203,8 @@ export default function AdminPage() {
                                                 'Preto/Renda': '#1F1F1F',
                                                 'Branco/Renda': '#F5F5F5'
                                             }
-                                            const hex = COLOR_MAP[color] || '#CCCCCC'
+                                            const customMap = JSON.parse(localStorage.getItem('meraki_custom_colors_map') || '{}')
+                                            const hex = COLOR_MAP[color] || customMap[color] || '#CCCCCC'
                                             return (
                                                 <button
                                                     key={color}
@@ -1216,6 +1227,48 @@ export default function AdminPage() {
                                                 </button>
                                             )
                                         })}
+                                    </div>
+
+                                    {/* Inseridor de Nova Cor */}
+                                    <div className="flex gap-2 items-center mt-2 bg-white p-2.5 rounded-xl border border-[#EEEEEE]">
+                                        <input 
+                                            type="text" 
+                                            value={newColorName}
+                                            onChange={e => setNewColorName(e.target.value)}
+                                            placeholder="Nova Cor (Ex: Azul Serenity)" 
+                                            className={`${inputCls} !py-2 !px-3 text-xs flex-grow`}
+                                        />
+                                        <div className="flex items-center gap-1.5 shrink-0">
+                                            <label className="text-[10px] font-bold text-gray-500 uppercase">Tom:</label>
+                                            <input 
+                                                type="color" 
+                                                value={newColorHex}
+                                                onChange={e => setNewColorHex(e.target.value)}
+                                                className="w-8 h-8 rounded-lg border border-gray-200 cursor-pointer p-0.5"
+                                            />
+                                        </div>
+                                        <button 
+                                            type="button" 
+                                            onClick={() => {
+                                                const name = newColorName.trim()
+                                                if (name) {
+                                                    const currentMap = JSON.parse(localStorage.getItem('meraki_custom_colors_map') || '{}')
+                                                    currentMap[name] = newColorHex
+                                                    localStorage.setItem('meraki_custom_colors_map', JSON.stringify(currentMap))
+                                                    if (!customColorsList.includes(name)) {
+                                                        setCustomColorsList(prev => [...prev, name])
+                                                    }
+                                                    if (!selectedModalColors.includes(name)) {
+                                                        setSelectedModalColors(prev => [...prev, name])
+                                                    }
+                                                    setNewColorName('')
+                                                    setNewColorHex('#7A3E4A')
+                                                }
+                                            }}
+                                            className="px-3.5 py-2 bg-[#7A3E4A] hover:bg-[#6b3540] text-white text-xs font-black uppercase rounded-lg transition-all cursor-pointer shadow-2xs active:scale-98"
+                                        >
+                                            + Cor
+                                        </button>
                                     </div>
                                 </div>
 

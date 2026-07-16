@@ -365,7 +365,8 @@ export default function ProductPage() {
                                             'Preto/Renda': '#1F1F1F',
                                             'Branco/Renda': '#F5F5F5'
                                         }
-                                        const hex = COLOR_MAP[color] || '#CCCCCC'
+                                        const customMap = JSON.parse(localStorage.getItem('meraki_custom_colors_map') || '{}')
+                                        const hex = COLOR_MAP[color] || customMap[color] || '#CCCCCC'
                                         return (
                                             <button
                                                 key={color}
