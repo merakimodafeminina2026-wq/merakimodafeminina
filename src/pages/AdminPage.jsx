@@ -727,12 +727,8 @@ export default function AdminPage() {
             if (urls?.[0]) mobileImageUrl = urls[0]
         }
 
-        if (!imageUrl && mobileImageUrl) {
-            imageUrl = mobileImageUrl
-        }
-
-        if (!imageUrl) {
-            alert('Por favor insira um link ou faça upload de um arquivo de mídia (foto, GIF ou vídeo).')
+        if (!imageUrl && !mobileImageUrl) {
+            alert('Por favor insira um link ou faça upload de um arquivo de mídia (foto, GIF ou vídeo) para Desktop ou Mobile.')
             setSaving(false)
             return
         }

@@ -201,7 +201,10 @@ export default function HeroBanner() {
                     <div className="absolute inset-0 z-0">
                         <Link to={slides[current].link} className="block w-full h-full">
                             <MediaDisplay
-                                src={isMobile && slides[current].mobile_image ? slides[current].mobile_image : slides[current].image}
+                                src={isMobile
+                                    ? (slides[current].mobile_image || slides[current].image)
+                                    : (slides[current].image || slides[current].mobile_image)
+                                }
                                 alt={slides[current].alt}
                                 className="w-full h-full object-cover object-center"
                             />
@@ -247,7 +250,10 @@ export default function HeroBanner() {
                     >
                         <Link to={slides[current].link} className="block w-full h-full">
                             <MediaDisplay
-                                src={isMobile && slides[current].mobile_image ? slides[current].mobile_image : slides[current].image}
+                                src={isMobile
+                                    ? (slides[current].mobile_image || slides[current].image)
+                                    : (slides[current].image || slides[current].mobile_image)
+                                }
                                 alt={slides[current].alt}
                                 className="w-full h-full object-cover object-center"
                             />
