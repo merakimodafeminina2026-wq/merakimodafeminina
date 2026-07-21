@@ -5,18 +5,26 @@ import Footer from '../components/Footer.jsx'
 import WhatsAppButton from '../components/WhatsAppButton.jsx'
 import Notification from '../components/Notification.jsx'
 import OrderTracker from '../components/OrderTracker.jsx'
+import FireworksEffect from '../components/FireworksEffect.jsx'
 
 export default function OrderSuccessPage() {
     const { orderId } = useParams()
     const [order, setOrder] = useState(null)
     const [copied, setCopied] = useState(false)
     const [notification, setNotification] = useState({ message: '', visible: false })
+    const [showFireworks, setShowFireworks] = useState(false)
 
     useEffect(() => {
         const savedOrders = JSON.parse(localStorage.getItem('meraki_orders') || '[]')
         const targetOrder = savedOrders.find(o => o.id === orderId)
         if (targetOrder) {
             setOrder(targetOrder)
+            const s = (targetOrder.status || '').toLowerCase()
+            if (s === 'pago' || s === 'aprovado' || s === 'entregue' || s === 'enviado' || targetOrder.paymentMethod === 'card') {
+                setShowFireworks(true)
+            }
+        } else {
+            setShowFireworks(true)
         }
     }, [orderId])
 
@@ -46,6 +54,7 @@ export default function OrderSuccessPage() {
 
     return (
         <div className="bg-[#FCFAFA] min-h-screen flex flex-col font-sans">
+            {showFireworks && <FireworksEffect duration={6000} />}
             <Header />
 
             <main className="max-w-6xl mx-auto px-4 py-12 flex-grow w-full space-y-8">

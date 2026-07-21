@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { getAssetUrl } from '../utils/assets.js'
+import FireworksEffect from './FireworksEffect.jsx'
 
 export default function OrderTracker({ order, onCopyPix, pixCopied }) {
     const [copiedTracking, setCopiedTracking] = useState(false)
@@ -77,6 +78,7 @@ export default function OrderTracker({ order, onCopyPix, pixCopied }) {
 
     return (
         <div className="space-y-8 font-sans">
+            {activeStep >= 2 && !isCancelled && <FireworksEffect duration={5000} />}
             {/* Header Title & Personalized Message */}
             <div className="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-sm space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-4">
