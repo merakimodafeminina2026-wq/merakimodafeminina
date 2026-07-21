@@ -406,7 +406,27 @@ export default function CategoryPage() {
 
         // 1. Filter by category slug or offers or promo combo
         if (slug === 'promo-combo' || slug === 'combos') {
-            result = result.filter(p => p.inPromoCombo === true)
+            const normalizeText = (str) => (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            let promoCombo = {}
+            try {
+                promoCombo = JSON.parse(localStorage.getItem('meraki_promo_combo') || '{}')
+            } catch (e) {}
+            const queryStr = normalizeText(promoCombo.query || promoCombo.keyword || 'sutiã')
+
+            const explicitPromo = result.filter(p => p.inPromoCombo === true || p.in_promo_combo === true)
+            const queryMatched = result.filter(p => {
+                const nameNorm = normalizeText(p.name)
+                const catNorm = normalizeText(p.category)
+                const descNorm = normalizeText(p.description)
+                return nameNorm.includes(queryStr) || catNorm.includes(queryStr) || descNorm.includes(queryStr)
+            })
+
+            if (explicitPromo.length > 0) {
+                result = explicitPromo
+            } else if (queryMatched.length > 0) {
+                result = queryMatched
+            }
+            // If still empty, result remains allProducts so customer gets product selection!
         } else if (slug === 'ofertas') {
             result = result.filter(p => p.original_price > 0 && p.original_price > p.price)
         } else {

@@ -316,16 +316,37 @@ export default function HomePage() {
                             {/* Product Grid Right Side */}
                             <div className="lg:col-span-6 grid grid-cols-2 gap-4 sm:gap-6">
                                 {(() => {
-                                    const promoProducts = allProducts.filter(p => p.inPromoCombo === true)
-                                    const fallbackProducts = allProducts.filter(p => p.name.toLowerCase().includes((promoCombo.query || 'sutiã').toLowerCase()))
-                                    
-                                    const combined = [...promoProducts]
-                                    for (const fallback of fallbackProducts) {
-                                        if (combined.length >= 2) break
-                                        if (!combined.some(p => p.id === fallback.id)) {
-                                            combined.push(fallback)
+                                    const normalizeText = (str) => (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                                    const rawQuery = promoCombo.query || promoCombo.keyword || 'sutiã'
+                                    const queryStr = normalizeText(rawQuery)
+
+                                    // 1. Products explicitly marked as inPromoCombo
+                                    const explicitPromo = allProducts.filter(p => p.inPromoCombo === true || p.in_promo_combo === true)
+
+                                    // 2. Products matching keyword/query in name, category, or description (accent-insensitive)
+                                    const matchedByQuery = allProducts.filter(p => {
+                                        const nameNorm = normalizeText(p.name)
+                                        const catNorm = normalizeText(p.category)
+                                        const descNorm = normalizeText(p.description)
+                                        return nameNorm.includes(queryStr) || catNorm.includes(queryStr) || descNorm.includes(queryStr)
+                                    })
+
+                                    // 3. Fallback to all products so the grid is NEVER empty
+                                    const combined = []
+                                    const addUnique = (list) => {
+                                        for (const p of list) {
+                                            if (combined.length >= 2) break
+                                            if (!combined.some(existing => existing.id === p.id)) {
+                                                combined.push(p)
+                                            }
                                         }
                                     }
+
+                                    addUnique(explicitPromo)
+                                    addUnique(matchedByQuery)
+                                    addUnique(bestSellers)
+                                    addUnique(allProducts)
+
                                     const displayProducts = combined.slice(0, 2)
                                     return displayProducts.map(product => {
                                         const isWish = isWishlisted(product.id)
