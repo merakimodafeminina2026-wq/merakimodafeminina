@@ -727,7 +727,15 @@ export default function AdminPage() {
             if (urls?.[0]) mobileImageUrl = urls[0]
         }
 
-        if (!imageUrl) { alert('Por favor insira um link de imagem ou faça upload de um arquivo.'); setSaving(false); return }
+        if (!imageUrl && mobileImageUrl) {
+            imageUrl = mobileImageUrl
+        }
+
+        if (!imageUrl) {
+            alert('Por favor insira um link ou faça upload de um arquivo de mídia (foto, GIF ou vídeo).')
+            setSaving(false)
+            return
+        }
         const newBanner = { 
             id: 'bn-' + Date.now(), 
             image: imageUrl, 
