@@ -11,6 +11,12 @@ if (!hasValidCreds) {
 
 export const supabase = createClient(
     hasValidCreds ? supabaseUrl : 'https://placeholder-project.supabase.co',
-    hasValidCreds ? supabaseAnonKey : 'placeholder-anon-key'
+    hasValidCreds ? supabaseAnonKey : 'placeholder-anon-key',
+    {
+        auth: {
+            autoRefreshToken: true,
+            persistSession: true,
+            detectSessionInUrl: true
+        }
+    }
 )
-
