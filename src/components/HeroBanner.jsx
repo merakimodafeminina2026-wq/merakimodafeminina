@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { getAssetUrl } from '../utils/assets.js'
+import MediaDisplay from './MediaDisplay.jsx'
 
 const DEFAULT_SLIDES = [
     { image: getAssetUrl('/assets/banners/banner-1.jpg'), alt: 'Nova Coleção Meraki - Transforme-se', link: '/shop' },
@@ -199,10 +200,11 @@ export default function HeroBanner() {
                 <>
                     <div className="absolute inset-0 z-0">
                         <Link to={slides[current].link} className="block w-full h-full">
-                            <picture className="block w-full h-full">
-                                {slides[current].mobile_image && <source media="(max-width: 768px)" srcSet={getAssetUrl(slides[current].mobile_image)} />}
-                                <img src={getAssetUrl(slides[current].image)} alt={slides[current].alt} className="w-full h-full object-cover object-center" draggable={false} />
-                            </picture>
+                            <MediaDisplay
+                                src={isMobile && slides[current].mobile_image ? slides[current].mobile_image : slides[current].image}
+                                alt={slides[current].alt}
+                                className="w-full h-full object-cover object-center"
+                            />
                         </Link>
                     </div>
                     {isTransitioning && previous !== null && (
@@ -244,10 +246,11 @@ export default function HeroBanner() {
                         style={{ transformStyle: 'preserve-3d' }}
                     >
                         <Link to={slides[current].link} className="block w-full h-full">
-                            <picture className="block w-full h-full">
-                                {slides[current].mobile_image && <source media="(max-width: 768px)" srcSet={getAssetUrl(slides[current].mobile_image)} />}
-                                <img src={getAssetUrl(slides[current].image)} alt={slides[current].alt} className="w-full h-full object-cover object-center" draggable={false} />
-                            </picture>
+                            <MediaDisplay
+                                src={isMobile && slides[current].mobile_image ? slides[current].mobile_image : slides[current].image}
+                                alt={slides[current].alt}
+                                className="w-full h-full object-cover object-center"
+                            />
                         </Link>
                     </motion.div>
                 </AnimatePresence>

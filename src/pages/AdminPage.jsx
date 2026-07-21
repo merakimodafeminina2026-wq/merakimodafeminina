@@ -1952,16 +1952,20 @@ export default function AdminPage() {
                                         className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all ${dragActive ? 'border-[#7A3E4A] bg-[#7A3E4A]/5' : 'border-[#EEEEEE] hover:border-[#7A3E4A]/40 hover:bg-[#FAF9F5]'}`}
                                         onClick={() => fileInputRef.current?.click()}
                                     >
-                                        <input type="file" ref={fileInputRef} multiple accept="image/*" className="hidden" onChange={e => handleFileSelect(e.target.files)} />
+                                        <input type="file" ref={fileInputRef} multiple accept="image/*,video/*,.gif,.mp4,.webm,.mov" className="hidden" onChange={e => handleFileSelect(e.target.files)} />
                                         <Icon path="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                                        <p className="text-xs font-bold text-gray-400">Arraste fotos ou clique para enviar</p>
-                                        <p className="text-[10px] text-gray-300 mt-1">Aceita: JPG, PNG, WebP</p>
+                                        <p className="text-xs font-bold text-gray-400">Arraste mídias ou clique para enviar</p>
+                                        <p className="text-[10px] text-gray-300 mt-1">Aceita: Fotos, GIFs e Vídeos (MP4, WebM, MOV)</p>
                                     </div>
                                     {imageFiles.length > 0 && (
                                         <div className="flex flex-wrap gap-2 mt-3">
                                             {imageFiles.map((file, i) => (
                                                 <div key={i} className="relative w-16 h-16 rounded-xl overflow-hidden border border-[#EEEEEE]">
-                                                    <img src={URL.createObjectURL(file)} alt="" className="w-full h-full object-cover" />
+                                                    {file.type?.startsWith('video/') ? (
+                                                        <video src={URL.createObjectURL(file)} autoPlay loop muted className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <img src={URL.createObjectURL(file)} alt="" className="w-full h-full object-cover" />
+                                                    )}
                                                     <button type="button" onClick={() => setImageFiles(prev => prev.filter((_, idx) => idx !== i))} className="absolute top-0.5 right-0.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-[9px] font-black cursor-pointer shadow-sm">✕</button>
                                                 </div>
                                             ))}
@@ -2027,20 +2031,20 @@ export default function AdminPage() {
                         </div>
                         <form onSubmit={handleCreateBanner} className="p-5 space-y-4">
                             <div>
-                                <label className={labelCls}>Upload de Imagem Desktop <span className="text-[9px] text-[#C6A76A] lowercase font-normal">(Recomendado: 1920x800px)</span></label>
-                                <input type="file" accept="image/*" onChange={e => {
-                                    if (e.target.files?.[0]) setBannerImageFiles([e.target.files[0]])
+                                <label className={labelCls}>Upload de Mídia Desktop (Foto, GIF ou Vídeo) <span className="text-[9px] text-[#C6A76A] lowercase font-normal">(MP4, WebM, JPG, PNG, GIF)</span></label>
+                                <input type="file" accept="image/*,video/*,.gif,.mp4,.webm,.mov" onChange={e => {
+                                     if (e.target.files?.[0]) setBannerImageFiles([e.target.files[0]])
                                 }} className="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#7A3E4A]/10 file:text-[#7A3E4A] hover:file:bg-[#7A3E4A]/20 cursor-pointer" />
                             </div>
-                            <div><label className={labelCls}>Ou Link de Imagem Desktop</label><input type="text" placeholder="https://..." value={bannerForm.image} onChange={e => setBannerForm(prev => ({ ...prev, image: e.target.value }))} className={inputCls} /></div>
+                            <div><label className={labelCls}>Ou Link de Mídia Desktop</label><input type="text" placeholder="https://..." value={bannerForm.image} onChange={e => setBannerForm(prev => ({ ...prev, image: e.target.value }))} className={inputCls} /></div>
                             
                             <div className="border-t border-dashed border-[#EEEEEE] pt-3">
-                                <label className={labelCls}>Upload de Imagem Mobile (Opcional) <span className="text-[9px] text-[#C6A76A] lowercase font-normal">(Recomendado: 800x1000px ou vertical)</span></label>
-                                <input type="file" accept="image/*" onChange={e => {
-                                    if (e.target.files?.[0]) setBannerMobileImageFiles([e.target.files[0]])
+                                <label className={labelCls}>Upload de Mídia Mobile (Foto, GIF ou Vídeo) <span className="text-[9px] text-[#C6A76A] lowercase font-normal">(MP4, WebM, JPG, PNG, GIF)</span></label>
+                                <input type="file" accept="image/*,video/*,.gif,.mp4,.webm,.mov" onChange={e => {
+                                     if (e.target.files?.[0]) setBannerMobileImageFiles([e.target.files[0]])
                                 }} className="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#7A3E4A]/10 file:text-[#7A3E4A] hover:file:bg-[#7A3E4A]/20 cursor-pointer" />
                             </div>
-                            <div><label className={labelCls}>Ou Link de Imagem Mobile</label><input type="text" placeholder="https://..." value={bannerForm.mobile_image} onChange={e => setBannerForm(prev => ({ ...prev, mobile_image: e.target.value }))} className={inputCls} /></div>
+                            <div><label className={labelCls}>Ou Link de Mídia Mobile</label><input type="text" placeholder="https://..." value={bannerForm.mobile_image} onChange={e => setBannerForm(prev => ({ ...prev, mobile_image: e.target.value }))} className={inputCls} /></div>
                             
                             <div><label className={labelCls}>Texto Alternativo (Alt)</label><input type="text" placeholder="Ex: Nova Coleção" value={bannerForm.alt} onChange={e => setBannerForm(prev => ({ ...prev, alt: e.target.value }))} className={inputCls} /></div>
                             <div><label className={labelCls}>Link de Destino</label><input type="text" value={bannerForm.link} onChange={e => setBannerForm(prev => ({ ...prev, link: e.target.value }))} className={inputCls} /></div>

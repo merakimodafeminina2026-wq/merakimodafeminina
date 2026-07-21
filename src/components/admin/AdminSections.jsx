@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../services/supabase.js'
+import { getAssetUrl } from '../../utils/assets.js'
+import MediaDisplay from '../MediaDisplay.jsx'
 
 function Icon({ path, className = 'w-5 h-5' }) {
     return (
@@ -510,19 +512,19 @@ export function BannersSection({
                         <div className="grid grid-cols-3 gap-3">
                             {/* Desktop preview (2/3 width) */}
                             <div className="col-span-2 space-y-1">
-                                <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wider">Desktop (Widescreen)</span>
+                                <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wider">Desktop (Foto/Vídeo/GIF)</span>
                                 <div className="aspect-[16/7] bg-gray-50 rounded-xl overflow-hidden border border-gray-100 flex items-center justify-center">
-                                    <img src={getAssetUrl(bn.image)} alt={bn.alt} className="w-full h-full object-cover" />
+                                    <MediaDisplay src={bn.image} alt={bn.alt} className="w-full h-full object-cover" />
                                 </div>
                             </div>
                             {/* Mobile preview (1/3 width) */}
                             <div className="col-span-1 space-y-1">
-                                <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wider">Mobile (Vertical)</span>
+                                <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wider">Mobile (Foto/Vídeo/GIF)</span>
                                 <div className="aspect-[4/5] bg-gray-50 rounded-xl overflow-hidden border border-gray-100 flex items-center justify-center relative">
                                     {bn.mobile_image ? (
-                                        <img src={getAssetUrl(bn.mobile_image)} alt={bn.alt} className="w-full h-full object-cover" />
+                                        <MediaDisplay src={bn.mobile_image} alt={bn.alt} className="w-full h-full object-cover" />
                                     ) : (
-                                        <div className="text-center p-2 text-[8px] text-gray-300 font-bold">Sem imagem mobile</div>
+                                        <div className="text-center p-2 text-[8px] text-gray-300 font-bold">Sem mídia mobile</div>
                                     )}
                                 </div>
                             </div>
@@ -541,19 +543,19 @@ export function BannersSection({
                             </div>
 
                             <div className="grid grid-cols-2 gap-2">
-                                {/* Change Desktop Image */}
+                                {/* Change Desktop Image/Video/GIF */}
                                 <div>
                                     <button
                                         onClick={() => document.getElementById(`change-banner-desk-${bn.id}`).click()}
                                         className="w-full py-2 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-600 text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer text-center"
                                     >
-                                        Foto Desktop
+                                        Mídia Desktop 🎥/🖼️
                                     </button>
-                                    <p className="text-[8px] text-gray-400 text-center mt-1">(1920x800px)</p>
+                                    <p className="text-[8px] text-gray-400 text-center mt-1">(Foto, GIF ou Vídeo MP4/WebM)</p>
                                     <input 
                                         id={`change-banner-desk-${bn.id}`}
                                         type="file" 
-                                        accept="image/*" 
+                                        accept="image/*,video/*,.gif,.mp4,.webm,.mov" 
                                         onChange={async (e) => {
                                             if (e.target.files?.[0]) {
                                                 const { urls } = await uploadMultipleImages([e.target.files[0]])
@@ -566,19 +568,19 @@ export function BannersSection({
                                     />
                                 </div>
 
-                                {/* Change Mobile Image */}
+                                {/* Change Mobile Image/Video/GIF */}
                                 <div>
                                     <button
                                         onClick={() => document.getElementById(`change-banner-mob-${bn.id}`).click()}
                                         className="w-full py-2 rounded-xl bg-[#7A3E4A]/10 text-[#7A3E4A] hover:bg-[#7A3E4A]/20 text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer text-center"
                                     >
-                                        Foto Mobile
+                                        Mídia Mobile 🎥/🖼️
                                     </button>
-                                    <p className="text-[8px] text-[#7A3E4A] text-center mt-1">(800x1000px)</p>
+                                    <p className="text-[8px] text-[#7A3E4A] text-center mt-1">(Foto, GIF ou Vídeo MP4/WebM)</p>
                                     <input 
                                         id={`change-banner-mob-${bn.id}`}
                                         type="file" 
-                                        accept="image/*" 
+                                        accept="image/*,video/*,.gif,.mp4,.webm,.mov" 
                                         onChange={async (e) => {
                                             if (e.target.files?.[0]) {
                                                 const { urls } = await uploadMultipleImages([e.target.files[0]])
@@ -738,7 +740,7 @@ export function PromoComboSection({
                         </div>
                         <div>
                             <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Upload de Imagem</label>
-                            <input type="file" name="promoImage" accept="image/*" className="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#7A3E4A]/10 file:text-[#7A3E4A] hover:file:bg-[#7A3E4A]/20 cursor-pointer" />
+                            <input type="file" name="promoImage" accept="image/*,video/*,.gif,.mp4,.webm,.mov" className="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#7A3E4A]/10 file:text-[#7A3E4A] hover:file:bg-[#7A3E4A]/20 cursor-pointer" />
                         </div>
                     </div>
 
@@ -833,7 +835,7 @@ export function EditorialSection({
 
                     <div>
                         <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Upload de Imagem</label>
-                        <input type="file" name="edImage" accept="image/*" className="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#7A3E4A]/10 file:text-[#7A3E4A] hover:file:bg-[#7A3E4A]/20 cursor-pointer" />
+                        <input type="file" name="edImage" accept="image/*,video/*,.gif,.mp4,.webm,.mov" className="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#7A3E4A]/10 file:text-[#7A3E4A] hover:file:bg-[#7A3E4A]/20 cursor-pointer" />
                     </div>
 
                     <div className="flex gap-4 pt-2">
@@ -970,7 +972,7 @@ export function CategoriesSection({
                             </div>
                             <div>
                                 <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Imagem de Capa</label>
-                                <input type="file" name="catImage" accept="image/*" className="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#7A3E4A]/10 file:text-[#7A3E4A] hover:file:bg-[#7A3E4A]/20 cursor-pointer" />
+                                <input type="file" name="catImage" accept="image/*,video/*,.gif,.mp4,.webm,.mov" className="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#7A3E4A]/10 file:text-[#7A3E4A] hover:file:bg-[#7A3E4A]/20 cursor-pointer" />
                                 {editingIndex !== null && (
                                     <p className="text-[9px] text-gray-400 mt-1">Deixe em branco para manter a imagem atual</p>
                                 )}
@@ -1020,7 +1022,7 @@ export function CategoriesSection({
                     <div className="space-y-3">
                         <input 
                             type="file" 
-                            accept="image/*" 
+                            accept="image/*,video/*,.gif,.mp4,.webm,.mov" 
                             id="defaultCatImageInput"
                             onChange={async (e) => {
                                 const file = e.target.files?.[0]
@@ -1204,7 +1206,7 @@ export function CategoriesSection({
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Fazer Upload da Imagem</label>
-                                    <input type="file" name="homeCatImage" accept="image/*" className="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#7A3E4A]/10 file:text-[#7A3E4A] hover:file:bg-[#7A3E4A]/20 cursor-pointer" />
+                                    <input type="file" name="homeCatImage" accept="image/*,video/*,.gif,.mp4,.webm,.mov" className="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#7A3E4A]/10 file:text-[#7A3E4A] hover:file:bg-[#7A3E4A]/20 cursor-pointer" />
                                 </div>
                                 <div>
                                     <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Ou Link da Imagem (Opcional)</label>
