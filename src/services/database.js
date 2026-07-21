@@ -20,7 +20,7 @@ const TABLE_COLUMNS = {
     store_config: [
         'id', 'whatsapp', 'sac_phone', 'address', 'cnpj', 'infinitepay_handle',
         'topbarmessages', 'topbarstyle', 'promocombo', 'editorial', 'available_colors', 'available_emojis', 'shipping_message',
-        'available_badges', 'installment_text', 'banner_transition'
+        'available_badges', 'installment_text', 'banner_transition', 'reward_bar'
     ],
     reviews: ['id', 'product_id', 'name', 'rating', 'comment', 'verified', 'created_at']
 }
@@ -240,7 +240,15 @@ export async function initSupabaseSync() {
                     buttonLink: '/story',
                     image: '/assets/banners/banner-2.jpg'
                 },
-                shippingMessage: 'Frete grátis para a região Centro-Oeste nas compras acima de R$ 299,90.'
+                shippingMessage: 'Frete grátis para a região Centro-Oeste nas compras acima de R$ 299,90.',
+                rewardBar: {
+                    enabled: true,
+                    target_type: 'value',
+                    target_value: 299.99,
+                    reward_type: 'frete_gratis',
+                    reward_title: 'Frete Grátis',
+                    success_message: 'Parabéns! Você ganhou Frete Grátis!'
+                }
             }
             localStorage.setItem('meraki_store_config', JSON.stringify(defaultConfig))
             localStorage.setItem('meraki_topbar_messages', JSON.stringify(defaultConfig.topbarMessages))
@@ -248,6 +256,7 @@ export async function initSupabaseSync() {
             localStorage.setItem('meraki_promo_combo', JSON.stringify(defaultConfig.promoCombo))
             localStorage.setItem('meraki_editorial', JSON.stringify(defaultConfig.editorial))
             localStorage.setItem('meraki_shipping_message', defaultConfig.shippingMessage)
+            localStorage.setItem('meraki_reward_bar', JSON.stringify(defaultConfig.rewardBar))
             const defaultHomeCats = [
                 { name: 'Home', description: 'Voltar para a página inicial', image: '/assets/categories/cat-conjuntos.jpg', link: '/' },
                 { name: 'Categorias', description: 'Navegar pelas nossas coleções', image: '/assets/categories/cat-noite.jpg', link: '/category/conjuntos' },

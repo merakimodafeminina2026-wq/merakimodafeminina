@@ -20,6 +20,53 @@ export default function CartDrawer() {
         return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
     }
 
+    const [rewardBarConfig, setRewardBarConfig] = useState(() => {
+        try {
+            const storedConfig = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+            const storedReward = JSON.parse(localStorage.getItem('meraki_reward_bar') || 'null')
+            return storedReward || storedConfig.rewardBar || {
+                enabled: true,
+                target_type: 'value',
+                target_value: 299.99,
+                reward_type: 'frete_gratis',
+                reward_title: 'Frete Grátis',
+                success_message: 'Parabéns! Você ganhou Frete Grátis!'
+            }
+        } catch {
+            return {
+                enabled: true,
+                target_type: 'value',
+                target_value: 299.99,
+                reward_type: 'frete_gratis',
+                reward_title: 'Frete Grátis',
+                success_message: 'Parabéns! Você ganhou Frete Grátis!'
+            }
+        }
+    })
+
+    useEffect(() => {
+        const handleUpdate = () => {
+            try {
+                const storedConfig = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+                const storedReward = JSON.parse(localStorage.getItem('meraki_reward_bar') || 'null')
+                setRewardBarConfig(storedReward || storedConfig.rewardBar || rewardBarConfig)
+            } catch (e) {}
+        }
+        window.addEventListener('storeConfigUpdated', handleUpdate)
+        return () => window.removeEventListener('storeConfigUpdated', handleUpdate)
+    }, [])
+
+    const isRewardEnabled = rewardBarConfig?.enabled !== false
+    const targetType = rewardBarConfig?.target_type || 'value'
+    const targetValue = Number(rewardBarConfig?.target_value) || 299.99
+    const rewardTitle = rewardBarConfig?.reward_title || 'Frete Grátis'
+    const successMessage = rewardBarConfig?.success_message || 'Parabéns! Você ganhou Frete Grátis!'
+
+    const currentProgressValue = targetType === 'quantity' ? cartCount : subtotal
+    const isCompleted = currentProgressValue >= targetValue
+    const progressPercentage = Math.min(100, Math.max(0, (currentProgressValue / targetValue) * 100))
+    const remainingValue = Math.max(0, targetValue - currentProgressValue)
+
     if (!isOpen) return null
 
     return (
@@ -40,7 +87,7 @@ export default function CartDrawer() {
                     </div>
                     <button 
                         onClick={() => setIsOpen(false)}
-                        className="p-2 text-gray-400 hover:text-[#1A1A1A] transition-colors rounded-full hover:bg-gray-50"
+                        className="p-2 text-gray-400 hover:text-[#1A1A1A] transition-colors rounded-full hover:bg-gray-50 cursor-pointer"
                         aria-label="Fechar carrinho"
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -48,6 +95,50 @@ export default function CartDrawer() {
                         </svg>
                     </button>
                 </div>
+
+                {/* Reward Progress Bar */}
+                {isRewardEnabled && (
+                    <div className="bg-gradient-to-r from-[#FAF6F0] via-[#FFF9F6] to-[#F7F2EC] px-6 py-4 border-b border-[#EEEEEE]">
+                        {isCompleted ? (
+                            <div className="flex items-center gap-3 text-[#7A3E4A]">
+                                <div className="w-8 h-8 rounded-full bg-[#7A3E4A]/10 flex items-center justify-center shrink-0 animate-bounce">
+                                    <span className="text-sm">🎉</span>
+                                </div>
+                                <div className="flex-1">
+                                    <p className="text-xs font-black tracking-wide text-[#7A3E4A] leading-tight">
+                                        {successMessage}
+                                    </p>
+                                    <p className="text-[10px] text-gray-500 font-medium mt-0.5">
+                                        Recompensa ativada no seu pedido!
+                                    </p>
+                                </div>
+                            </div>
+                        ) : (
+                            <div>
+                                <div className="flex items-center justify-between text-xs mb-2">
+                                    <span className="font-medium text-gray-600 text-[11px]">
+                                        {targetType === 'quantity' ? (
+                                            <>Faltam <strong className="text-[#7A3E4A] font-bold">{remainingValue} {remainingValue === 1 ? 'item' : 'itens'}</strong> para ganhar <span className="font-bold text-[#7A3E4A]">{rewardTitle}</span></>
+                                        ) : (
+                                            <>Faltam <strong className="text-[#7A3E4A] font-bold">{formatCurrency(remainingValue)}</strong> para <span className="font-bold text-[#7A3E4A]">{rewardTitle}</span></>
+                                        )}
+                                    </span>
+                                    <span className="text-[10px] font-bold text-[#C6A76A] bg-[#C6A76A]/10 px-2 py-0.5 rounded-full">
+                                        {Math.round(progressPercentage)}%
+                                    </span>
+                                </div>
+
+                                {/* Progress Track */}
+                                <div className="w-full h-2.5 bg-gray-200/80 rounded-full overflow-hidden p-0.5 border border-gray-200/50 shadow-inner">
+                                    <div
+                                        className="h-full rounded-full bg-gradient-to-r from-[#7A3E4A] via-[#9A5060] to-[#C6A76A] transition-all duration-500 ease-out shadow-sm"
+                                        style={{ width: `${progressPercentage}%` }}
+                                    />
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 {/* Items List */}
                 <div className="flex-1 overflow-y-auto p-6 space-y-6">

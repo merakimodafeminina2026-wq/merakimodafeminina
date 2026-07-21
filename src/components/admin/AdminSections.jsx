@@ -1486,6 +1486,29 @@ export function SettingsSection({ saving, setSaving }) {
         const stored = JSON.parse(localStorage.getItem('meraki_store_config'))
         return stored?.infinitepay_handle || 'nicolly_gomes'
     })
+    const [rewardBar, setRewardBar] = useState(() => {
+        try {
+            const storedConfig = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+            const storedReward = JSON.parse(localStorage.getItem('meraki_reward_bar') || 'null')
+            return storedReward || storedConfig.rewardBar || {
+                enabled: true,
+                target_type: 'value',
+                target_value: 299.99,
+                reward_type: 'frete_gratis',
+                reward_title: 'Frete Grátis',
+                success_message: 'Parabéns! Você ganhou Frete Grátis!'
+            }
+        } catch {
+            return {
+                enabled: true,
+                target_type: 'value',
+                target_value: 299.99,
+                reward_type: 'frete_gratis',
+                reward_title: 'Frete Grátis',
+                success_message: 'Parabéns! Você ganhou Frete Grátis!'
+            }
+        }
+    })
     const [message, setMessage] = useState('')
 
     // Password states
@@ -1529,9 +1552,20 @@ export function SettingsSection({ saving, setSaving }) {
         setSaving(true)
         setMessage('')
         try {
-            const newConfig = { id: 'default', whatsapp, sac_phone: sacPhone, address, cnpj, infinitepay_handle: infinitepayHandle }
+            const newConfig = {
+                id: 'default',
+                whatsapp,
+                sac_phone: sacPhone,
+                address,
+                cnpj,
+                infinitepay_handle: infinitepayHandle,
+                reward_bar: rewardBar,
+                rewardBar
+            }
             localStorage.setItem('meraki_store_config', JSON.stringify(newConfig))
-            setMessage('Configurações salvas e integradas com o Supabase com sucesso!')
+            localStorage.setItem('meraki_reward_bar', JSON.stringify(rewardBar))
+            window.dispatchEvent(new Event('storeConfigUpdated'))
+            setMessage('Configurações salvas com sucesso!')
             setTimeout(() => setMessage(''), 3000)
         } catch (err) {
             console.error(err)
@@ -1619,6 +1653,90 @@ export function SettingsSection({ saving, setSaving }) {
                         className="px-6 py-3 bg-gradient-to-r from-[#7A3E4A] to-[#9A5060] text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:shadow-lg hover:shadow-[#7A3E4A]/30 transition-all cursor-pointer disabled:opacity-50"
                     >
                         {saving ? 'Salvando...' : 'Salvar Alterações'}
+                    </button>
+                </div>
+            </form>
+
+            {/* Barra de Progresso / Recompensas do Carrinho */}
+            <form onSubmit={handleSave} className="bg-white p-6 rounded-2xl border border-[#EEEEEE] space-y-4">
+                <div className="flex items-center justify-between border-b border-[#F5F5F5] pb-4">
+                    <div>
+                        <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider mb-1 flex items-center gap-2">
+                            <span>🎁</span> Barra de Progresso / Recompensas no Carrinho
+                        </h3>
+                        <p className="text-xs text-gray-400">Configure metas de valor ou quantidade para liberar Frete Grátis, Brindes ou Descontos no carrinho.</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={rewardBar.enabled}
+                            onChange={(e) => setRewardBar(prev => ({ ...prev, enabled: e.target.checked }))}
+                            className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#7A3E4A]"></div>
+                        <span className="ml-2 text-xs font-bold text-gray-700">{rewardBar.enabled ? 'Ativada' : 'Desativada'}</span>
+                    </label>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-wider">Tipo de Meta</label>
+                        <select
+                            value={rewardBar.target_type}
+                            onChange={(e) => setRewardBar(prev => ({ ...prev, target_type: e.target.value }))}
+                            className="w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-sm outline-none focus:border-[#7A3E4A] transition-all font-medium"
+                        >
+                            <option value="value">Valor Mínimo da Compra (R$)</option>
+                            <option value="quantity">Quantidade Mínima de Produtos (Qtd)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-wider">
+                            {rewardBar.target_type === 'quantity' ? 'Quantidade Meta (ex: 3)' : 'Valor Meta R$ (ex: 299.99)'}
+                        </label>
+                        <input
+                            type="number"
+                            step="any"
+                            value={rewardBar.target_value}
+                            onChange={(e) => setRewardBar(prev => ({ ...prev, target_value: parseFloat(e.target.value) || 0 }))}
+                            className="w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-sm outline-none focus:border-[#7A3E4A] transition-all font-medium"
+                            required
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-wider">Título do Prêmio / Recompensa</label>
+                        <input
+                            type="text"
+                            value={rewardBar.reward_title}
+                            onChange={(e) => setRewardBar(prev => ({ ...prev, reward_title: e.target.value }))}
+                            className="w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-sm outline-none focus:border-[#7A3E4A] transition-all font-medium"
+                            placeholder="Ex: Frete Grátis ou Batom de Brinde"
+                            required
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-wider">Mensagem de Comemoração (Ao atingir a meta)</label>
+                    <input
+                        type="text"
+                        value={rewardBar.success_message}
+                        onChange={(e) => setRewardBar(prev => ({ ...prev, success_message: e.target.value }))}
+                        className="w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-sm outline-none focus:border-[#7A3E4A] transition-all font-medium"
+                        placeholder="Ex: Parabéns! Você ganhou Frete Grátis!"
+                        required
+                    />
+                </div>
+
+                <div className="flex gap-2 justify-end pt-2">
+                    <button
+                        type="submit"
+                        disabled={saving}
+                        className="px-6 py-3 bg-gradient-to-r from-[#7A3E4A] to-[#9A5060] text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:shadow-lg hover:shadow-[#7A3E4A]/30 transition-all cursor-pointer disabled:opacity-50"
+                    >
+                        {saving ? 'Salvando...' : 'Salvar Recompensas do Carrinho'}
                     </button>
                 </div>
             </form>
