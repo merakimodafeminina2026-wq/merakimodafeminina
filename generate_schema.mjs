@@ -197,6 +197,24 @@ CREATE TABLE IF NOT EXISTS public.store_config (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Garantir todas as colunas para store_config se a tabela já existir
+ALTER TABLE public.store_config ADD COLUMN IF NOT EXISTS whatsapp TEXT;
+ALTER TABLE public.store_config ADD COLUMN IF NOT EXISTS sac_phone TEXT;
+ALTER TABLE public.store_config ADD COLUMN IF NOT EXISTS address TEXT;
+ALTER TABLE public.store_config ADD COLUMN IF NOT EXISTS cnpj TEXT;
+ALTER TABLE public.store_config ADD COLUMN IF NOT EXISTS infinitepay_handle TEXT;
+ALTER TABLE public.store_config ADD COLUMN IF NOT EXISTS topbarmessages JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.store_config ADD COLUMN IF NOT EXISTS topbarstyle JSONB DEFAULT '{}'::jsonb;
+ALTER TABLE public.store_config ADD COLUMN IF NOT EXISTS promocombo JSONB DEFAULT '{}'::jsonb;
+ALTER TABLE public.store_config ADD COLUMN IF NOT EXISTS editorial JSONB DEFAULT '{}'::jsonb;
+ALTER TABLE public.store_config ADD COLUMN IF NOT EXISTS available_colors JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.store_config ADD COLUMN IF NOT EXISTS available_emojis JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.store_config ADD COLUMN IF NOT EXISTS shipping_message TEXT;
+ALTER TABLE public.store_config ADD COLUMN IF NOT EXISTS available_badges JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.store_config ADD COLUMN IF NOT EXISTS installment_text TEXT;
+ALTER TABLE public.store_config ADD COLUMN IF NOT EXISTS banner_transition TEXT DEFAULT 'shatter';
+ALTER TABLE public.store_config ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
+
 -- ====================================================================
 -- CONFIGURAÇÃO DE SEGURANÇA (ROW LEVEL SECURITY - RLS)
 -- ====================================================================
