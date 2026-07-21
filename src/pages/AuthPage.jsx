@@ -54,6 +54,20 @@ export default function AuthPage() {
     const [returnOrderId, setReturnOrderId] = useState('')
     const [returnItemId, setReturnItemId] = useState('')
     const [returnType, setReturnType] = useState('troca')
+    
+    // Addresses Management State
+    const [userAddresses, setUserAddresses] = useState([])
+    const [showAddressModal, setShowAddressModal] = useState(false)
+    const [editingAddressId, setEditingAddressId] = useState(null)
+    const [addrLabel, setAddrLabel] = useState('Casa')
+    const [addrCep, setAddrCep] = useState('')
+    const [addrStreet, setAddrStreet] = useState('')
+    const [addrNumber, setAddrNumber] = useState('')
+    const [addrComp, setAddrComp] = useState('')
+    const [addrBairro, setAddrBairro] = useState('')
+    const [addrCity, setAddrCity] = useState('')
+    const [addrState, setAddrState] = useState('')
+    
     const [showButterflyBg] = useState(true) // Defina como false para desativar as borboletas e o fundo fosco, retornando ao visual anterior.
     const [processedButterflySrc, setProcessedButterflySrc] = useState('/assets/borboleta-v2.png')
 
@@ -120,6 +134,15 @@ export default function AuthPage() {
         if (user) {
             const storedReturns = JSON.parse(localStorage.getItem(`meraki_returns_${user.email}`) || '[]')
             setReturnsList(storedReturns)
+            try {
+                const storedUsers = JSON.parse(localStorage.getItem('meraki_users') || '[]')
+                const currentDbUser = storedUsers.find(u => u.email === user.email)
+                if (currentDbUser && Array.isArray(currentDbUser.addresses)) {
+                    setUserAddresses(currentDbUser.addresses)
+                }
+            } catch (e) {
+                console.error(e)
+            }
         }
     }, [profile, user])
 
@@ -144,6 +167,92 @@ export default function AuthPage() {
             fetchAddress()
         }
     }, [editCep])
+
+    // Fetch address from ViaCEP when addrCep reaches 8 digits (Address Tab form)
+    useEffect(() => {
+        const cleanCep = addrCep.replace(/\D/g, '')
+        if (cleanCep.length === 8) {
+            const fetchAddress = async () => {
+                try {
+                    const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`)
+                    const data = await response.json()
+                    if (!data.erro) {
+                        setAddrStreet(data.logradouro || '')
+                        setAddrBairro(data.bairro || '')
+                        setAddrCity(data.localidade || '')
+                        setAddrState(data.uf || '')
+                    }
+                } catch (err) {
+                    console.error('Erro ao buscar CEP no formulário:', err)
+                }
+            }
+            fetchAddress()
+        }
+    }, [addrCep])
+
+    const handleSaveAddress = (e) => {
+        e.preventDefault()
+        if (!addrCep || !addrStreet || !addrNumber) {
+            showAlert('Preencha CEP, Rua e Número do endereço.')
+            return
+        }
+
+        const storedUsers = JSON.parse(localStorage.getItem('meraki_users') || '[]')
+        const index = storedUsers.findIndex(u => u.email === user?.email)
+
+        let updatedAddresses = [...userAddresses]
+
+        if (editingAddressId) {
+            updatedAddresses = updatedAddresses.map(a =>
+                a.id === editingAddressId
+                    ? { id: editingAddressId, label: addrLabel, cep: addrCep, street: addrStreet, number: addrNumber, complement: addrComp, neighborhood: addrBairro, city: addrCity, state: addrState }
+                    : a
+            )
+        } else {
+            const newAddr = {
+                id: 'addr-' + Date.now(),
+                label: addrLabel || 'Casa',
+                cep: addrCep,
+                street: addrStreet,
+                number: addrNumber,
+                complement: addrComp,
+                neighborhood: addrBairro,
+                city: addrCity,
+                state: addrState
+            }
+            updatedAddresses.push(newAddr)
+        }
+
+        if (index !== -1) {
+            storedUsers[index].addresses = updatedAddresses
+            localStorage.setItem('meraki_users', JSON.stringify(storedUsers))
+        }
+
+        setUserAddresses(updatedAddresses)
+        setShowAddressModal(false)
+        setEditingAddressId(null)
+        setAddrLabel('Casa')
+        setAddrCep('')
+        setAddrStreet('')
+        setAddrNumber('')
+        setAddrComp('')
+        setAddrBairro('')
+        setAddrCity('')
+        setAddrState('')
+        showAlert('Endereço salvo com sucesso!', 'success')
+    }
+
+    const handleDeleteAddress = (id) => {
+        const updated = userAddresses.filter(a => a.id !== id)
+        const storedUsers = JSON.parse(localStorage.getItem('meraki_users') || '[]')
+        const index = storedUsers.findIndex(u => u.email === user?.email)
+        if (index !== -1) {
+            storedUsers[index].addresses = updated
+            localStorage.setItem('meraki_users', JSON.stringify(storedUsers))
+        }
+        setUserAddresses(updated)
+        showAlert('Endereço removido com sucesso!', 'success')
+    }
 
     function showAlert(message, type = 'error') {
         setAlert({ message, type })
@@ -479,9 +588,10 @@ export default function AuthPage() {
                         <div className="sticky top-0 z-30 bg-white border-b border-[#E8E0D8] shadow-[0_1px_0_rgba(0,0,0,0.04)]">
                             <div className="flex">
                                 {[
-                                    { id: 'orders',  label: 'Pedidos',  icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
-                                    { id: 'returns', label: 'Trocas',   icon: 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15' },
-                                    { id: 'profile', label: 'Perfil',   icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
+                                    { id: 'orders',    label: 'Pedidos',   icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
+                                    { id: 'addresses', label: 'Endereços', icon: 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z' },
+                                    { id: 'returns',   label: 'Trocas',    icon: 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15' },
+                                    { id: 'profile',   label: 'Perfil',    icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
                                 ].map(t => (
                                     <button
                                         key={t.id}
@@ -599,6 +709,222 @@ export default function AuthPage() {
                                                     </div>
                                                 )
                                             })}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* ─── ENDEREÇOS TAB ─── */}
+                            {dashboardTab === 'addresses' && (
+                                <div className="space-y-5 animate-[fadeIn_200ms_ease-out]">
+                                    <div className="flex items-center justify-between">
+                                        <h2 className="text-xs font-bold text-[#2d1a1e] uppercase tracking-[0.15em]">Meus Endereços de Entrega</h2>
+                                        <button
+                                            onClick={() => {
+                                                setShowAddressModal(!showAddressModal)
+                                                setEditingAddressId(null)
+                                                setAddrLabel('Casa')
+                                                setAddrCep('')
+                                                setAddrStreet('')
+                                                setAddrNumber('')
+                                                setAddrComp('')
+                                                setAddrBairro('')
+                                                setAddrCity('')
+                                                setAddrState('')
+                                            }}
+                                            className="px-3.5 py-2 bg-[#7A3E4A] hover:bg-[#63303a] text-white text-[10px] font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-xs flex items-center gap-1.5"
+                                        >
+                                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                            </svg>
+                                            {showAddressModal ? 'Cancelar' : 'Novo Endereço'}
+                                        </button>
+                                    </div>
+
+                                    {/* ── FORM NOVO / EDITAR ENDEREÇO ── */}
+                                    {showAddressModal && (
+                                        <div className="bg-white border border-[#E8E0D8] rounded-2xl p-5 shadow-xs space-y-4">
+                                            <h3 className="text-xs font-bold text-[#7A3E4A] uppercase tracking-wider border-b border-[#F0EBE3] pb-2">
+                                                {editingAddressId ? 'Editar Endereço' : 'Cadastrar Novo Endereço'}
+                                            </h3>
+
+                                            <form onSubmit={handleSaveAddress} className="space-y-4">
+                                                {/* Identificador Rápido */}
+                                                <div>
+                                                    <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Identificador do Endereço (ex: Casa, Trabalho)</label>
+                                                    <div className="flex flex-wrap gap-2 mb-2">
+                                                        {['Casa', 'Trabalho', 'Outro'].map(lbl => (
+                                                            <button
+                                                                key={lbl}
+                                                                type="button"
+                                                                onClick={() => setAddrLabel(lbl)}
+                                                                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                                                                    addrLabel === lbl
+                                                                        ? 'bg-[#7A3E4A] text-white shadow-xs'
+                                                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                                }`}
+                                                            >
+                                                                {lbl === 'Casa' ? '🏠 Casa' : lbl === 'Trabalho' ? '💼 Trabalho' : '📍 Outro'}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                    <input
+                                                        type="text"
+                                                        value={addrLabel}
+                                                        onChange={e => setAddrLabel(e.target.value)}
+                                                        placeholder="Ex: Casa da Praia, Escritório..."
+                                                        required
+                                                        className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E8E0D8] rounded-xl text-xs outline-none focus:border-[#7A3E4A]"
+                                                    />
+                                                </div>
+
+                                                {/* CEP com Busca Auto */}
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">CEP (8 Números)</label>
+                                                        <input
+                                                            type="text"
+                                                            maxLength="9"
+                                                            value={addrCep}
+                                                            onChange={e => setAddrCep(maskCep(e.target.value))}
+                                                            placeholder="00000-000"
+                                                            required
+                                                            className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E8E0D8] rounded-xl text-xs outline-none focus:border-[#7A3E4A]"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Rua / Logradouro</label>
+                                                        <input
+                                                            type="text"
+                                                            value={addrStreet}
+                                                            onChange={e => setAddrStreet(e.target.value)}
+                                                            required
+                                                            className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E8E0D8] rounded-xl text-xs outline-none focus:border-[#7A3E4A]"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="grid grid-cols-3 gap-4">
+                                                    <div>
+                                                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Número</label>
+                                                        <input
+                                                            type="text"
+                                                            value={addrNumber}
+                                                            onChange={e => setAddrNumber(e.target.value)}
+                                                            required
+                                                            className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E8E0D8] rounded-xl text-xs outline-none focus:border-[#7A3E4A]"
+                                                        />
+                                                    </div>
+                                                    <div className="col-span-2">
+                                                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Complemento (Apto, Bloco...)</label>
+                                                        <input
+                                                            type="text"
+                                                            value={addrComp}
+                                                            onChange={e => setAddrComp(e.target.value)}
+                                                            className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E8E0D8] rounded-xl text-xs outline-none focus:border-[#7A3E4A]"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                                    <div>
+                                                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Bairro</label>
+                                                        <input
+                                                            type="text"
+                                                            value={addrBairro}
+                                                            onChange={e => setAddrBairro(e.target.value)}
+                                                            required
+                                                            className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E8E0D8] rounded-xl text-xs outline-none focus:border-[#7A3E4A]"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Cidade</label>
+                                                        <input
+                                                            type="text"
+                                                            value={addrCity}
+                                                            onChange={e => setAddrCity(e.target.value)}
+                                                            required
+                                                            className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E8E0D8] rounded-xl text-xs outline-none focus:border-[#7A3E4A]"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">UF (Estado)</label>
+                                                        <input
+                                                            type="text"
+                                                            maxLength="2"
+                                                            value={addrState}
+                                                            onChange={e => setAddrState(e.target.value.toUpperCase())}
+                                                            required
+                                                            className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E8E0D8] rounded-xl text-xs uppercase text-center outline-none focus:border-[#7A3E4A]"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="pt-2 flex justify-end gap-2">
+                                                    <button
+                                                        type="submit"
+                                                        className="px-6 py-3 bg-[#7A3E4A] hover:bg-[#63303a] text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-md"
+                                                    >
+                                                        {editingAddressId ? 'Atualizar Endereço' : 'Salvar Endereço'}
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    )}
+
+                                    {/* ── LISTA DE ENDEREÇOS SALVOS ── */}
+                                    {userAddresses.length === 0 ? (
+                                        <div className="bg-white border border-dashed border-[#E8E0D8] rounded-2xl py-12 text-center">
+                                            <svg className="w-10 h-10 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                            </svg>
+                                            <p className="text-xs font-bold text-gray-600 mb-1">Nenhum endereço cadastrado</p>
+                                            <p className="text-[11px] text-gray-400">Cadastre seus endereços (Casa, Trabalho) para calcular frete instantâneo no carrinho!</p>
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {userAddresses.map(addr => (
+                                                <div key={addr.id} className="bg-white border border-[#E8E0D8] rounded-2xl p-5 space-y-3 hover:shadow-md transition-all flex flex-col justify-between">
+                                                    <div>
+                                                        <div className="flex items-center justify-between mb-2">
+                                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#FAF6F0] border border-[#C6A76A]/30 text-[#7A3E4A] text-[10px] font-black uppercase tracking-wider rounded-full">
+                                                                <span>{addr.label === 'Casa' ? '🏠' : addr.label === 'Trabalho' ? '💼' : '📍'}</span>
+                                                                {addr.label}
+                                                            </span>
+                                                            <span className="font-mono text-xs text-gray-400 font-bold">CEP: {addr.cep}</span>
+                                                        </div>
+
+                                                        <p className="text-xs font-bold text-gray-900">{addr.street}, Nº {addr.number} {addr.complement && `- ${addr.complement}`}</p>
+                                                        <p className="text-xs text-gray-500 mt-0.5">{addr.neighborhood} — {addr.city}/{addr.state}</p>
+                                                    </div>
+
+                                                    <div className="pt-3 border-t border-[#F0EBE3] flex justify-end gap-2">
+                                                        <button
+                                                            onClick={() => {
+                                                                setEditingAddressId(addr.id)
+                                                                setAddrLabel(addr.label)
+                                                                setAddrCep(addr.cep)
+                                                                setAddrStreet(addr.street)
+                                                                setAddrNumber(addr.number)
+                                                                setAddrComp(addr.complement || '')
+                                                                setAddrBairro(addr.neighborhood)
+                                                                setAddrCity(addr.city)
+                                                                setAddrState(addr.state)
+                                                                setShowAddressModal(true)
+                                                            }}
+                                                            className="px-3 py-1.5 border border-gray-200 hover:bg-gray-50 text-gray-700 text-[10px] font-bold uppercase rounded-lg transition-colors cursor-pointer"
+                                                        >
+                                                            Editar
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeleteAddress(addr.id)}
+                                                            className="px-3 py-1.5 border border-red-200 hover:bg-red-50 text-red-600 text-[10px] font-bold uppercase rounded-lg transition-colors cursor-pointer"
+                                                        >
+                                                            Excluir
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     )}
                                 </div>
