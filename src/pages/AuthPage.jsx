@@ -532,15 +532,23 @@ export default function AuthPage() {
                                                 const cfg = statusConfig[order.status] || { bg: 'bg-gray-50', text: 'text-gray-600', dot: 'bg-gray-400' }
                                                 return (
                                                     <div key={order.id} className="bg-white border border-[#E8E0D8] overflow-hidden">
-                                                        {/* Order header */}
+                                                         {/* Order header */}
                                                         <div className="flex items-center justify-between px-4 py-3 border-b border-[#F0EBE3]">
                                                             <div>
                                                                 <p className="text-[10px] text-gray-400 font-medium">{new Date(order.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
                                                                 <p className="text-xs font-bold text-[#2d1a1e] mt-0.5">{order.id}</p>
                                                             </div>
-                                                            <div className={`flex items-center gap-1.5 px-2.5 py-1 ${cfg.bg}`}>
-                                                                <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
-                                                                <span className={`text-[10px] font-bold ${cfg.text}`}>{order.status}</span>
+                                                            <div className="flex items-center gap-2">
+                                                                <div className={`flex items-center gap-1.5 px-2.5 py-1 ${cfg.bg}`}>
+                                                                    <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+                                                                    <span className={`text-[10px] font-bold ${cfg.text}`}>{order.status}</span>
+                                                                </div>
+                                                                <Link
+                                                                    to={`/order-success/${order.id}`}
+                                                                    className="hidden sm:flex items-center gap-1 px-3 py-1 bg-[#7A3E4A] hover:bg-[#63303a] !text-white text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all cursor-pointer"
+                                                                >
+                                                                    Acompanhar
+                                                                </Link>
                                                             </div>
                                                         </div>
 
@@ -566,8 +574,21 @@ export default function AuthPage() {
                                                         </div>
 
                                                         {/* Footer */}
-                                                        <div className="flex items-center justify-between px-4 py-3 bg-[#FAF8F5] border-t border-[#F0EBE3]">
-                                                            <span className="text-[10px] text-gray-400 font-medium">{order.paymentMethod}</span>
+                                                        <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 bg-[#FAF8F5] border-t border-[#F0EBE3]">
+                                                            <div className="flex items-center gap-3">
+                                                                <span className="text-[10px] text-gray-400 font-medium capitalize">
+                                                                    {order.paymentMethod === 'pix' ? 'Pix à vista' : order.paymentMethod === 'card' ? 'Cartão de Crédito' : order.paymentMethod || 'Pagamento'}
+                                                                </span>
+                                                                <Link
+                                                                    to={`/order-success/${order.id}`}
+                                                                    className="px-3 py-1.5 bg-[#7A3E4A] hover:bg-[#63303a] !text-white text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
+                                                                >
+                                                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                    </svg>
+                                                                    Acompanhar Pedido
+                                                                </Link>
+                                                            </div>
                                                             <div className="flex items-center gap-1">
                                                                 <span className="text-[9px] text-gray-400 uppercase tracking-wider">Total</span>
                                                                 <span className="text-sm font-bold text-[#7A3E4A] ml-1">
