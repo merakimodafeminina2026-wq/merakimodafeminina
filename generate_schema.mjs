@@ -216,6 +216,26 @@ ALTER TABLE public.store_config ADD COLUMN IF NOT EXISTS banner_transition TEXT 
 ALTER TABLE public.store_config ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
 
 -- ====================================================================
+-- TABELA: reviews (Avaliações de Produtos)
+-- ====================================================================
+CREATE TABLE IF NOT EXISTS public.reviews (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    product_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    rating INTEGER DEFAULT 5,
+    comment TEXT,
+    verified BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.reviews ADD COLUMN IF NOT EXISTS product_id TEXT;
+ALTER TABLE public.reviews ADD COLUMN IF NOT EXISTS name TEXT;
+ALTER TABLE public.reviews ADD COLUMN IF NOT EXISTS rating INTEGER DEFAULT 5;
+ALTER TABLE public.reviews ADD COLUMN IF NOT EXISTS comment TEXT;
+ALTER TABLE public.reviews ADD COLUMN IF NOT EXISTS verified BOOLEAN DEFAULT TRUE;
+ALTER TABLE public.reviews ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
+
+-- ====================================================================
 -- CONFIGURAÇÃO DE SEGURANÇA (ROW LEVEL SECURITY - RLS)
 -- ====================================================================
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
@@ -226,6 +246,7 @@ ALTER TABLE public.coupons ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.banners ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.returns ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.store_config ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.reviews ENABLE ROW LEVEL SECURITY;
 
 -- Políticas de Leitura Pública para o E-commerce
 DROP POLICY IF EXISTS "Public read products" ON public.products;
@@ -242,6 +263,9 @@ CREATE POLICY "Public read coupons" ON public.coupons FOR SELECT USING (true);
 
 DROP POLICY IF EXISTS "Public read store_config" ON public.store_config;
 CREATE POLICY "Public read store_config" ON public.store_config FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public read reviews" ON public.reviews;
+CREATE POLICY "Public read reviews" ON public.reviews FOR SELECT USING (true);
 
 -- Permissão total para inserção/atualização (Suporta operações anon e autenticadas do app)
 DROP POLICY IF EXISTS "Allow public write products" ON public.products;
@@ -267,6 +291,9 @@ CREATE POLICY "Allow public write store_config" ON public.store_config FOR ALL U
 
 DROP POLICY IF EXISTS "Allow public write profiles" ON public.profiles;
 CREATE POLICY "Allow public write profiles" ON public.profiles FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow public write reviews" ON public.reviews;
+CREATE POLICY "Allow public write reviews" ON public.reviews FOR ALL USING (true) WITH CHECK (true);
 
 -- ====================================================================
 -- CONFIGURAÇÃO DO BUCKET DE STORAGE (IMAGENS DOS PRODUTOS & BANNERS)

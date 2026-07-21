@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { getAssetUrl } from '../utils/assets.js'
+import { fetchProductReviews } from '../services/database.js'
 
 export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, isWishlisted, onToggleWishlist }) {
     const [selectedSize, setSelectedSize] = useState(null)
@@ -7,19 +8,16 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
     const [currentImageIndex, setCurrentImageIndex] = useState(0)
     const [reviews, setReviews] = useState([])
 
-    // Load reviews dynamically from localStorage when the product changes
+    // Load reviews dynamically from Supabase / cache when the product changes
     useEffect(() => {
         if (!product) return
-        const stored = localStorage.getItem(`meraki_reviews_${product.id}`)
-        if (stored) {
-            try {
-                setReviews(JSON.parse(stored))
-            } catch {
-                setReviews([])
+        let isMounted = true
+        fetchProductReviews(product.id).then(({ data }) => {
+            if (isMounted && data) {
+                setReviews(data)
             }
-        } else {
-            setReviews([])
-        }
+        })
+        return () => { isMounted = false }
     }, [product])
 
     if (!isOpen || !product) return null

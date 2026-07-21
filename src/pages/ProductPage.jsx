@@ -11,6 +11,7 @@ import SearchOverlay from '../components/SearchOverlay.jsx'
 import QuickViewModal from '../components/QuickViewModal.jsx'
 import Notification from '../components/Notification.jsx'
 import WhatsAppButton from '../components/WhatsAppButton.jsx'
+import { fetchProductReviews, createProductReview } from '../services/database.js'
 
 const slugifyCategory = (name) => name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s-]/g, '').trim().replace(/[\s-]+/g, '-')
 
@@ -37,27 +38,17 @@ export default function ProductPage() {
     const [activeImageIndex, setActiveImageIndex] = useState(0)
     const [lightboxOpen, setLightboxOpen] = useState(false)
 
-    // Synchronize and load reviews from localStorage
+    // Load reviews from Supabase / localStorage cache
     useEffect(() => {
         if (!id) return
-        const stored = localStorage.getItem(`meraki_reviews_${id}`)
-        if (stored) {
-            try {
-                setReviews(JSON.parse(stored))
-            } catch {
-                setReviews([])
+        let isMounted = true
+        fetchProductReviews(id).then(({ data }) => {
+            if (isMounted && data) {
+                setReviews(data)
             }
-        } else {
-            setReviews([])
-        }
+        })
+        return () => { isMounted = false }
     }, [id])
-
-    // Save reviews on change
-    useEffect(() => {
-        if (id && reviews.length >= 0) {
-            localStorage.setItem(`meraki_reviews_${id}`, JSON.stringify(reviews))
-        }
-    }, [reviews, id])
 
     const averageRating = useMemo(() => {
         if (!reviews || reviews.length === 0) return '5.0'
@@ -230,23 +221,31 @@ export default function ProductPage() {
         setNotification({ message: `${quantity}x ${product.name} adicionado ao carrinho!`, visible: true })
     }
 
-    const handleAddReview = (e) => {
+    const handleAddReview = async (e) => {
         e.preventDefault()
-        if (!newReview.name || !newReview.comment) return
-        setReviews([
-            {
-                id: Date.now(),
-                name: newReview.name,
-                rating: newReview.rating,
-                date: new Date().toLocaleDateString('pt-BR'),
-                comment: newReview.comment,
-                verified: false
-            },
-            ...reviews
-        ])
+        if (!newReview.name.trim() || !newReview.comment.trim()) return
+
+        const reviewPayload = {
+            product_id: id,
+            name: newReview.name.trim(),
+            rating: newReview.rating,
+            comment: newReview.comment.trim()
+        }
+
+        // Optimistically update state
+        const tempObj = {
+            ...reviewPayload,
+            id: 'rev-' + Date.now(),
+            date: new Date().toLocaleDateString('pt-BR'),
+            verified: true
+        }
+        setReviews(prev => [tempObj, ...prev])
         setNewReview({ name: '', rating: 5, comment: '' })
         setReviewSuccess(true)
         setTimeout(() => setReviewSuccess(false), 4000)
+
+        // Persist to Supabase
+        await createProductReview(reviewPayload)
     }
 
     const imageSrc = getAssetUrl(productImages[activeImageIndex] || '/placeholder.jpg')

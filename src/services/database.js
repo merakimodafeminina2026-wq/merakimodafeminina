@@ -21,7 +21,8 @@ const TABLE_COLUMNS = {
         'id', 'whatsapp', 'sac_phone', 'address', 'cnpj', 'infinitepay_handle',
         'topbarmessages', 'topbarstyle', 'promocombo', 'editorial', 'available_colors', 'available_emojis', 'shipping_message',
         'available_badges', 'installment_text', 'banner_transition'
-    ]
+    ],
+    reviews: ['id', 'product_id', 'name', 'rating', 'comment', 'verified', 'created_at']
 }
 
 // Maps database columns to alternative frontend keys
@@ -624,4 +625,54 @@ export async function clearProductBadges(badgeList) {
         console.error('Error clearing product badges:', e)
         return { success: false, error: e }
     }
+}
+
+// ─── REVIEWS / AVALIAÇÕES DO SUPABASE ────────────────────────────────────────
+
+export async function fetchProductReviews(productId) {
+    if (!productId) return { data: [], error: null }
+    try {
+        const { data, error } = await supabase
+            .from('reviews')
+            .select('*')
+            .eq('product_id', String(productId))
+            .order('created_at', { ascending: false })
+            
+        if (!error && data) {
+            localStorage.setItem(`meraki_reviews_${productId}`, JSON.stringify(data))
+            return { data, error: null }
+        }
+    } catch (e) {
+        console.warn('Erro ao carregar avaliações do Supabase, usando cache local:', e)
+    }
+
+    const cached = JSON.parse(localStorage.getItem(`meraki_reviews_${productId}`) || '[]')
+    return { data: cached, error: null }
+}
+
+export async function createProductReview({ product_id, name, rating, comment }) {
+    const payload = {
+        product_id: String(product_id),
+        name,
+        rating: Number(rating) || 5,
+        comment,
+        verified: true,
+        created_at: new Date().toISOString()
+    }
+
+    // Save to local cache immediately
+    const cached = JSON.parse(localStorage.getItem(`meraki_reviews_${product_id}`) || '[]')
+    const updated = [payload, ...cached]
+    localStorage.setItem(`meraki_reviews_${product_id}`, JSON.stringify(updated))
+
+    try {
+        const { data, error } = await supabase.from('reviews').insert([payload]).select().single()
+        if (!error && data) {
+            return { data, error: null }
+        }
+    } catch (e) {
+        console.warn('Erro ao inserir avaliação no Supabase:', e)
+    }
+
+    return { data: payload, error: null }
 }
