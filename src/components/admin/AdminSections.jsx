@@ -879,8 +879,17 @@ export function CategoriesSection({
 
     const [defaultCategoryImage, setDefaultCategoryImage] = useState(() => {
         const stored = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
-        return stored.default_category_image || 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=400&q=80'
+        return stored.default_category_image || categories?.[0]?.image || '/assets/categories/cat-sexy.jpg'
     })
+
+    useEffect(() => {
+        const stored = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+        if (stored.default_category_image) {
+            setDefaultCategoryImage(stored.default_category_image)
+        } else if (categories && categories.length > 0 && categories[0]?.image) {
+            setDefaultCategoryImage(categories[0].image)
+        }
+    }, [categories])
 
     const resetForm = () => {
         setEditingIndex(null)
@@ -1015,7 +1024,7 @@ export function CategoriesSection({
                         </p>
                         
                         <div className="w-full h-32 rounded-xl overflow-hidden border border-[#EEEEEE] bg-gray-50 mb-4 relative group">
-                            <img src={defaultCategoryImage} alt="Imagem Padrão" className="w-full h-full object-cover" />
+                            <MediaDisplay src={defaultCategoryImage} alt="Imagem Padrão do Menu" className="w-full h-full object-cover" />
                         </div>
                     </div>
 

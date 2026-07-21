@@ -51,9 +51,9 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onSearchOpen 
     const [defaultCategoryImage, setDefaultCategoryImage] = useState(() => {
         try {
             const stored = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
-            return stored?.default_category_image || '/assets/categories/cat-conjuntos.jpg'
+            return stored?.default_category_image || '/assets/categories/cat-sexy.jpg'
         } catch {
-            return '/assets/categories/cat-conjuntos.jpg'
+            return '/assets/categories/cat-sexy.jpg'
         }
     })
 
