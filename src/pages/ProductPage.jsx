@@ -28,6 +28,7 @@ export default function ProductPage() {
     const [notification, setNotification] = useState({ message: '', visible: false })
     const [reviews, setReviews] = useState([])
     const [newReview, setNewReview] = useState({ name: '', rating: 5, comment: '' })
+    const [hoverRating, setHoverRating] = useState(0)
     const [reviewSuccess, setReviewSuccess] = useState(false)
 
     const [selectedColor, setSelectedColor] = useState(null)
@@ -38,30 +39,29 @@ export default function ProductPage() {
 
     // Synchronize and load reviews from localStorage
     useEffect(() => {
+        if (!id) return
         const stored = localStorage.getItem(`meraki_reviews_${id}`)
         if (stored) {
-            setReviews(JSON.parse(stored))
+            try {
+                setReviews(JSON.parse(stored))
+            } catch {
+                setReviews([])
+            }
         } else {
-            const defaults = [
-                { id: 1, name: 'Mariana Silva', rating: 5, date: '04/05/2026', comment: 'Renda impecável e caimento perfeito. Muito confortável!', verified: true },
-                { id: 2, name: 'Carolina Souza', rating: 5, date: '28/04/2026', comment: 'Lindo demais! Veste super bem e o suporte do bojo é ótimo.', verified: true },
-                { id: 3, name: 'Beatriz Costa', rating: 4, date: '15/04/2026', comment: 'Amei a cor e o material. A entrega foi super rápida.', verified: true }
-            ]
-            setReviews(defaults)
-            localStorage.setItem(`meraki_reviews_${id}`, JSON.stringify(defaults))
+            setReviews([])
         }
     }, [id])
 
     // Save reviews on change
     useEffect(() => {
-        if (reviews.length > 0) {
+        if (id && reviews.length >= 0) {
             localStorage.setItem(`meraki_reviews_${id}`, JSON.stringify(reviews))
         }
     }, [reviews, id])
 
     const averageRating = useMemo(() => {
-        if (reviews.length === 0) return 5
-        const sum = reviews.reduce((acc, r) => acc + r.rating, 0)
+        if (!reviews || reviews.length === 0) return '5.0'
+        const sum = reviews.reduce((acc, r) => acc + (Number(r.rating) || 5), 0)
         return (sum / reviews.length).toFixed(1)
     }, [reviews])
 
@@ -728,31 +728,44 @@ export default function ProductPage() {
 
                         {/* Customer Reviews List */}
                         <div className="lg:col-span-8 space-y-6">
-                            <div className="space-y-4">
-                                {reviews.map(rev => (
-                                    <div key={rev.id} className="bg-white p-5 rounded-2xl border border-gray-100/80 shadow-2xs">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-sm font-bold text-gray-900">{rev.name}</span>
-                                                {rev.verified && (
-                                                    <span className="bg-emerald-50 text-emerald-600 text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5">
-                                                        ✓ Compradora verificada
-                                                    </span>
-                                                )}
+                            {reviews.length > 0 ? (
+                                <div className="space-y-4">
+                                    {reviews.map(rev => (
+                                        <div key={rev.id} className="bg-white p-5 rounded-2xl border border-gray-100/80 shadow-2xs">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-sm font-bold text-gray-900">{rev.name}</span>
+                                                    {rev.verified && (
+                                                        <span className="bg-emerald-50 text-emerald-600 text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                                                            ✓ Compradora verificada
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <span className="text-[10px] text-gray-400">{rev.date}</span>
                                             </div>
-                                            <span className="text-[10px] text-gray-400">{rev.date}</span>
+                                            <div className="flex items-center gap-1 text-amber-400 mb-2">
+                                                {Array.from({ length: 5 }).map((_, i) => (
+                                                    <svg key={i} className={`w-4 h-4 ${i < (rev.rating || 5) ? 'text-amber-400 fill-amber-400' : 'text-gray-200 fill-gray-200'}`} viewBox="0 0 20 20">
+                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                    </svg>
+                                                ))}
+                                                <span className="text-xs font-bold text-gray-400 ml-1">{rev.rating || 5}.0</span>
+                                            </div>
+                                            <p className="text-xs text-gray-600 font-light leading-relaxed">{rev.comment}</p>
                                         </div>
-                                        <div className="flex text-amber-400 mb-2">
-                                            {Array.from({ length: rev.rating }).map((_, i) => (
-                                                <svg key={i} className="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20">
-                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                                </svg>
-                                            ))}
-                                        </div>
-                                        <p className="text-xs text-gray-600 font-light leading-relaxed">{rev.comment}</p>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="bg-white p-8 rounded-2xl border border-gray-100 text-center py-10 shadow-2xs">
+                                    <div className="w-12 h-12 rounded-full bg-amber-50 text-amber-400 flex items-center justify-center mx-auto mb-3">
+                                        <svg className="w-6 h-6 fill-current" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                        </svg>
                                     </div>
-                                ))}
-                            </div>
+                                    <p className="text-sm font-bold text-gray-800 mb-1">Nenhuma avaliação ainda</p>
+                                    <p className="text-xs text-gray-400">Seja a primeira pessoa a avaliar este produto!</p>
+                                </div>
+                            )}
 
                             {/* Add Review Form */}
                             <form onSubmit={handleAddReview} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-2xs mt-8">
@@ -775,18 +788,36 @@ export default function ProductPage() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-700 uppercase mb-2">Avaliação</label>
-                                        <select
-                                            value={newReview.rating}
-                                            onChange={e => setNewReview({ ...newReview, rating: parseInt(e.target.value) })}
-                                            className="w-full bg-[#FCFAFA] border border-gray-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#7A3E4A] text-gray-700"
-                                        >
-                                            <option value={5}>5 Estrelas (Excelente)</option>
-                                            <option value={4}>4 Estrelas (Muito Bom)</option>
-                                            <option value={3}>3 Estrelas (Bom)</option>
-                                            <option value={2}>2 Estrelas (Regular)</option>
-                                            <option value={1}>1 Estrela (Ruim)</option>
-                                        </select>
+                                        <label className="block text-xs font-bold text-gray-700 uppercase mb-2">Avaliação (Estrelas)</label>
+                                        <div className="flex items-center gap-1 bg-[#FCFAFA] border border-gray-200 rounded-xl px-3 py-1.5 h-[40px]">
+                                            {[1, 2, 3, 4, 5].map((star) => {
+                                                const activeRating = hoverRating || newReview.rating
+                                                const isFilled = star <= activeRating
+                                                return (
+                                                    <button
+                                                        key={star}
+                                                        type="button"
+                                                        onClick={() => setNewReview(prev => ({ ...prev, rating: star }))}
+                                                        onMouseEnter={() => setHoverRating(star)}
+                                                        onMouseLeave={() => setHoverRating(0)}
+                                                        className="p-1 cursor-pointer transition-transform hover:scale-115 focus:outline-none"
+                                                        aria-label={`${star} estrela${star > 1 ? 's' : ''}`}
+                                                    >
+                                                        <svg
+                                                            className={`w-5 h-5 transition-colors ${
+                                                                isFilled ? 'text-amber-400 fill-amber-400' : 'text-gray-300 fill-transparent stroke-gray-300'
+                                                            }`}
+                                                            viewBox="0 0 20 20"
+                                                        >
+                                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                        </svg>
+                                                    </button>
+                                                )
+                                            })}
+                                            <span className="text-[10px] font-bold text-amber-500 ml-1">
+                                                {hoverRating || newReview.rating}/5
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="mb-4">
@@ -802,7 +833,7 @@ export default function ProductPage() {
                                 </div>
                                 <button
                                     type="submit"
-                                    className="bg-[#7A3E4A] hover:bg-[#63303a] text-white py-3 px-6 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors shadow-sm"
+                                    className="bg-[#7A3E4A] hover:bg-[#63303a] text-white py-3 px-6 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors shadow-sm cursor-pointer"
                                 >
                                     Enviar Comentário
                                 </button>

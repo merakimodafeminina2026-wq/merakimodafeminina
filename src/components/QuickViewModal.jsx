@@ -12,14 +12,13 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
         if (!product) return
         const stored = localStorage.getItem(`meraki_reviews_${product.id}`)
         if (stored) {
-            setReviews(JSON.parse(stored))
+            try {
+                setReviews(JSON.parse(stored))
+            } catch {
+                setReviews([])
+            }
         } else {
-            // Default simulated reviews
-            setReviews([
-                { id: 1, name: 'Mariana Silva', rating: 5, date: '04/05/2026', comment: 'Renda impecável e caimento perfeito. Muito confortável!', verified: true },
-                { id: 2, name: 'Carolina Souza', rating: 5, date: '28/04/2026', comment: 'Lindo demais! Veste super bem e o suporte do bojo é ótimo.', verified: true },
-                { id: 3, name: 'Beatriz Costa', rating: 4, date: '15/04/2026', comment: 'Amei a cor e o material. A entrega foi super rápida.', verified: true }
-            ])
+            setReviews([])
         }
     }, [product])
 
