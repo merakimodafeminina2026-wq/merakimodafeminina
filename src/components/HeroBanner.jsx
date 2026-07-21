@@ -186,13 +186,13 @@ export default function HeroBanner() {
     if (!slides || slides.length === 0) return null
 
     const hasMobileImage = !!slides[current]?.mobile_image
-    const aspectClass = isMobile && hasMobileImage ? 'aspect-[4/5]' : 'aspect-[16/7] md:aspect-[16/5]'
+    const aspectClass = isMobile && hasMobileImage ? 'aspect-[4/5]' : 'aspect-[1920/800]'
     const variants = getVariants(transition)
     const isShatter = transition === 'shatter'
     const isAnimated = !isShatter && variants !== null
 
     return (
-        <section className={`relative w-full overflow-hidden bg-[#F5EDE3] transition-all duration-300 max-h-[600px] ${aspectClass}`} style={{ perspective: '1200px' }}>
+        <section className={`relative w-full overflow-hidden bg-[#F5EDE3] transition-all duration-300 max-h-[800px] ${aspectClass}`} style={{ perspective: '1200px' }}>
 
             {/* ── SHATTER mode: manual grid overlay ── */}
             {isShatter && (
