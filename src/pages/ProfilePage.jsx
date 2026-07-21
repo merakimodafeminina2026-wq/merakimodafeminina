@@ -224,6 +224,15 @@ export default function ProfilePage() {
                                                     }`}>
                                                         {order.status}
                                                     </span>
+                                                    <Link
+                                                        to={`/order-success/${order.id}`}
+                                                        className="px-3 py-1.5 bg-[#7A3E4A] hover:bg-[#63303a] text-white text-[10px] font-bold uppercase tracking-wider rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+                                                    >
+                                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                        Acompanhar
+                                                    </Link>
                                                 </div>
                                             </div>
 
