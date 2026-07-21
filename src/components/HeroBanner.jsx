@@ -184,9 +184,17 @@ export default function HeroBanner() {
         }
     }
 
-    if (!slides || slides.length === 0) return null
+    // Desktop only shows slides that have a desktop image set.
+    // Mobile shows all slides (falls back to desktop image if no mobile image).
+    const visibleSlides = isMobile ? slides : slides.filter(s => s.image)
 
-    const hasMobileImage = !!slides[current]?.mobile_image
+    if (!visibleSlides || visibleSlides.length === 0) return null
+
+    // Clamp current index in case visible slides count is less
+    const safeIndex = Math.min(current, visibleSlides.length - 1)
+    const currentSlide = visibleSlides[safeIndex]
+
+    const hasMobileImage = !!currentSlide?.mobile_image
     const aspectClass = isMobile && hasMobileImage ? 'aspect-[4/5]' : 'aspect-[1920/800]'
     const variants = getVariants(transition)
     const isShatter = transition === 'shatter'
@@ -199,13 +207,13 @@ export default function HeroBanner() {
             {isShatter && (
                 <>
                     <div className="absolute inset-0 z-0">
-                        <Link to={slides[current].link} className="block w-full h-full">
+                        <Link to={currentSlide.link} className="block w-full h-full">
                             <MediaDisplay
                                 src={isMobile
-                                    ? (slides[current].mobile_image || slides[current].image)
-                                    : (slides[current].image || slides[current].mobile_image)
+                                    ? (currentSlide.mobile_image || currentSlide.image)
+                                    : currentSlide.image
                                 }
-                                alt={slides[current].alt}
+                                alt={currentSlide.alt}
                                 className="w-full h-full object-cover object-center"
                             />
                         </Link>
@@ -248,13 +256,13 @@ export default function HeroBanner() {
                         exit="exit"
                         style={{ transformStyle: 'preserve-3d' }}
                     >
-                        <Link to={slides[current].link} className="block w-full h-full">
+                        <Link to={currentSlide.link} className="block w-full h-full">
                             <MediaDisplay
                                 src={isMobile
-                                    ? (slides[current].mobile_image || slides[current].image)
-                                    : (slides[current].image || slides[current].mobile_image)
+                                    ? (currentSlide.mobile_image || currentSlide.image)
+                                    : currentSlide.image
                                 }
-                                alt={slides[current].alt}
+                                alt={currentSlide.alt}
                                 className="w-full h-full object-cover object-center"
                             />
                         </Link>
@@ -265,9 +273,9 @@ export default function HeroBanner() {
             {/* Pagination Dots */}
             <div className="absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 z-20">
                 <div className="flex gap-2.5 bg-black/20 backdrop-blur-sm rounded-full px-4 py-2">
-                    {slides.map((_, i) => (
+                    {visibleSlides.map((_, i) => (
                         <button key={i} onClick={() => goTo(i)} aria-label={`Ir para banner ${i + 1}`} className="group relative p-1 cursor-pointer">
-                            <div className={`rounded-full transition-all duration-500 ease-out ${i === current ? 'bg-white w-7 h-2.5' : 'bg-white/40 hover:bg-white/70 w-2.5 h-2.5'}`} />
+                            <div className={`rounded-full transition-all duration-500 ease-out ${i === safeIndex ? 'bg-white w-7 h-2.5' : 'bg-white/40 hover:bg-white/70 w-2.5 h-2.5'}`} />
                         </button>
                     ))}
                 </div>
