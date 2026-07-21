@@ -1456,7 +1456,7 @@ export function ReturnsSection({
 export function SettingsSection({ saving, setSaving }) {
     const [whatsapp, setWhatsapp] = useState(() => {
         const stored = JSON.parse(localStorage.getItem('meraki_store_config'))
-        return stored?.whatsapp || '5511999999999'
+        return stored?.whatsapp || '551123880403'
     })
     const [sacPhone, setSacPhone] = useState(() => {
         const stored = JSON.parse(localStorage.getItem('meraki_store_config'))
@@ -1464,7 +1464,7 @@ export function SettingsSection({ saving, setSaving }) {
     })
     const [address, setAddress] = useState(() => {
         const stored = JSON.parse(localStorage.getItem('meraki_store_config'))
-        return stored?.address || 'Rua Alpont, 428 - Bairro Capuava - Mauá - São Paulo. CEP: 09380-115'
+        return stored?.address || 'Avenida Alfredo Nasser, Qd. 14, Lt. 05 - Centro, Bonfinópolis - GO, CEP: 75225-000'
     })
     const [cnpj, setCnpj] = useState(() => {
         const stored = JSON.parse(localStorage.getItem('meraki_store_config'))

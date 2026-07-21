@@ -275,21 +275,23 @@ INSERT INTO public.store_config (
     topbarmessages, topbarstyle, promocombo, editorial, shipping_message, banner_transition
 ) VALUES (
     'default',
-    '5511999999999',
+    '551123880403',
     '(11) 2388-0403',
-    'Rua Alpont, 428 - Bairro Capuava - Mauá - São Paulo. CEP: 09380-115',
+    'Avenida Alfredo Nasser, Qd. 14, Lt. 05 - Centro, Bonfinópolis - GO, CEP: 75225-000',
     '57.484.768/0064-89',
     'merakimodafeminina2026',
     '["✨ Frete Grátis acima de R$ 299 • Parcele em até 12x", "Utilize o cupom BEMVIND010 em sua primeira compra!", "Ganhe 5% de desconto pagando no PIX!"]'::jsonb,
     '{"bgColor": "#C6A76A", "textColor": "#FFFFFF"}'::jsonb,
-    '{"title": "Combo Sutiã", "subtitle": "Do P ao EG. Diversos modelos para você escolher.", "image": "https://images.unsplash.com/photo-1616422285623-13ff0162193c?w=800&auto=format&fit=crop&q=80", "price2Items": 139, "price3Items": 169, "link": "/category/promo-combo", "query": "sutiã", "visible": true}'::jsonb,
+    '{"title": "Combo Sutiã", "subtitle": "Do P ao EG. Diversos modelos para você escolher.", "image": "/assets/categories/cat-conjuntos.jpg", "price2Items": 139, "price3Items": 169, "link": "/category/promo-combo", "query": "sutiã", "visible": true}'::jsonb,
     '{"label": "Artesanal & Premium", "title": "A arte de se sentir extraordinária.", "description": "Cada costura, cada detalhe em renda foi pensado para elevar sua confiança e celebrar sua beleza única em todos os momentos.", "buttonText": "Ver Manifesto", "buttonLink": "/story", "image": "/assets/banners/banner-2.jpg"}'::jsonb,
     'Frete grátis para a região Centro-Oeste nas compras acima de R$ 299,90.',
     'shatter'
 ) ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.coupons (code, value, type, minpurchase)
-VALUES ('BEMVINDA10', 10.00, 'percent', 0.00)
+VALUES 
+    ('BEMVINDA10', 10.00, 'percent', 0.00),
+    ('BEMVIND010', 10.00, 'percent', 0.00)
 ON CONFLICT (code) DO NOTHING;
 
 INSERT INTO public.categories (name, "group", description, image)

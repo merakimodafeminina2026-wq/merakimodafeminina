@@ -4,7 +4,7 @@ export default function Footer() {
     const [butterflySrc, setButterflySrc] = useState('/assets/borboleta-v2.png')
     const [config, setConfig] = useState({
         sac_phone: '(11) 2388-0403',
-        address: 'Rua Alpont, 428 - Bairro Capuava - Mauá - São Paulo. CEP: 09380-115',
+        address: 'Avenida Alfredo Nasser, Qd. 14, Lt. 05 - Centro, Bonfinópolis - GO, CEP: 75225-000',
         cnpj: '57.484.768/0064-89'
     })
 
@@ -15,7 +15,7 @@ export default function Footer() {
                 if (stored) {
                     setConfig({
                         sac_phone: stored.sac_phone || '(11) 2388-0403',
-                        address: stored.address || 'Rua Alpont, 428 - Bairro Capuava - Mauá - São Paulo. CEP: 09380-115',
+                        address: stored.address || 'Avenida Alfredo Nasser, Qd. 14, Lt. 05 - Centro, Bonfinópolis - GO, CEP: 75225-000',
                         cnpj: stored.cnpj || '57.484.768/0064-89'
                     })
                 }

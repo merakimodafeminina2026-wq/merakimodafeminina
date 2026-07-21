@@ -13,20 +13,20 @@ const defaultTopBarMessages = [
 const slugifyCategory = (name) => name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s-]/g, '').trim().replace(/[\s-]+/g, '-')
 
 const categoryImages = {
-    'conjuntos': 'https://images.unsplash.com/photo-1616422285623-13ff0162193c?auto=format&fit=crop&w=400&q=80',
-    'calcinhas': 'https://images.unsplash.com/photo-1573140247632-f8fd74997d5c?auto=format&fit=crop&w=400&q=80',
-    'tanga': 'https://images.unsplash.com/photo-1582533561751-ef6f6ab93a2e?auto=format&fit=crop&w=400&q=80',
-    'body': 'https://images.unsplash.com/photo-1508962914676-134849a727f0?auto=format&fit=crop&w=400&q=80',
-    'camisola': 'https://images.unsplash.com/photo-1518622358385-8ea7d0794bf6?auto=format&fit=crop&w=400&q=80',
-    'baby-doll': 'https://images.unsplash.com/photo-1549064482-6779ba3292fe?auto=format&fit=crop&w=400&q=80',
-    'camisolas-babydolls': 'https://images.unsplash.com/photo-1518622358385-8ea7d0794bf6?auto=format&fit=crop&w=400&q=80',
-    'plus-size': 'https://images.unsplash.com/photo-1581338834647-b0fb40704e21?auto=format&fit=crop&w=400&q=80',
-    'personalizados': 'https://images.unsplash.com/photo-1549439602-43ebcb23281f?auto=format&fit=crop&w=400&q=80',
-    'fantasias': 'https://images.unsplash.com/photo-1502301197179-6522b4bce294?auto=format&fit=crop&w=400&q=80',
-    'sex-shop': 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=400&q=80',
-    'acessorios': 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=400&q=80',
-    'linha-sexy': 'https://images.unsplash.com/photo-1566207274740-0f8cf6b7d5a5?auto=format&fit=crop&w=400&q=80',
-    'moda-praia': 'https://images.unsplash.com/photo-1502301197179-6522b4bce294?auto=format&fit=crop&w=400&q=80'
+    'conjuntos': '/assets/categories/cat-conjuntos.jpg',
+    'calcinhas': '/assets/categories/cat-sexy.jpg',
+    'tanga': '/assets/categories/cat-sexy.jpg',
+    'body': '/assets/categories/cat-sexy.jpg',
+    'camisola': '/assets/categories/cat-noite.jpg',
+    'baby-doll': '/assets/categories/cat-noite.jpg',
+    'camisolas-babydolls': '/assets/categories/cat-noite.jpg',
+    'plus-size': '/assets/categories/cat-plus.jpg',
+    'personalizados': '/assets/categories/cat-conjuntos.jpg',
+    'fantasias': '/assets/categories/cat-sexy.jpg',
+    'sex-shop': '/assets/categories/cat-sexy.jpg',
+    'acessorios': '/assets/categories/cat-acessorios.jpg',
+    'linha-sexy': '/assets/categories/cat-sexy.jpg',
+    'moda-praia': '/assets/categories/cat-conjuntos.jpg'
 }
 
 export default function Header({ cartCount = 0, wishlistCount = 0, onSearchOpen }) {
@@ -51,9 +51,9 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onSearchOpen 
     const [defaultCategoryImage, setDefaultCategoryImage] = useState(() => {
         try {
             const stored = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
-            return stored?.default_category_image || 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=400&q=80'
+            return stored?.default_category_image || '/assets/categories/cat-conjuntos.jpg'
         } catch {
-            return 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=400&q=80'
+            return '/assets/categories/cat-conjuntos.jpg'
         }
     })
 

@@ -210,9 +210,9 @@ export async function initSupabaseSync() {
         } else {
             const defaultConfig = {
                 id: 'default',
-                whatsapp: '5511999999999',
+                whatsapp: '551123880403',
                 sac_phone: '(11) 2388-0403',
-                address: 'Rua Alpont, 428 - Bairro Capuava - Mauá - São Paulo. CEP: 09380-115',
+                address: 'Avenida Alfredo Nasser, Qd. 14, Lt. 05 - Centro, Bonfinópolis - GO, CEP: 75225-000',
                 cnpj: '57.484.768/0064-89',
                 infinitepay_handle: 'merakimodafeminina2026',
                 topbarMessages: [
@@ -224,7 +224,7 @@ export async function initSupabaseSync() {
                 promoCombo: {
                     title: 'Combo Sutiã',
                     subtitle: 'Do P ao EG. Diversos modelos para você escolher.',
-                    image: 'https://images.unsplash.com/photo-1616422285623-13ff0162193c?w=800&auto=format&fit=crop&q=80',
+                    image: '/assets/categories/cat-conjuntos.jpg',
                     price2Items: 139,
                     price3Items: 169,
                     link: '/category/promo-combo',
@@ -234,7 +234,7 @@ export async function initSupabaseSync() {
                 editorial: {
                     label: 'Artesanal & Premium',
                     title: 'A arte de se sentir extraordinária.',
-                    description: 'Cada costura, cada detalhe in renda foi pensado para elevar sua confiança e celebrar sua beleza única em todos os momentos.',
+                    description: 'Cada costura, cada detalhe em renda foi pensado para elevar sua confiança e celebrar sua beleza única em todos os momentos.',
                     buttonText: 'Ver Manifesto',
                     buttonLink: '/story',
                     image: '/assets/banners/banner-2.jpg'

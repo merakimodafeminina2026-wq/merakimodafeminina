@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 
 export default function WhatsAppButton() {
-    const [whatsapp, setWhatsapp] = useState('5511999999999')
+    const [whatsapp, setWhatsapp] = useState('551123880403')
 
     useEffect(() => {
         const loadConfig = () => {
