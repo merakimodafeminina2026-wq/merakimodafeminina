@@ -34,7 +34,7 @@ export default function OrderTracker({ order, onCopyPix, pixCopied }) {
         { key: 'created', label: 'Pedido realizado', icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
         { key: 'pending', label: 'Aguardando pagamento', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
         { key: 'paid', label: 'Pagamento aprovado', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
-        { key: 'shipped', label: 'Entregue à transportadora', icon: 'M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0' },
+        { key: 'shipped', label: 'Preparando pedido', icon: 'M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0' },
         { key: 'delivered', label: 'Pedido entregue', icon: 'M5 13l4 4L19 7' }
     ]
 
@@ -48,7 +48,7 @@ export default function OrderTracker({ order, onCopyPix, pixCopied }) {
             case 2:
                 return `${customerFirstName}, seu pagamento foi aprovado! Suas peças já estão sendo preparadas para envio.`
             case 3:
-                return `${customerFirstName}, seu pedido já foi enviado e está a caminho com a transportadora. Preparada para recebê-lo?`
+                return `${customerFirstName}, seu pedido está sendo preparado com todo carinho para envio!`
             case 4:
                 return `${customerFirstName}, seu pedido foi entregue com sucesso! Esperamos que você se sinta extraordinária com suas novas peças.`
             default:
@@ -76,7 +76,7 @@ export default function OrderTracker({ order, onCopyPix, pixCopied }) {
     }
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 font-sans">
             {/* Header Title & Personalized Message */}
             <div className="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-sm space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-4">
@@ -88,7 +88,7 @@ export default function OrderTracker({ order, onCopyPix, pixCopied }) {
                         </div>
                         <div>
                             <span className="text-[10px] font-bold uppercase tracking-widest text-[#C6A76A]">Status em Tempo Real</span>
-                            <h1 className="font-heading text-xl sm:text-2xl font-bold text-gray-900">Pedido #{order.id}</h1>
+                            <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">Pedido #{order.id}</h1>
                         </div>
                     </div>
 
@@ -299,7 +299,7 @@ export default function OrderTracker({ order, onCopyPix, pixCopied }) {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                 </svg>
                             </div>
-                            <h3 className="font-heading text-base font-bold text-gray-900">Resumo da compra</h3>
+                            <h3 className="text-sm font-extrabold text-gray-900 uppercase tracking-wider">Resumo da compra</h3>
                         </div>
 
                         <div className="space-y-3.5 text-xs text-gray-600">
