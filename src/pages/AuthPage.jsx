@@ -131,12 +131,25 @@ export default function AuthPage() {
             setEditCity(profile.city || '')
             setEditState(profile.state || '')
         }
-        if (user) {
-            const storedReturns = JSON.parse(localStorage.getItem(`meraki_returns_${user.email}`) || '[]')
+        if (user && user.email) {
+            const cleanEmail = user.email.trim().toLowerCase()
+            const storedReturns = JSON.parse(localStorage.getItem(`meraki_returns_${cleanEmail}`) || '[]')
             setReturnsList(storedReturns)
             try {
+                // 1. Check user-specific address key
+                const userAddressesKey = `meraki_user_addresses_${cleanEmail}`
+                const specificAddrs = localStorage.getItem(userAddressesKey)
+                if (specificAddrs) {
+                    const parsed = JSON.parse(specificAddrs)
+                    if (Array.isArray(parsed)) {
+                        setUserAddresses(parsed)
+                        return
+                    }
+                }
+
+                // 2. Fallback to meraki_users array
                 const storedUsers = JSON.parse(localStorage.getItem('meraki_users') || '[]')
-                const currentDbUser = storedUsers.find(u => u.email === user.email)
+                const currentDbUser = storedUsers.find(u => u.email?.trim().toLowerCase() === cleanEmail)
                 if (currentDbUser && Array.isArray(currentDbUser.addresses)) {
                     setUserAddresses(currentDbUser.addresses)
                 }
@@ -197,8 +210,14 @@ export default function AuthPage() {
             return
         }
 
+        if (!user || !user.email) {
+            showAlert('Você precisa estar logado para salvar um endereço.')
+            return
+        }
+
+        const cleanEmail = user.email.trim().toLowerCase()
         const storedUsers = JSON.parse(localStorage.getItem('meraki_users') || '[]')
-        const index = storedUsers.findIndex(u => u.email === user?.email)
+        let userIndex = storedUsers.findIndex(u => u.email?.trim().toLowerCase() === cleanEmail)
 
         let updatedAddresses = [...userAddresses]
 
@@ -223,10 +242,24 @@ export default function AuthPage() {
             updatedAddresses.push(newAddr)
         }
 
-        if (index !== -1) {
-            storedUsers[index].addresses = updatedAddresses
-            localStorage.setItem('meraki_users', JSON.stringify(storedUsers))
+        // Always save/update in meraki_users
+        if (userIndex === -1) {
+            storedUsers.push({
+                id: user.id || 'usr-' + Date.now(),
+                email: cleanEmail,
+                full_name: profile?.full_name || 'Cliente',
+                phone: profile?.phone || '',
+                cpf: profile?.cpf || '',
+                addresses: updatedAddresses
+            })
+        } else {
+            storedUsers[userIndex].addresses = updatedAddresses
         }
+
+        localStorage.setItem('meraki_users', JSON.stringify(storedUsers))
+
+        // ALSO save to user-specific fail-safe key
+        localStorage.setItem(`meraki_user_addresses_${cleanEmail}`, JSON.stringify(updatedAddresses))
 
         setUserAddresses(updatedAddresses)
         setShowAddressModal(false)
@@ -243,13 +276,18 @@ export default function AuthPage() {
     }
 
     const handleDeleteAddress = (id) => {
+        if (!user || !user.email) return
+        const cleanEmail = user.email.trim().toLowerCase()
         const updated = userAddresses.filter(a => a.id !== id)
+
         const storedUsers = JSON.parse(localStorage.getItem('meraki_users') || '[]')
-        const index = storedUsers.findIndex(u => u.email === user?.email)
+        const index = storedUsers.findIndex(u => u.email?.trim().toLowerCase() === cleanEmail)
         if (index !== -1) {
             storedUsers[index].addresses = updated
             localStorage.setItem('meraki_users', JSON.stringify(storedUsers))
         }
+
+        localStorage.setItem(`meraki_user_addresses_${cleanEmail}`, JSON.stringify(updated))
         setUserAddresses(updated)
         showAlert('Endereço removido com sucesso!', 'success')
     }

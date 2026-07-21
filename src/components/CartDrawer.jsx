@@ -28,13 +28,23 @@ export default function CartDrawer() {
 
     // Load user's saved addresses when logged in
     useEffect(() => {
-        if (!user) {
+        if (!user || !user.email) {
             setSavedAddresses([])
             return
         }
         try {
+            const cleanEmail = user.email.trim().toLowerCase()
+            const specificAddrs = localStorage.getItem(`meraki_user_addresses_${cleanEmail}`)
+            if (specificAddrs) {
+                const parsed = JSON.parse(specificAddrs)
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    setSavedAddresses(parsed)
+                    return
+                }
+            }
+
             const storedUsers = JSON.parse(localStorage.getItem('meraki_users') || '[]')
-            const currentDbUser = storedUsers.find(u => u.email === user.email)
+            const currentDbUser = storedUsers.find(u => u.email?.trim().toLowerCase() === cleanEmail)
             if (currentDbUser && Array.isArray(currentDbUser.addresses)) {
                 setSavedAddresses(currentDbUser.addresses)
             }
