@@ -20,45 +20,63 @@ export default function CartDrawer() {
         return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
     }
 
-    const [rewardBarConfig, setRewardBarConfig] = useState(() => {
+    const readRewardConfig = () => {
         try {
-            const storedConfig = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
             const storedReward = JSON.parse(localStorage.getItem('meraki_reward_bar') || 'null')
-            return storedReward || storedConfig.rewardBar || {
-                enabled: true,
-                target_type: 'value',
-                target_value: 299.99,
-                reward_type: 'frete_gratis',
-                reward_title: 'Frete Grátis',
-                success_message: 'Parabéns! Você ganhou Frete Grátis!'
+            if (storedReward && typeof storedReward === 'object' && Object.keys(storedReward).length > 0) {
+                return {
+                    enabled: storedReward.enabled !== false,
+                    target_type: storedReward.target_type || 'value',
+                    target_value: Number(storedReward.target_value) > 0 ? Number(storedReward.target_value) : 299.99,
+                    reward_type: storedReward.reward_type || 'frete_gratis',
+                    reward_title: storedReward.reward_title || 'Frete Grátis',
+                    success_message: storedReward.success_message || 'Parabéns! Você ganhou Frete Grátis!'
+                }
             }
-        } catch {
-            return {
-                enabled: true,
-                target_type: 'value',
-                target_value: 299.99,
-                reward_type: 'frete_gratis',
-                reward_title: 'Frete Grátis',
-                success_message: 'Parabéns! Você ganhou Frete Grátis!'
+
+            const storedConfig = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+            const cfg = storedConfig?.rewardBar || storedConfig?.reward_bar
+            if (cfg && typeof cfg === 'object' && Object.keys(cfg).length > 0) {
+                return {
+                    enabled: cfg.enabled !== false,
+                    target_type: cfg.target_type || 'value',
+                    target_value: Number(cfg.target_value) > 0 ? Number(cfg.target_value) : 299.99,
+                    reward_type: cfg.reward_type || 'frete_gratis',
+                    reward_title: cfg.reward_title || 'Frete Grátis',
+                    success_message: cfg.success_message || 'Parabéns! Você ganhou Frete Grátis!'
+                }
             }
+        } catch (e) {
+            console.error(e)
         }
-    })
+
+        return {
+            enabled: true,
+            target_type: 'value',
+            target_value: 299.99,
+            reward_type: 'frete_gratis',
+            reward_title: 'Frete Grátis',
+            success_message: 'Parabéns! Você ganhou Frete Grátis!'
+        }
+    }
+
+    const [rewardBarConfig, setRewardBarConfig] = useState(readRewardConfig)
 
     useEffect(() => {
         const handleUpdate = () => {
-            try {
-                const storedConfig = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
-                const storedReward = JSON.parse(localStorage.getItem('meraki_reward_bar') || 'null')
-                setRewardBarConfig(storedReward || storedConfig.rewardBar || rewardBarConfig)
-            } catch (e) {}
+            setRewardBarConfig(readRewardConfig())
         }
         window.addEventListener('storeConfigUpdated', handleUpdate)
-        return () => window.removeEventListener('storeConfigUpdated', handleUpdate)
+        window.addEventListener('storage', handleUpdate)
+        return () => {
+            window.removeEventListener('storeConfigUpdated', handleUpdate)
+            window.removeEventListener('storage', handleUpdate)
+        }
     }, [])
 
     const isRewardEnabled = rewardBarConfig?.enabled !== false
     const targetType = rewardBarConfig?.target_type || 'value'
-    const targetValue = Number(rewardBarConfig?.target_value) || 299.99
+    const targetValue = Number(rewardBarConfig?.target_value) > 0 ? Number(rewardBarConfig?.target_value) : 299.99
     const rewardTitle = rewardBarConfig?.reward_title || 'Frete Grátis'
     const successMessage = rewardBarConfig?.success_message || 'Parabéns! Você ganhou Frete Grátis!'
 
@@ -116,20 +134,23 @@ export default function CartDrawer() {
                         ) : (
                             <div>
                                 <div className="flex items-center justify-between text-xs mb-2">
-                                    <span className="font-medium text-gray-600 text-[11px]">
+                                    <span className="font-semibold text-gray-700 text-[11px] flex items-center gap-1.5">
+                                        <svg className="w-4 h-4 text-[#7A3E4A] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                        </svg>
                                         {targetType === 'quantity' ? (
-                                            <>Faltam <strong className="text-[#7A3E4A] font-bold">{remainingValue} {remainingValue === 1 ? 'item' : 'itens'}</strong> para ganhar <span className="font-bold text-[#7A3E4A]">{rewardTitle}</span></>
+                                            <>Faltam <strong className="text-[#7A3E4A] font-extrabold">{remainingValue} {remainingValue === 1 ? 'item' : 'itens'}</strong> para ganhar <span className="font-extrabold text-[#7A3E4A]">{rewardTitle}</span></>
                                         ) : (
-                                            <>Faltam <strong className="text-[#7A3E4A] font-bold">{formatCurrency(remainingValue)}</strong> para <span className="font-bold text-[#7A3E4A]">{rewardTitle}</span></>
+                                            <>Faltam <strong className="text-[#7A3E4A] font-extrabold">{formatCurrency(remainingValue)}</strong> para <span className="font-extrabold text-[#7A3E4A]">{rewardTitle}</span></>
                                         )}
                                     </span>
-                                    <span className="text-[10px] font-bold text-[#C6A76A] bg-[#C6A76A]/10 px-2 py-0.5 rounded-full">
+                                    <span className="text-[10px] font-black text-[#7A3E4A] bg-[#7A3E4A]/10 px-2 py-0.5 rounded-full">
                                         {Math.round(progressPercentage)}%
                                     </span>
                                 </div>
 
                                 {/* Progress Track */}
-                                <div className="w-full h-2.5 bg-gray-200/80 rounded-full overflow-hidden p-0.5 border border-gray-200/50 shadow-inner">
+                                <div className="w-full h-3 bg-gray-200/90 rounded-full overflow-hidden p-0.5 border border-gray-300/50 shadow-inner">
                                     <div
                                         className="h-full rounded-full bg-gradient-to-r from-[#7A3E4A] via-[#9A5060] to-[#C6A76A] transition-all duration-500 ease-out shadow-sm"
                                         style={{ width: `${progressPercentage}%` }}
