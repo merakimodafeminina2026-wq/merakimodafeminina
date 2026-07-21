@@ -55,6 +55,7 @@ export default function AdminPage() {
     const [modal, setModal] = useState({ open: false, editing: null })
     const [deleteModal, setDeleteModal] = useState({ open: false, product: null })
     const [couponModal, setCouponModal] = useState(false)
+    const [editingCoupon, setEditingCoupon] = useState(null)
     const [bannerModal, setBannerModal] = useState(false)
 
     const [saving, setSaving] = useState(false)
@@ -657,13 +658,52 @@ export default function AdminPage() {
         setDeleteModal({ open: false, product: null })
     }
 
+    const handleOpenCreateCoupon = () => {
+        setEditingCoupon(null)
+        setCouponForm({ code: '', type: 'percentage', value: '', minPurchase: '' })
+        setCouponModal(true)
+    }
+
+    const handleOpenEditCoupon = (cp) => {
+        setEditingCoupon(cp)
+        setCouponForm({
+            code: cp.code || '',
+            type: cp.type || 'percentage',
+            value: cp.value !== undefined ? String(cp.value) : '',
+            minPurchase: cp.minPurchase !== undefined ? String(cp.minPurchase) : ''
+        })
+        setCouponModal(true)
+    }
+
     const handleCreateCoupon = (e) => {
         e.preventDefault()
         if (!couponForm.code.trim()) return
-        const newCoupon = { id: 'cp-' + Date.now(), code: couponForm.code.toUpperCase().trim(), type: couponForm.type, value: parseFloat(couponForm.value) || 0, minPurchase: parseFloat(couponForm.minPurchase) || 0 }
-        const updated = [...coupons, newCoupon]
-        setCoupons(updated); localStorage.setItem('meraki_coupons', JSON.stringify(updated))
-        setCouponForm({ code: '', type: 'percentage', value: '', minPurchase: '' }); setCouponModal(false)
+
+        let updated
+        if (editingCoupon) {
+            updated = coupons.map(c => c.id === editingCoupon.id ? {
+                ...c,
+                code: couponForm.code.toUpperCase().trim(),
+                type: couponForm.type,
+                value: parseFloat(couponForm.value) || 0,
+                minPurchase: parseFloat(couponForm.minPurchase) || 0
+            } : c)
+        } else {
+            const newCoupon = {
+                id: 'cp-' + Date.now(),
+                code: couponForm.code.toUpperCase().trim(),
+                type: couponForm.type,
+                value: parseFloat(couponForm.value) || 0,
+                minPurchase: parseFloat(couponForm.minPurchase) || 0
+            }
+            updated = [...coupons, newCoupon]
+        }
+
+        setCoupons(updated)
+        localStorage.setItem('meraki_coupons', JSON.stringify(updated))
+        setCouponForm({ code: '', type: 'percentage', value: '', minPurchase: '' })
+        setEditingCoupon(null)
+        setCouponModal(false)
         window.dispatchEvent(new Event('couponsUpdated'))
     }
 
@@ -925,6 +965,8 @@ export default function AdminPage() {
                             coupons={coupons}
                             paginatedCoupons={paginatedCoupons}
                             setCouponModal={setCouponModal}
+                            handleOpenCreateCoupon={handleOpenCreateCoupon}
+                            handleOpenEditCoupon={handleOpenEditCoupon}
                             handleDeleteCoupon={handleDeleteCoupon}
                             renderPagination={renderPagination}
                             cpPage={cpPage}
@@ -1937,15 +1979,15 @@ export default function AdminPage() {
             })()}
 
             {/* ═══════════════════════════════════════════════════════════════════ */}
-            {/* MODAL: CREATE COUPON */}
+            {/* MODAL: CREATE / EDIT COUPON */}
             {/* ═══════════════════════════════════════════════════════════════════ */}
             {couponModal && (
                 <>
-                    <div className="fixed inset-0 z-[90] bg-black/50 backdrop-blur-sm" onClick={() => setCouponModal(false)} />
+                    <div className="fixed inset-0 z-[90] bg-black/50 backdrop-blur-sm" onClick={() => { setCouponModal(false); setEditingCoupon(null); }} />
                     <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[95] bg-white rounded-2xl shadow-2xl max-w-sm w-[calc(100%-2rem)]">
                         <div className="flex items-center justify-between p-5 border-b border-[#EEEEEE]">
-                            <h2 className="text-sm font-black text-gray-900">Novo Cupom</h2>
-                            <button onClick={() => setCouponModal(false)} className="w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center cursor-pointer transition-colors">
+                            <h2 className="text-sm font-black text-gray-900">{editingCoupon ? 'Editar Cupom' : 'Novo Cupom'}</h2>
+                            <button onClick={() => { setCouponModal(false); setEditingCoupon(null); }} className="w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center cursor-pointer transition-colors">
                                 <Icon path="M6 18L18 6M6 6l12 12" className="w-4 h-4 text-gray-600" />
                             </button>
                         </div>
@@ -1963,7 +2005,7 @@ export default function AdminPage() {
                             </div>
                             <div><label className={labelCls}>Mínimo de Compra (R$)</label><input type="number" placeholder="100" value={couponForm.minPurchase} onChange={e => setCouponForm(prev => ({ ...prev, minPurchase: e.target.value }))} className={inputCls} /></div>
                             <button type="submit" className="w-full py-4 bg-gradient-to-r from-[#7A3E4A] to-[#9A5060] text-white text-xs font-black uppercase tracking-widest rounded-xl hover:shadow-lg hover:shadow-[#7A3E4A]/30 transition-all cursor-pointer">
-                                Criar Cupom
+                                {editingCoupon ? 'Salvar Alterações' : 'Criar Cupom'}
                             </button>
                         </form>
                     </div>

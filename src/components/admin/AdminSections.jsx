@@ -251,11 +251,15 @@ export function CouponsSection({
     coupons,
     paginatedCoupons,
     setCouponModal,
+    handleOpenCreateCoupon,
+    handleOpenEditCoupon,
     handleDeleteCoupon,
     renderPagination,
     cpPage,
     setCpPage
 }) {
+    const onNewCouponClick = handleOpenCreateCoupon || (() => setCouponModal(true))
+
     return (
         <div className="space-y-5">
             <div className="flex items-center justify-between">
@@ -263,7 +267,7 @@ export function CouponsSection({
                     <h2 className="text-sm font-black text-gray-900">Cupons Ativos</h2>
                     <p className="text-[10px] text-gray-400 font-medium">{coupons.length} cupom{coupons.length !== 1 ? 's' : ''} cadastrado{coupons.length !== 1 ? 's' : ''}</p>
                 </div>
-                <button onClick={() => setCouponModal(true)} className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-[#7A3E4A] to-[#9A5060] text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:shadow-lg hover:shadow-[#7A3E4A]/30 transition-all cursor-pointer">
+                <button onClick={onNewCouponClick} className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-[#7A3E4A] to-[#9A5060] text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:shadow-lg hover:shadow-[#7A3E4A]/30 transition-all cursor-pointer">
                     <Icon path="M12 4v16m8-8H4" className="w-4 h-4" /> Criar Cupom
                 </button>
             </div>
@@ -292,9 +296,17 @@ export function CouponsSection({
                                     <p className="text-[10px] text-gray-400 font-medium">
                                          Mínimo: <span className="font-bold text-gray-600">R$ {cp.minPurchase?.toFixed(2)}</span>
                                     </p>
-                                    <button onClick={() => handleDeleteCoupon(cp.id)} className="text-[10px] font-bold text-red-400 hover:text-red-600 uppercase tracking-wider cursor-pointer px-2 py-1 rounded-lg hover:bg-red-50 transition-all">
-                                         Remover
-                                    </button>
+                                    <div className="flex items-center gap-1.5">
+                                        {handleOpenEditCoupon && (
+                                            <button onClick={() => handleOpenEditCoupon(cp)} className="text-[10px] font-bold text-[#C6A76A] hover:text-[#7A3E4A] uppercase tracking-wider cursor-pointer px-2.5 py-1 rounded-lg hover:bg-[#C6A76A]/10 transition-all flex items-center gap-1">
+                                                <Icon path="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" className="w-3 h-3" />
+                                                Editar
+                                            </button>
+                                        )}
+                                        <button onClick={() => handleDeleteCoupon(cp.id)} className="text-[10px] font-bold text-red-400 hover:text-red-600 uppercase tracking-wider cursor-pointer px-2 py-1 rounded-lg hover:bg-red-50 transition-all">
+                                             Remover
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         ))}
