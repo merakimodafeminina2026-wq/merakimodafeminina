@@ -1,12 +1,22 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useCart } from '../hooks/useCart.js'
+import { useAuth } from '../hooks/useAuth.js'
 import { getAssetUrl } from '../utils/assets.js'
 
 export default function CartDrawer() {
     const [isOpen, setIsOpen] = useState(false)
     const { cart, removeFromCart, updateQuantity, cartCount, subtotal, comboDiscount, total } = useCart()
+    const { user } = useAuth()
     const navigate = useNavigate()
+
+    // Shipping Calculator State
+    const [cepInput, setCepInput] = useState('')
+    const [calculatingCep, setCalculatingCep] = useState(false)
+    const [shippingOption, setShippingOption] = useState(null)
+    const [shippingError, setShippingError] = useState('')
+    const [savedAddresses, setSavedAddresses] = useState([])
+    const [selectedAddressId, setSelectedAddressId] = useState(null)
 
     useEffect(() => {
         const handleToggle = (e) => {
@@ -16,8 +26,25 @@ export default function CartDrawer() {
         return () => window.removeEventListener('toggle-cart', handleToggle)
     }, [isOpen])
 
+    // Load user's saved addresses when logged in
+    useEffect(() => {
+        if (!user) {
+            setSavedAddresses([])
+            return
+        }
+        try {
+            const storedUsers = JSON.parse(localStorage.getItem('meraki_users') || '[]')
+            const currentDbUser = storedUsers.find(u => u.email === user.email)
+            if (currentDbUser && Array.isArray(currentDbUser.addresses)) {
+                setSavedAddresses(currentDbUser.addresses)
+            }
+        } catch (e) {
+            console.error(e)
+        }
+    }, [user])
+
     const formatCurrency = (val) => {
-        return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+        return (val || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
     }
 
     const readRewardConfig = () => {
@@ -85,10 +112,89 @@ export default function CartDrawer() {
     const progressPercentage = Math.min(100, Math.max(0, (currentProgressValue / targetValue) * 100))
     const remainingValue = Math.max(0, targetValue - currentProgressValue)
 
+    // Check if free shipping reward is activated by progress bar
+    const isFreeShippingBonusActive = isRewardEnabled && isCompleted && (
+        rewardBarConfig?.reward_type === 'frete_gratis' || 
+        rewardTitle.toLowerCase().includes('frete')
+    )
+
+    // Calculate freight for a given CEP
+    const handleCalculateShipping = async (rawCep, addrLabel = '') => {
+        const cleanCep = (rawCep || '').replace(/\D/g, '')
+        if (cleanCep.length !== 8) {
+            setShippingError('Digite um CEP válido com 8 números.')
+            return
+        }
+
+        setCalculatingCep(true)
+        setShippingError('')
+
+        try {
+            const res = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`)
+            const data = await res.json()
+
+            if (data.erro) {
+                setShippingError('CEP não encontrado. Tente novamente.')
+                setCalculatingCep(false)
+                return
+            }
+
+            const city = data.localidade || ''
+            const state = data.uf || ''
+            const isBonfinopolis = cleanCep.startsWith('75225') || city.toLowerCase().includes('bonfinópolis') || city.toLowerCase().includes('bonfinopolis')
+
+            let calculatedOption = null
+
+            if (isBonfinopolis) {
+                const freeLocal = subtotal >= 29.99 || isFreeShippingBonusActive
+                calculatedOption = {
+                    title: freeLocal ? 'Entrega Grátis (Bonfinópolis-GO)' : 'Entrega Local (Bonfinópolis)',
+                    price: freeLocal ? 0 : 9.90,
+                    deadline: 'Hoje ou próximo dia útil',
+                    cep: cleanCep,
+                    city,
+                    state,
+                    label: addrLabel || 'Bonfinópolis'
+                }
+            } else if (isFreeShippingBonusActive) {
+                calculatedOption = {
+                    title: 'PAC Correios — Frete Grátis Bônus! 🎉',
+                    price: 0,
+                    deadline: '5 a 8 dias úteis',
+                    cep: cleanCep,
+                    city,
+                    state,
+                    label: addrLabel
+                }
+            } else {
+                calculatedOption = {
+                    title: `PAC Correios (${city}/${state})`,
+                    price: 19.90,
+                    deadline: '5 a 8 dias úteis',
+                    cep: cleanCep,
+                    city,
+                    state,
+                    label: addrLabel
+                }
+            }
+
+            setShippingOption(calculatedOption)
+            localStorage.setItem('meraki_cart_shipping', JSON.stringify(calculatedOption))
+        } catch (err) {
+            console.error(err)
+            setShippingError('Erro ao consultar CEP. Tente novamente.')
+        } finally {
+            setCalculatingCep(false)
+        }
+    }
+
+    const shippingCost = shippingOption ? shippingOption.price : 0
+    const finalCartTotal = Math.max(0, total + shippingCost)
+
     if (!isOpen) return null
 
     return (
-        <div className="fixed inset-0 z-[150] flex justify-end">
+        <div className="fixed inset-0 z-[150] flex justify-end font-sans">
             {/* Backdrop */}
             <div 
                 className="absolute inset-0 bg-black/50 backdrop-blur-xs animate-[fadeIn_200ms_ease-out]"
@@ -243,25 +349,129 @@ export default function CartDrawer() {
                     )}
                 </div>
 
-                {/* Footer Section */}
+                {/* Shipping Calculation & Footer Section */}
                 {cart.length > 0 && (
                     <div className="p-6 border-t border-gray-100 bg-gray-50/50 space-y-4">
+                        
+                        {/* Freight Calculation Box */}
+                        <div className="bg-white p-4 rounded-2xl border border-gray-200/80 space-y-3">
+                            <div className="flex items-center justify-between">
+                                <span className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
+                                    <svg className="w-4 h-4 text-[#7A3E4A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
+                                    </svg>
+                                    Calcular Frete
+                                </span>
+                                {shippingOption && (
+                                    <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-full">
+                                        CEP {shippingOption.cep}
+                                    </span>
+                                )}
+                            </div>
+
+                            {/* Saved Address Pills for Logged-In Customer */}
+                            {savedAddresses.length > 0 && (
+                                <div className="space-y-1.5 pt-1">
+                                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Seus Endereços Salvos:</p>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {savedAddresses.map(addr => (
+                                            <button
+                                                key={addr.id}
+                                                onClick={() => {
+                                                    setSelectedAddressId(addr.id)
+                                                    setCepInput(addr.cep)
+                                                    handleCalculateShipping(addr.cep, addr.label)
+                                                }}
+                                                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+                                                    selectedAddressId === addr.id
+                                                        ? 'bg-[#7A3E4A] text-white shadow-xs'
+                                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                }`}
+                                            >
+                                                <span>{addr.label === 'Casa' ? '🏠' : addr.label === 'Trabalho' ? '💼' : '📍'}</span>
+                                                <span>{addr.label}</span>
+                                                <span className="text-[10px] opacity-75 font-mono">({addr.cep})</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Manual CEP Input Field */}
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="text"
+                                    maxLength="9"
+                                    placeholder="Digitar CEP (ex: 75225-000)"
+                                    value={cepInput}
+                                    onChange={(e) => setCepInput(e.target.value)}
+                                    className="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-xs outline-none focus:border-[#7A3E4A] bg-gray-50/50"
+                                />
+                                <button
+                                    onClick={() => {
+                                        setSelectedAddressId(null)
+                                        handleCalculateShipping(cepInput)
+                                    }}
+                                    disabled={calculatingCep}
+                                    className="px-4 py-2 bg-[#7A3E4A] hover:bg-[#63303a] text-white text-xs font-bold rounded-xl transition-colors cursor-pointer disabled:opacity-50"
+                                >
+                                    {calculatingCep ? '...' : 'Calcular'}
+                                </button>
+                            </div>
+
+                            {shippingError && (
+                                <p className="text-[10px] text-red-500 font-medium">{shippingError}</p>
+                            )}
+
+                            {/* Calculated Shipping Result Banner */}
+                            {shippingOption && (
+                                <div className="p-3 bg-[#FAF6F0] rounded-xl border border-[#C6A76A]/30 flex items-center justify-between text-xs">
+                                    <div>
+                                        <p className="font-bold text-gray-900 leading-tight">{shippingOption.title}</p>
+                                        <p className="text-[10px] text-gray-500">{shippingOption.deadline}</p>
+                                    </div>
+                                    <span className="font-black text-[#7A3E4A] text-sm">
+                                        {shippingOption.price === 0 ? 'GRÁTIS' : formatCurrency(shippingOption.price)}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Summary Costs Table */}
                         <div className="space-y-2">
                             <div className="flex items-center justify-between text-xs">
                                 <span className="text-gray-500 font-medium">Subtotal</span>
                                 <span className="text-gray-900 font-semibold">{formatCurrency(subtotal)}</span>
                             </div>
+                            
                             {comboDiscount > 0 && (
                                 <div className="flex items-center justify-between text-xs text-[#D11A6E] font-medium">
                                     <span>Desconto do Combo</span>
                                     <span>-{formatCurrency(comboDiscount)}</span>
                                 </div>
                             )}
+
+                            <div className="flex items-center justify-between text-xs">
+                                <span className="text-gray-500 font-medium">Frete</span>
+                                <span className="font-semibold text-gray-900">
+                                    {shippingOption ? (
+                                        shippingOption.price === 0 ? (
+                                            <span className="text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-full">GRÁTIS</span>
+                                        ) : (
+                                            formatCurrency(shippingOption.price)
+                                        )
+                                    ) : (
+                                        <span className="text-gray-400 font-normal">A calcular</span>
+                                    )}
+                                </span>
+                            </div>
+
                             <div className="flex items-center justify-between text-sm pt-2 border-t border-gray-200/60">
                                 <span className="text-[#1A1A1A] font-bold">Total</span>
-                                <span className="text-base font-extrabold text-[#7A3E4A]">{formatCurrency(total)}</span>
+                                <span className="text-base font-extrabold text-[#7A3E4A]">{formatCurrency(finalCartTotal)}</span>
                             </div>
                         </div>
+
                         <p className="text-[11px] text-gray-400 font-light leading-relaxed">Fretamento e descontos aplicados diretamente na etapa de finalização da compra.</p>
                         
                         <button
@@ -269,7 +479,7 @@ export default function CartDrawer() {
                                 setIsOpen(false)
                                 navigate('/checkout')
                             }}
-                            className="w-full py-4 bg-[#7A3E4A] hover:bg-[#63303a] text-white text-xs font-bold uppercase tracking-[0.2em] rounded-xl transition-all shadow-md flex items-center justify-center gap-2 hover:scale-[1.01]"
+                            className="w-full py-4 bg-[#7A3E4A] hover:bg-[#63303a] text-white text-xs font-bold uppercase tracking-[0.2em] rounded-xl transition-all shadow-md flex items-center justify-center gap-2 hover:scale-[1.01] cursor-pointer"
                         >
                             Finalizar Compra
                         </button>

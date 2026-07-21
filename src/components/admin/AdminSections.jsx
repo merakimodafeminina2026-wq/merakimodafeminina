@@ -1678,13 +1678,30 @@ export function SettingsSection({ saving, setSaving }) {
                     </label>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-wider">Tipo de Bônus / Recompensa</label>
+                        <select
+                            value={rewardBar.reward_type || 'frete_gratis'}
+                            onChange={(e) => setRewardBar(prev => ({ 
+                                ...prev, 
+                                reward_type: e.target.value,
+                                reward_title: e.target.value === 'frete_gratis' ? 'Frete Grátis' : (e.target.value === 'brinde' ? 'Brinde Especial' : 'Desconto Especial')
+                            }))}
+                            className="w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-xs outline-none focus:border-[#7A3E4A] transition-all font-medium"
+                        >
+                            <option value="frete_gratis">🚚 Frete Grátis</option>
+                            <option value="brinde">🎁 Brinde Especial (ex: Batom/Mimo)</option>
+                            <option value="desconto">🏷️ Desconto Especial</option>
+                        </select>
+                    </div>
+
                     <div>
                         <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-wider">Tipo de Meta</label>
                         <select
                             value={rewardBar.target_type}
                             onChange={(e) => setRewardBar(prev => ({ ...prev, target_type: e.target.value }))}
-                            className="w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-sm outline-none focus:border-[#7A3E4A] transition-all font-medium"
+                            className="w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-xs outline-none focus:border-[#7A3E4A] transition-all font-medium"
                         >
                             <option value="value">Valor Mínimo da Compra (R$)</option>
                             <option value="quantity">Quantidade Mínima de Produtos (Qtd)</option>
@@ -1700,18 +1717,18 @@ export function SettingsSection({ saving, setSaving }) {
                             step="any"
                             value={rewardBar.target_value}
                             onChange={(e) => setRewardBar(prev => ({ ...prev, target_value: parseFloat(e.target.value) || 0 }))}
-                            className="w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-sm outline-none focus:border-[#7A3E4A] transition-all font-medium"
+                            className="w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-xs outline-none focus:border-[#7A3E4A] transition-all font-medium"
                             required
                         />
                     </div>
 
                     <div>
-                        <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-wider">Título do Prêmio / Recompensa</label>
+                        <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-wider">Título da Recompensa</label>
                         <input
                             type="text"
                             value={rewardBar.reward_title}
                             onChange={(e) => setRewardBar(prev => ({ ...prev, reward_title: e.target.value }))}
-                            className="w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-sm outline-none focus:border-[#7A3E4A] transition-all font-medium"
+                            className="w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-xs outline-none focus:border-[#7A3E4A] transition-all font-medium"
                             placeholder="Ex: Frete Grátis ou Batom de Brinde"
                             required
                         />
