@@ -118,6 +118,8 @@ CREATE TABLE IF NOT EXISTS public.orders (
     coupon TEXT,
     status TEXT DEFAULT 'Pendente',
     items JSONB DEFAULT '[]'::jsonb,
+    tracking_code TEXT DEFAULT '',
+    postage_code TEXT DEFAULT '',
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -129,6 +131,8 @@ ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS subtotal NUMERIC(10, 2);
 ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS shipping NUMERIC(10, 2);
 ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS discount NUMERIC(10, 2);
 ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS coupon TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS tracking_code TEXT DEFAULT '';
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS postage_code TEXT DEFAULT '';
 
 -- ====================================================================
 -- TABELA: coupons (Cupons de Desconto)
