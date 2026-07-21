@@ -5,18 +5,21 @@ import { supabase } from './supabase.js'
 // Initialize database schema sync
 // Define expected columns for each database table
 const TABLE_COLUMNS = {
-    orders: ['id', 'customername', 'customeremail', 'total', 'status', 'items', 'created_at'],
+    orders: [
+        'id', 'customername', 'customeremail', 'customerphone', 'customercpf', 'shippingaddress',
+        'paymentmethod', 'subtotal', 'shipping', 'discount', 'total', 'coupon', 'status', 'items', 'created_at'
+    ],
     coupons: ['id', 'code', 'value', 'type', 'minpurchase', 'created_at'],
-    banners: ['id', 'image', 'mobile_image', 'alt', 'created_at'],
+    banners: ['id', 'image', 'mobile_image', 'alt', 'link', 'created_at'],
     returns: ['id', 'orderid', 'itemid', 'customeremail', 'type', 'postagecode', 'status', 'created_at'],
     categories: ['id', 'name', 'group', 'description', 'image', 'created_at'],
     products: [
         'id', 'name', 'category', 'price', 'original_price', 'image', 'badge', 'section', 'sizes', 'description', 'stock', 'created_at',
-        'colors', 'inPromoCombo', 'isCustomizable', 'customPriceWith', 'customPriceWithout', 'customFeeLetter', 'customFeeNumber', 'customFeeEmoji', 'customizable_emojis'
+        'colors', 'inpromocombo', 'iscustomizable', 'custompricewith', 'custompricewithout', 'customfeeletter', 'customfeenumber', 'customfeeemoji', 'customizable_emojis'
     ],
     store_config: [
         'id', 'whatsapp', 'sac_phone', 'address', 'cnpj', 'infinitepay_handle',
-        'topbarMessages', 'topbarStyle', 'promoCombo', 'editorial', 'available_colors', 'available_emojis', 'shipping_message',
+        'topbarmessages', 'topbarstyle', 'promocombo', 'editorial', 'available_colors', 'available_emojis', 'shipping_message',
         'available_badges', 'installment_text', 'banner_transition'
     ]
 }
@@ -25,6 +28,10 @@ const TABLE_COLUMNS = {
 const FIELD_MAPPING = {
     customername: ['customerName', 'customername'],
     customeremail: ['customerEmail', 'customeremail'],
+    customerphone: ['customerPhone', 'customerphone'],
+    customercpf: ['customerCpf', 'customercpf'],
+    shippingaddress: ['shippingAddress', 'shippingaddress'],
+    paymentmethod: ['paymentMethod', 'paymentmethod'],
     minpurchase: ['minPurchase', 'minpurchase'],
     orderid: ['orderId', 'orderid'],
     itemid: ['itemId', 'itemid'],
@@ -67,6 +74,10 @@ function mapDbToFrontend(table, item) {
     if (table === 'orders') {
         if (item.customername !== undefined) mapped.customerName = item.customername
         if (item.customeremail !== undefined) mapped.customerEmail = item.customeremail
+        if (item.customerphone !== undefined) mapped.customerPhone = item.customerphone
+        if (item.customercpf !== undefined) mapped.customerCpf = item.customercpf
+        if (item.shippingaddress !== undefined) mapped.shippingAddress = item.shippingaddress
+        if (item.paymentmethod !== undefined) mapped.paymentMethod = item.paymentmethod
     } else if (table === 'returns') {
         if (item.orderid !== undefined) mapped.orderId = item.orderid
         if (item.itemid !== undefined) mapped.itemId = item.itemid
