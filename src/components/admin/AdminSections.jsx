@@ -2155,26 +2155,63 @@ export function InstitutionalSection({ saving, setSaving, updateStoreConfig }) {
         { id: 'stores', label: 'Nossas Lojas', category: 'Lojas' }
     ]
 
+    const defaultPagesData = {
+        story: {
+            title: 'Nossa História',
+            content: `A Meraki nasceu do desejo de celebrar a beleza autêntica e a sofisticação da mulher moderna. Fundada em 2023, nossa marca tem como propósito criar lingeries que oferecem o equilíbrio perfeito entre sensualidade, conforto e qualidade excepcional.\n\nO termo grego "Meraki" significa fazer algo com alma, criatividade ou amor; colocar uma parte de si em tudo o que faz. Essa filosofia está presente em cada detalhe de nosso processo: desde a escolha cuidadosa das rendas francesas de toque macio até o design das costuras e acabamentos manuais de luxo.\n\n"Acreditamos que a primeira camada de roupa que uma mulher veste tem o poder de transformar como ela se sente por fora e por dentro."\n\nHoje, contamos com ateliê próprio e coleções exclusivas criadas para abraçar a diversidade dos corpos femininos com caimento impecável e modelagem inteligente.`
+        },
+        revenda: {
+            title: 'Seja um Revendedor',
+            content: `Aumente sua renda revendendo lingeries premium de altíssima aceitação. O programa de revendedoras da Meraki foi desenvolvido para quem busca flexibilidade de horários, independência financeira e um produto com design autoral diferenciado.\n\nMargens de Lucro:\nCondições comerciais e descontos progressivos atrativos para compras no atacado.\n\nFotos & Catálogos:\nAcesso completo a materiais fotográficos de alta qualidade para divulgação nas suas redes sociais.\n\nSem Burocracia:\nPedido mínimo inicial reduzido e reposição rápida de peças conforme a sua demanda.\n\nPara receber nosso catálogo de atacado e a tabela de valores de revenda, envie um e-mail para revenda@merakistore.com.br ou entre em contato pelo nosso WhatsApp de atendimento comercial.`
+        },
+        connect: {
+            title: 'Conecte-se',
+            content: `Acompanhe de perto as nossas novidades, coleções exclusivas e bastidores da marca em nossos canais oficiais de comunicação.\n\nInstagram:\n@merakistore.oficial\n\nWhatsApp VIP:\n(11) 2388-0403\n\nAtendimento Geral:\ncontato@merakistore.com.br`
+        },
+        security: {
+            title: 'Compra Segura',
+            content: `Para nós da Meraki, a segurança dos seus dados pessoais e de pagamento é prioridade absoluta. Investimos nas melhores tecnologias de criptografia do mercado para proporcionar a você uma experiência de compra tranquila e protegida.\n\nNossas Certificações & Garantias:\n- Criptografia SSL (Secure Sockets Layer): Protege e codifica toda a comunicação de dados durante as transações financeiras e preenchimento de senhas.\n- Certificado Let's Encrypt: Garante a autenticidade e a criptografia ponto a ponto de ponta em todas as conexões da plataforma.\n- Proteção Antifraude Integrada: Análise de segurança automática com validação instantânea dos meios de pagamento.`
+        },
+        payment: {
+            title: 'Formas de Pagamento',
+            content: `Disponibilizamos formas de pagamento flexíveis e seguras para facilitar o processo de compra das suas lingeries prediletas.\n\nFormas Aceitas:\n- Cartão de Crédito: Aceitamos as bandeiras Visa, Mastercard, Elo, American Express e Diners Club. Você pode parcelar suas compras em até 12x sem juros (ou conforme promoção vigente).\n- Pix (Pagamento Instantâneo): Pagamentos via Pix são processados em tempo real, agilizando a expedição e o envio imediato da sua compra.`
+        },
+        delivery: {
+            title: 'Entrega e Frete',
+            content: `Entregamos em todo o Brasil por meio de transportadoras homologadas e dos Correios, com códigos de rastreamento enviados diretamente ao seu e-mail após a postagem.\n\nCondições Especiais:\n- Frete Grátis Bonfinópolis-GO: Entrega especial em Bonfinópolis-GO nas compras acima de R$ 29,99.\n- Frete Grátis Centro-Oeste: Disponível nas compras acima de R$ 299,90 para a região.\n- Prazo de Expedição: Pedidos aprovados são separados, revisados e postados em até 24 horas úteis.\n- Opções de Envio: Modalidades Sedex (Expressa) e PAC (Normal), cotadas no fechamento do carrinho.`
+        },
+        returns: {
+            title: 'Política de Troca',
+            content: `Queremos que você se sinta plenamente satisfeita com a sua lingerie Meraki. Por se tratar de peças íntimas e por questões de higiene e saúde, oferecemos um processo de troca seguro e descomplicado.\n\nRegras de Troca:\n- Prazo de Solicitação: Até 7 dias corridos após a entrega do produto, contados conforme o rastreamento da transportadora.\n- Condições da Peça: Os produtos não podem apresentar qualquer sinal de uso, prova inadequada, lavagem, manchas, odores ou alterações e devem conter a etiqueta original fixada.\n- Primeira Troca: O frete de retorno do produto para troca é custeado pela Meraki por meio de código de autorização de postagem reversa na primeira troca.`
+        },
+        withdrawal: {
+            title: 'Direito de Arrependimento',
+            content: `De acordo com o artigo 49 do Código de Defesa do Consumidor brasileiro, nas compras realizadas fora do estabelecimento físico (via internet), o cliente possui o direito de arrependimento e cancelamento da compra.\n\nProcedimento:\n- O arrependimento deve ser formalizado em até 7 dias corridos a partir do recebimento da encomenda.\n- Após o recebimento e análise de controle de qualidade das lingeries em nosso ateliê, o reembolso do valor total pago é realizado em até 5 dias úteis no caso de Pix, ou estornado em até duas faturas no caso de cartão de crédito.`
+        },
+        privacy: {
+            title: 'Política de Privacidade',
+            content: `Esta Política de Privacidade descreve como tratamos e protegemos as suas informações cadastrais e dados de navegação ao interagir em nossa plataforma digital, seguindo rigorosamente a Lei Geral de Proteção de Dados (LGPD).\n\nSegurança e Compartilhamento:\n- Utilizamos seus dados cadastrais (Nome, CPF, Endereço) unicamente para processamento e emissão de notas fiscais dos seus pedidos.\n- Nunca comercializamos ou expomos dados pessoais a terceiros estranhos ao processo de entrega ou processamento bancário.\n- Você pode solicitar a alteração ou exclusão definitiva do seu cadastro da base de dados enviando solicitação formal aos nossos canais de suporte.`
+        },
+        'promotional-rules': {
+            title: 'Regras Promocionais',
+            content: `Para garantir a transparência de nossas ofertas e campanhas, listamos abaixo as diretrizes gerais de aplicação de cupons, descontos e combos.\n\nRegras Gerais:\n- Cupons de Desconto: Não são cumulativos. Apenas um cupom pode ser inserido por pedido no fechamento da compra.\n- Preços Promocionais: Preços destacados ou riscados em promoção são válidos por tempo limitado ou enquanto durarem os estoques do lote.\n- Frete Grátis: Atingindo o valor mínimo estipulado após a dedução de todos os descontos promocionais.`
+        },
+        stores: {
+            title: 'Nossas Lojas',
+            content: `Venha viver a experiência Meraki presencialmente e desfrutar de um atendimento personalizado em nosso showroom exclusivo em Bonfinópolis-GO.\n\nShowroom Meraki Bonfinópolis:\nAvenida Alfredo Nasser, Qd. 14, Lt. 05 - Centro, Bonfinópolis - GO, CEP: 75195-000\nTelefone/WhatsApp de Atendimento: (11) 2388-0403`
+        }
+    }
+
     const [selectedPageId, setSelectedPageId] = useState('story')
     const [pagesData, setPagesData] = useState(() => {
         try {
             const stored = localStorage.getItem('meraki_pages_content')
-            if (stored) return JSON.parse(stored)
-        } catch (e) { console.error(e) }
-        return {
-            story: {
-                title: 'Nossa História',
-                content: `A Meraki nasceu do desejo de celebrar a beleza autêntica e a sofisticação da mulher moderna. Fundada em 2023, nossa marca tem como propósito criar lingeries que oferecem o equilíbrio perfeito entre sensualidade, conforto e qualidade excepcional.\n\nO termo grego "Meraki" significa fazer algo com alma, criatividade ou amor; colocar uma parte de si em tudo o que faz. Essa filosofia está presente em cada detalhe de nosso processo: desde a escolha cuidadosa das rendas francesas de toque macio até o design das costuras e acabamentos manuais de luxo.\n\n"Acreditamos que a primeira camada de roupa que uma mulher veste tem o poder de transformar como ela se sente por fora e por dentro."\n\nHoje, contamos com ateliê próprio e coleções exclusivas criadas para abraçar a diversidade dos corpos femininos com caimento impecável e modelagem inteligente.`
-            },
-            revenda: {
-                title: 'Seja um Revendedor',
-                content: `Aumente sua renda revendendo lingeries premium de altíssima aceitação. O programa de revendedoras da Meraki foi desenvolvido para quem busca flexibilidade de horários, independência financeira e um produto com design autoral diferenciado.\n\nMargens de Lucro:\nCondições comerciais e descontos progressivos atrativos para compras no atacado.\n\nFotos & Catálogos:\nAcesso completo a materiais fotográficos de alta qualidade para divulgação nas suas redes sociais.\n\nSem Burocracia:\nPedido mínimo inicial reduzido e reposição rápida de peças conforme a sua demanda.\n\nPara receber nosso catálogo de atacado e a tabela de valores de revenda, envie um e-mail para revenda@merakistore.com.br ou entre em contato pelo nosso WhatsApp de atendimento comercial.`
-            },
-            connect: {
-                title: 'Conecte-se',
-                content: `Acompanhe de perto as nossas novidades, coleções exclusivas e bastidores da marca em nossos canais oficiais de comunicação.\n\nInstagram:\n@merakistore.oficial\n\nWhatsApp VIP:\n(11) 2388-0403\n\nAtendimento Geral:\ncontato@merakistore.com.br`
+            if (stored) {
+                const parsed = JSON.parse(stored)
+                return { ...defaultPagesData, ...parsed }
             }
-        }
+        } catch (e) { console.error(e) }
+        return defaultPagesData
     })
 
     const [pageTitle, setPageTitle] = useState('')
