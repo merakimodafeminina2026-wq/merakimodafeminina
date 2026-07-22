@@ -333,20 +333,8 @@ export default function CheckoutPage() {
         const normCity = (city || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
         const isBonfinopolis = cleanCep.startsWith('75195') || cleanCep.startsWith('75198') || cleanCep.startsWith('75225') || cleanCep.startsWith('7519') || normCity.includes('bonfinopolis')
 
-        // If PIX payment and Bonfinópolis customer, redirect directly to Order Tracker
-        if (paymentMethod === 'pix' && isBonfinopolis) {
-            navigate(`/order-success/${orderId}`)
-            return
-        }
-
-        // Create InfinitePay payment session and redirect for other cases
-        const { paymentUrl } = await createPaymentSession(newOrder)
-        if (paymentUrl) {
-            window.location.href = paymentUrl
-        } else {
-            // Redirect to success fallback
-            navigate(`/order-success/${orderId}`)
-        }
+        // Redireciona diretamente para a tela de Sucesso / Rastreio & Pagamento PIX no próprio site
+        navigate(`/order-success/${orderId}`)
     }
 
     if (cart.length === 0) {
