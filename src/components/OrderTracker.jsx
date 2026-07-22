@@ -128,7 +128,7 @@ export default function OrderTracker({ order, onCopyPix, pixCopied }) {
 
                 {/* Bonfinópolis Location Sharing Notice */}
                 {isBonfinopolisOrder() && (
-                    <div className="bg-gradient-to-r from-[#FAF6F0] via-[#FFF9F6] to-[#FDF4EC] border-2 border-[#C6A76A] rounded-2xl p-5 sm:p-6 space-y-4 shadow-sm relative overflow-hidden">
+                    <div className="bg-gradient-to-br from-[#FFF9F6] via-white to-[#FDF4EC] border border-[#E8E0D8] rounded-2xl p-5 sm:p-6 space-y-4 shadow-md relative overflow-hidden">
                         <div className="flex items-start gap-3.5">
                             <div className="w-10 h-10 rounded-xl bg-[#7A3E4A] text-white flex items-center justify-center shrink-0 shadow-md">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,14 +137,14 @@ export default function OrderTracker({ order, onCopyPix, pixCopied }) {
                                 </svg>
                             </div>
                             <div className="flex-1 space-y-1">
-                                <span className="bg-[#7A3E4A] text-white text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full inline-block">
+                                <span className="bg-[#7A3E4A] text-white text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full inline-block shadow-xs">
                                     Aviso de Entrega Local — Bonfinópolis-GO
                                 </span>
-                                <h3 className="font-heading text-sm sm:text-base font-bold text-gray-900 leading-snug">
+                                <h3 className="font-sans text-sm sm:text-base font-black text-gray-900 leading-snug">
                                     Envie sua Localização em Tempo Real no WhatsApp 📍
                                 </h3>
                                 <p className="text-xs text-gray-600 leading-relaxed font-medium pt-1">
-                                    Como os endereços na cidade de Bonfinópolis podem ter numerações ou quadras confusas, assim que o pagamento for autorizado por favor nos envie o comprovante e sua <strong className="text-[#7A3E4A]">localização em tempo real</strong> pelo WhatsApp para garantirmos uma entrega super rápida!
+                                    Como os endereços na cidade de Bonfinópolis podem ter numerações ou quadras confusas, assim que o pagamento for autorizado por favor nos envie o comprovante e sua <strong className="text-[#7A3E4A] font-extrabold">localização em tempo real</strong> pelo WhatsApp para garantirmos uma entrega super rápida!
                                 </p>
                             </div>
                         </div>
@@ -154,7 +154,7 @@ export default function OrderTracker({ order, onCopyPix, pixCopied }) {
                                 href={`https://wa.me/551123880403?text=${encodeURIComponent(`Olá! Fiz o pedido #${order.id} em Bonfinópolis-GO. Segue o comprovante de pagamento e minha localização em tempo real para a entrega:`)}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all shadow-md hover:scale-[1.01]"
+                                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all shadow-md hover:scale-[1.01] cursor-pointer"
                             >
                                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
                                     <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z" />
