@@ -45,9 +45,9 @@ export default function ProfilePage() {
             setCpf(profile.cpf || '')
         }
 
-        // Load addresses safely from user-specific key
+        // Load addresses safely from user-specific sessionStorage
         if (cleanEmail) {
-            const userAddrs = localStorage.getItem(`meraki_user_addresses_${cleanEmail}`)
+            const userAddrs = sessionStorage.getItem(`meraki_user_addresses_${cleanEmail}`) || localStorage.getItem(`meraki_user_addresses_${cleanEmail}`)
             if (userAddrs) {
                 try { setAddresses(JSON.parse(userAddrs)) } catch {}
             }
@@ -60,6 +60,11 @@ export default function ProfilePage() {
     }, [user, profile, navigate])
 
     const handleSignOutClick = async () => {
+        if (user?.email) {
+            const cleanEmail = user.email.trim().toLowerCase()
+            sessionStorage.removeItem(`meraki_user_addresses_${cleanEmail}`)
+            localStorage.removeItem(`meraki_user_addresses_${cleanEmail}`)
+        }
         await signOut()
         navigate('/')
     }
@@ -119,7 +124,7 @@ export default function ProfilePage() {
             state: uf
         }
         const updatedAddresses = [...addresses, newAddr]
-        localStorage.setItem(`meraki_user_addresses_${cleanEmail}`, JSON.stringify(updatedAddresses))
+        sessionStorage.setItem(`meraki_user_addresses_${cleanEmail}`, JSON.stringify(updatedAddresses))
         setAddresses(updatedAddresses)
         setShowAddressForm(false)
         // Reset form
@@ -137,7 +142,7 @@ export default function ProfilePage() {
         if (!user?.email) return
         const cleanEmail = user.email.trim().toLowerCase()
         const updatedAddresses = addresses.filter(a => a.id !== id)
-        localStorage.setItem(`meraki_user_addresses_${cleanEmail}`, JSON.stringify(updatedAddresses))
+        sessionStorage.setItem(`meraki_user_addresses_${cleanEmail}`, JSON.stringify(updatedAddresses))
         setAddresses(updatedAddresses)
     }
 

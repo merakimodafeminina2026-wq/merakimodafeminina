@@ -8,10 +8,21 @@ import { applyTransparentButterflyFavicon } from './utils/favicon.js'
 applyTransparentButterflyFavicon()
 
 // Security Purge: Ensure sensitive user data is never stored in persistent localStorage
-try {
-    localStorage.removeItem('meraki_users')
-    localStorage.removeItem('meraki_session')
-} catch (e) {}
+const cleanSessionData = () => {
+    try {
+        localStorage.removeItem('meraki_users')
+        localStorage.removeItem('meraki_session')
+        Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('meraki_user_addresses_') || key.startsWith('meraki_returns_')) {
+                localStorage.removeItem(key)
+            }
+        })
+    } catch (e) {}
+}
+cleanSessionData()
+
+window.addEventListener('pagehide', cleanSessionData)
+window.addEventListener('beforeunload', cleanSessionData)
 
 // Auto-recover from stale Vercel asset 404s after new deployments
 window.addEventListener('error', (event) => {

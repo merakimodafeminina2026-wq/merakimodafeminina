@@ -232,8 +232,8 @@ export default function AuthPage() {
             updatedAddresses.push(newAddr)
         }
 
-        // Save strictly to user-specific key
-        localStorage.setItem(`meraki_user_addresses_${cleanEmail}`, JSON.stringify(updatedAddresses))
+        // Save strictly to user-specific sessionStorage
+        sessionStorage.setItem(`meraki_user_addresses_${cleanEmail}`, JSON.stringify(updatedAddresses))
 
         setUserAddresses(updatedAddresses)
         setShowAddressModal(false)
@@ -253,7 +253,7 @@ export default function AuthPage() {
         if (!user || !user.email) return
         const cleanEmail = user.email.trim().toLowerCase()
         const updated = userAddresses.filter(a => a.id !== id)
-        localStorage.setItem(`meraki_user_addresses_${cleanEmail}`, JSON.stringify(updated))
+        sessionStorage.setItem(`meraki_user_addresses_${cleanEmail}`, JSON.stringify(updated))
         setUserAddresses(updated)
         showAlert('Endereço removido com sucesso!', 'success')
     }
