@@ -2203,6 +2203,9 @@ export function InstitutionalSection({ saving, setSaving, updateStoreConfig }) {
     }
 
     const [selectedPageId, setSelectedPageId] = useState('story')
+    const [editorMode, setEditorMode] = useState('editor') // 'editor' | 'preview'
+    const textareaRef = useRef(null)
+
     const [pagesData, setPagesData] = useState(() => {
         try {
             const stored = localStorage.getItem('meraki_pages_content')
@@ -2224,6 +2227,21 @@ export function InstitutionalSection({ saving, setSaving, updateStoreConfig }) {
         setPageTitle(current.title || defaultPage?.label || '')
         setPageContent(current.content || '')
     }, [selectedPageId, pagesData])
+
+    const insertTag = (openTag, closeTag = '') => {
+        const textarea = textareaRef.current
+        if (!textarea) return
+        const start = textarea.selectionStart
+        const end = textarea.selectionEnd
+        const selectedText = pageContent.substring(start, end)
+        const replacement = `${openTag}${selectedText || 'Seu texto aqui'}${closeTag}`
+        const newContent = pageContent.substring(0, start) + replacement + pageContent.substring(end)
+        setPageContent(newContent)
+        setTimeout(() => {
+            textarea.focus()
+            textarea.setSelectionRange(start + openTag.length, start + openTag.length + (selectedText ? selectedText.length : 14))
+        }, 50)
+    }
 
     const handleSavePage = async (e) => {
         e.preventDefault()
@@ -2259,13 +2277,31 @@ export function InstitutionalSection({ saving, setSaving, updateStoreConfig }) {
     const inputCls = "w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-sm text-gray-800 outline-none focus:border-[#7A3E4A] focus:ring-2 focus:ring-[#7A3E4A]/10 transition-all font-medium placeholder-gray-400"
     const labelCls = "block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5"
 
+    const isHtmlContent = /<[a-z][\s\S]*>/i.test(pageContent)
+    const renderPreviewContent = () => {
+        if (!pageContent) return <p className="text-gray-400 text-xs italic">Sem conteúdo digitado.</p>
+        if (isHtmlContent) {
+            return (
+                <div 
+                    className="prose prose-stone max-w-none text-sm leading-relaxed text-gray-600 space-y-4"
+                    dangerouslySetInnerHTML={{ __html: pageContent }}
+                />
+            )
+        }
+        return pageContent.split('\n\n').filter(Boolean).map((p, i) => (
+            <p key={i} className="text-sm leading-relaxed text-gray-600 whitespace-pre-line mb-4">
+                {p}
+            </p>
+        ))
+    }
+
     return (
         <div className="space-y-6 font-sans">
             <div className="bg-white p-6 rounded-2xl border border-[#EEEEEE] flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <span className="text-[10px] font-bold text-[#C6A76A] uppercase tracking-widest">Gerenciador de Conteúdo</span>
+                    <span className="text-[10px] font-bold text-[#C6A76A] uppercase tracking-widest">Editor Visual de Conteúdo</span>
                     <h2 className="text-xl font-bold text-gray-900">Páginas Institucionais & Atendimento</h2>
-                    <p className="text-xs text-gray-500 mt-1">Edite textos, títulos e informações das páginas "História", "Revendedor", "Compra Segura", etc.</p>
+                    <p className="text-xs text-gray-500 mt-1">Edite textos com cartões, negrito, destaques e pré-visualização ao vivo igual ao site.</p>
                 </div>
             </div>
 
@@ -2279,7 +2315,7 @@ export function InstitutionalSection({ saving, setSaving, updateStoreConfig }) {
                 {/* Page Selector List */}
                 <div className="lg:col-span-4 bg-white p-4 rounded-2xl border border-[#EEEEEE] space-y-2">
                     <h3 className="text-xs font-black text-gray-900 uppercase tracking-wider px-2 mb-3">Selecione a Página para Editar</h3>
-                    <div className="space-y-1 max-h-[500px] overflow-y-auto pr-1">
+                    <div className="space-y-1 max-h-[550px] overflow-y-auto pr-1">
                         {pagesList.map(p => {
                             const isSelected = selectedPageId === p.id
                             return (
@@ -2305,7 +2341,7 @@ export function InstitutionalSection({ saving, setSaving, updateStoreConfig }) {
                     </div>
                 </div>
 
-                {/* Page Content Form */}
+                {/* Page Content Form & Live Preview */}
                 <div className="lg:col-span-8 bg-white p-6 rounded-2xl border border-[#EEEEEE] space-y-5">
                     <div className="flex items-center justify-between border-b border-gray-100 pb-4">
                         <div>
@@ -2313,6 +2349,32 @@ export function InstitutionalSection({ saving, setSaving, updateStoreConfig }) {
                             <h3 className="text-lg font-black text-gray-900">
                                 {pagesList.find(p => p.id === selectedPageId)?.label}
                             </h3>
+                        </div>
+
+                        {/* Editor / Preview Toggle */}
+                        <div className="flex items-center bg-[#FAF9F5] p-1 rounded-xl border border-gray-200">
+                            <button
+                                type="button"
+                                onClick={() => setEditorMode('editor')}
+                                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                                    editorMode === 'editor'
+                                        ? 'bg-[#7A3E4A] text-white shadow-sm'
+                                        : 'text-gray-500 hover:text-gray-800'
+                                }`}
+                            >
+                                ✏️ Editar Texto
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setEditorMode('preview')}
+                                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                                    editorMode === 'preview'
+                                        ? 'bg-[#7A3E4A] text-white shadow-sm'
+                                        : 'text-gray-500 hover:text-gray-800'
+                                }`}
+                            >
+                                👁️ Ver como Fica no Site
+                            </button>
                         </div>
                     </div>
 
@@ -2329,18 +2391,111 @@ export function InstitutionalSection({ saving, setSaving, updateStoreConfig }) {
                             />
                         </div>
 
-                        <div>
-                            <label className={labelCls}>Conteúdo / Texto Principal (Separe parágrafos com pulo de linha)</label>
-                            <textarea
-                                rows="12"
-                                value={pageContent}
-                                onChange={(e) => setPageContent(e.target.value)}
-                                className={`${inputCls} resize-y leading-relaxed font-sans`}
-                                placeholder="Escreva aqui o texto completo que aparecerá na página..."
-                                required
-                            />
-                            <p className="text-[10px] text-gray-400 mt-1">Dica: Cada parágrafo separado por duas quebras de linha será formatado como um bloco de texto elegante no site.</p>
-                        </div>
+                        {editorMode === 'editor' ? (
+                            <div className="space-y-2">
+                                <label className={labelCls}>Barra de Ferramentas de Formatação (Clique para inserir)</label>
+                                
+                                {/* Rich Text Formatting Toolbar */}
+                                <div className="flex flex-wrap items-center gap-1.5 p-2.5 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl">
+                                    <button
+                                        type="button"
+                                        onClick={() => insertTag('<strong>', '</strong>')}
+                                        className="px-3 py-1.5 bg-white hover:bg-gray-100 border border-gray-200 rounded-lg text-xs font-black text-gray-900 transition-all cursor-pointer shadow-2xs"
+                                        title="Negrito"
+                                    >
+                                        B
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => insertTag('<em>', '</em>')}
+                                        className="px-3 py-1.5 bg-white hover:bg-gray-100 border border-gray-200 rounded-lg text-xs font-serif italic text-gray-900 transition-all cursor-pointer shadow-2xs"
+                                        title="Itálico"
+                                    >
+                                        I
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => insertTag('<u>', '</u>')}
+                                        className="px-3 py-1.5 bg-white hover:bg-gray-100 border border-gray-200 rounded-lg text-xs underline font-bold text-gray-900 transition-all cursor-pointer shadow-2xs"
+                                        title="Sublinhado"
+                                    >
+                                        U
+                                    </button>
+                                    <div className="w-px h-6 bg-gray-200 mx-1" />
+
+                                    <button
+                                        type="button"
+                                        onClick={() => insertTag('<h3 className="text-sm font-bold text-[#7A3E4A] uppercase tracking-wider mt-4 mb-2">', '</h3>')}
+                                        className="px-3 py-1.5 bg-white hover:bg-gray-100 border border-gray-200 rounded-lg text-xs font-bold text-[#7A3E4A] transition-all cursor-pointer shadow-2xs"
+                                    >
+                                        Subtítulo
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => insertTag('<span className="text-[#7A3E4A] font-bold">', '</span>')}
+                                        className="px-3 py-1.5 bg-white hover:bg-gray-100 border border-gray-200 rounded-lg text-xs font-bold text-[#7A3E4A] transition-all cursor-pointer shadow-2xs"
+                                    >
+                                        Destaque Vinho
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => insertTag('<span className="text-[#C6A76A] font-bold">', '</span>')}
+                                        className="px-3 py-1.5 bg-white hover:bg-gray-100 border border-gray-200 rounded-lg text-xs font-bold text-[#C6A76A] transition-all cursor-pointer shadow-2xs"
+                                    >
+                                        Destaque Dourado
+                                    </button>
+
+                                    <div className="w-px h-6 bg-gray-200 mx-1" />
+
+                                    <button
+                                        type="button"
+                                        onClick={() => insertTag('<div className="bg-[#FAF9F5] p-5 rounded-2xl border border-[#EEEEEE] my-4 shadow-2xs">\n  <h4 className="font-bold text-[#7A3E4A] text-xs uppercase tracking-wider mb-2">', '</h4>\n  <p className="text-xs text-gray-600 leading-relaxed">Descrição do Cartão...</p>\n</div>')}
+                                        className="px-3 py-1.5 bg-white hover:bg-gray-100 border border-gray-200 rounded-lg text-xs font-bold text-gray-800 transition-all cursor-pointer shadow-2xs flex items-center gap-1"
+                                    >
+                                        📦 Inserir Cartão (Card)
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => insertTag('<blockquote className="border-l-4 border-[#7A3E4A] pl-4 italic text-sm text-gray-500 my-4 bg-gray-50 py-3 rounded-r-md">', '</blockquote>')}
+                                        className="px-3 py-1.5 bg-white hover:bg-gray-100 border border-gray-200 rounded-lg text-xs font-bold text-gray-800 transition-all cursor-pointer shadow-2xs flex items-center gap-1"
+                                    >
+                                        💬 Caixa de Citação
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => insertTag('<ul className="list-disc pl-5 text-xs text-gray-600 space-y-1.5 my-3">\n  <li>', '</li>\n</ul>')}
+                                        className="px-3 py-1.5 bg-white hover:bg-gray-100 border border-gray-200 rounded-lg text-xs font-bold text-gray-800 transition-all cursor-pointer shadow-2xs flex items-center gap-1"
+                                    >
+                                        • Tópicos
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => insertTag('<span className="bg-[#7A3E4A] text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full inline-block">', '</span>')}
+                                        className="px-3 py-1.5 bg-[#7A3E4A] text-white rounded-lg text-xs font-bold transition-all cursor-pointer shadow-2xs"
+                                    >
+                                        🏷️ Etiqueta
+                                    </button>
+                                </div>
+
+                                <textarea
+                                    ref={textareaRef}
+                                    rows="14"
+                                    value={pageContent}
+                                    onChange={(e) => setPageContent(e.target.value)}
+                                    className={`${inputCls} resize-y leading-relaxed font-mono text-xs`}
+                                    placeholder="Escreva aqui o texto completo da página..."
+                                    required
+                                />
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                <label className={labelCls}>Pré-visualização do Resultado no Site</label>
+                                <div className="p-6 bg-white border border-gray-200 rounded-2xl shadow-sm min-h-[350px]">
+                                    <h2 className="text-2xl font-bold text-gray-900 border-b pb-4 mb-6">{pageTitle}</h2>
+                                    {renderPreviewContent()}
+                                </div>
+                            </div>
+                        )}
 
                         <div className="flex justify-end pt-2">
                             <button

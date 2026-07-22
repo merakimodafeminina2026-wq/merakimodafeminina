@@ -120,17 +120,24 @@ export default function InfoPage({ tab: propTab }) {
     const renderContent = () => {
         const custom = customPages[activeTab]
         if (custom && custom.content) {
-            const paragraphs = custom.content.split('\n\n').filter(Boolean)
+            const isHtml = /<[a-z][\s\S]*>/i.test(custom.content)
             return (
                 <div className="space-y-6 animate-[fadeIn_200ms_ease-out]">
                     <h2 className="text-2xl font-bold text-gray-900 border-b pb-4">
                         {custom.title || sections.find(s => s.id === activeTab)?.label}
                     </h2>
-                    {paragraphs.map((p, idx) => (
-                        <p key={idx} className="text-sm leading-relaxed text-gray-600 whitespace-pre-line">
-                            {p}
-                        </p>
-                    ))}
+                    {isHtml ? (
+                        <div 
+                            className="prose prose-stone max-w-none text-sm leading-relaxed text-gray-600 space-y-4"
+                            dangerouslySetInnerHTML={{ __html: custom.content }}
+                        />
+                    ) : (
+                        custom.content.split('\n\n').filter(Boolean).map((p, idx) => (
+                            <p key={idx} className="text-sm leading-relaxed text-gray-600 whitespace-pre-line">
+                                {p}
+                            </p>
+                        ))
+                    )}
                 </div>
             )
         }
