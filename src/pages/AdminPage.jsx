@@ -175,6 +175,7 @@ export default function AdminPage() {
 
     const [newSectionLabel, setNewSectionLabel] = useState('')
     const [selectedModalSection, setSelectedModalSection] = useState('best-sellers')
+    const [selectedModalSubcategory, setSelectedModalSubcategory] = useState('')
 
     const [selectedModalColors, setSelectedModalColors] = useState([])
     const [isCustomizable, setIsCustomizable] = useState(false)
@@ -398,6 +399,7 @@ export default function AdminPage() {
             setExistingImages(Array.isArray(imgs) ? imgs : (imgs ? [imgs] : []))
             setImageFiles([])
             setSelectedModalCategory(product?.category || categories[0]?.name || '')
+            setSelectedModalSubcategory(product?.subcategory || '')
             setSelectedModalSizes(product?.sizes || [])
             setSelectedModalSection(product?.section || 'best-sellers')
             const prodColors = product?.colors || []
@@ -444,6 +446,7 @@ export default function AdminPage() {
             setExistingImages([])
             setImageFiles([])
             setSelectedModalCategory(categories[0]?.name || '')
+            setSelectedModalSubcategory('')
             setSelectedModalSizes(['P', 'M', 'G', 'GG'])
             setSelectedModalSection(sections[0]?.id || 'best-sellers')
             setSelectedModalColors([])
@@ -626,6 +629,7 @@ export default function AdminPage() {
         const allImages = [...existingImages, ...uploadedUrls].filter(Boolean)
         const productData = {
             name: form.pName.value, category: selectedModalCategory,
+            subcategory: selectedModalSubcategory || '',
             price: parseFloat(form.pPrice.value), original_price: parseFloat(form.pOriginalPrice.value) || 0,
             stock: parseInt(form.pStock.value) || 0,
             badge: form.pBadge.value, section: selectedModalSection, sizes: selectedModalSizes, image: allImages, description: form.pDescription.value,
@@ -1430,6 +1434,60 @@ export default function AdminPage() {
                                             )
                                         })}
                                     </div>
+                                </div>
+
+                                <div>
+                                    <label className={labelCls}>Estilo de Filtragem ("Filtre por Estilo")</label>
+                                    {(() => {
+                                        const storedStyles = JSON.parse(localStorage.getItem('meraki_category_styles') || '{}')
+                                        const slugifyCatName = (n) => (n || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s-]/g, '').trim().replace(/[\s-]+/g, '-')
+                                        const catStyles = storedStyles[slugifyCatName(selectedModalCategory)] || storedStyles[selectedModalCategory] || []
+
+                                        if (catStyles.length > 0) {
+                                            return (
+                                                <div className="flex flex-wrap gap-1.5 bg-[#FAF9F5] p-3 rounded-xl border border-[#EEEEEE]">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setSelectedModalSubcategory('')}
+                                                        className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all cursor-pointer ${
+                                                            !selectedModalSubcategory
+                                                                ? 'bg-[#7A3E4A] text-white border-[#7A3E4A]'
+                                                                : 'bg-white text-gray-500 border-[#EEEEEE] hover:bg-gray-150'
+                                                        }`}
+                                                    >
+                                                        Sem Estilo Específico
+                                                    </button>
+                                                    {catStyles.map(st => (
+                                                        <button
+                                                            key={st.name}
+                                                            type="button"
+                                                            onClick={() => setSelectedModalSubcategory(st.name)}
+                                                            className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 ${
+                                                                selectedModalSubcategory === st.name
+                                                                    ? 'bg-[#7A3E4A] text-white border-[#7A3E4A] shadow-xs font-extrabold'
+                                                                    : 'bg-white text-gray-500 border-[#EEEEEE] hover:bg-gray-150'
+                                                            }`}
+                                                        >
+                                                            <span>✨</span> {st.name}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )
+                                        }
+
+                                        return (
+                                            <input
+                                                type="text"
+                                                value={selectedModalSubcategory}
+                                                onChange={(e) => setSelectedModalSubcategory(e.target.value)}
+                                                placeholder="Ex: Bodys, Corsets, Meia Taça..."
+                                                className={inputCls}
+                                            />
+                                        )
+                                    })()}
+                                    <p className="text-[9px] text-gray-400 font-semibold mt-1">
+                                        Ao selecionar o estilo, este produto será filtrado quando o cliente clicar no círculo correspondente na página da categoria.
+                                    </p>
                                 </div>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
