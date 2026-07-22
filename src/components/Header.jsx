@@ -476,7 +476,14 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onSearchOpen 
                     {/* Icons (Right) */}
                     <div className="flex items-center gap-2 sm:gap-4 lg:gap-6">
                         {/* Search */}
-                        <button onClick={onSearchOpen} className="group relative p-2 transition-all hover:-translate-y-0.5 cursor-pointer" aria-label="Buscar">
+                        <button 
+                            onClick={() => {
+                                if (onSearchOpen) onSearchOpen()
+                                window.dispatchEvent(new Event('open-search'))
+                            }} 
+                            className="group relative p-2 transition-all hover:-translate-y-0.5 cursor-pointer" 
+                            aria-label="Buscar"
+                        >
                             <svg className="w-5 h-5 text-[#1A1A1A] group-hover:text-[#7A3E4A] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
@@ -559,6 +566,22 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onSearchOpen 
                                     </svg>
                                 </button>
                             </div>
+                            {/* Mobile Search Button */}
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setMobileMenuOpen(false)
+                                    if (onSearchOpen) onSearchOpen()
+                                    window.dispatchEvent(new Event('open-search'))
+                                }}
+                                className="w-full flex items-center gap-3 p-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-gray-400 hover:text-[#7A3E4A] transition-colors mb-6 cursor-pointer"
+                            >
+                                <svg className="w-4 h-4 text-[#7A3E4A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                                <span className="text-xs font-semibold">O que você procura?</span>
+                            </button>
+
                             {/* Menu Links */}
                             <ul className="space-y-4">
                                 <li className="border-b border-gray-50 pb-3">

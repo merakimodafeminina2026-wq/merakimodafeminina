@@ -10,6 +10,7 @@ import ProductPage from './pages/ProductPage.jsx'
 import InfoPage from './pages/InfoPage.jsx'
 import ProfilePage from './pages/ProfilePage.jsx'
 import CartDrawer from './components/CartDrawer.jsx'
+import SearchOverlay from './components/SearchOverlay.jsx'
 import TrackingManager from './components/TrackingManager.jsx'
 import { isInitialSyncComplete } from './services/database.js'
 
@@ -120,6 +121,7 @@ export default function App() {
             <ScrollToTopReset />
             <TrackingManager />
             <CartDrawer />
+            <SearchOverlay />
             <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/auth" element={<AuthPage />} />
