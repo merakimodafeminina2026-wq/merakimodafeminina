@@ -18,7 +18,7 @@ const TABLE_COLUMNS = {
         'colors', 'inpromocombo', 'iscustomizable', 'custompricewith', 'custompricewithout', 'customfeeletter', 'customfeenumber', 'customfeeemoji', 'customizable_emojis'
     ],
     store_config: [
-        'id', 'whatsapp', 'sac_phone', 'address', 'cnpj', 'infinitepay_handle',
+        'id', 'whatsapp', 'sac_phone', 'address', 'cnpj', 'razao_social', 'origin_cep', 'meta_pixel_id', 'ga_tracking_id', 'infinitepay_handle',
         'topbarmessages', 'topbarstyle', 'promocombo', 'editorial', 'available_colors', 'available_emojis', 'shipping_message',
         'available_badges', 'installment_text', 'banner_transition', 'reward_bar'
     ],
