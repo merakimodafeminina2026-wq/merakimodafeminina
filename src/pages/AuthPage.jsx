@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.js'
-import { signIn, signUp, signOut, getUserProfile, signInWithProvider, resetPasswordForEmail, updatePassword } from '../services/auth.js'
+import { signIn, signUp, signOut, getUserProfile, updateUserProfile, signInWithProvider, resetPasswordForEmail, updatePassword } from '../services/auth.js'
 import Header from '../components/Header.jsx'
 import BenefitsBar from '../components/BenefitsBar.jsx'
 import Footer from '../components/Footer.jsx'
@@ -135,20 +135,47 @@ export default function AuthPage() {
             const cleanEmail = user.email.trim().toLowerCase()
             const storedReturns = JSON.parse(localStorage.getItem(`meraki_returns_${cleanEmail}`) || '[]')
             setReturnsList(storedReturns)
-            try {
-                // 1. Check user-specific address key
-                const userAddressesKey = `meraki_user_addresses_${cleanEmail}`
-                const specificAddrs = localStorage.getItem(userAddressesKey)
-                if (specificAddrs) {
-                    const parsed = JSON.parse(specificAddrs)
-                    if (Array.isArray(parsed)) {
-                        setUserAddresses(parsed)
-                        return
+
+            getUserProfile(user.id).then(({ profile: freshProfile }) => {
+                const activeProf = freshProfile || profile
+                let loadedAddrs = []
+
+                if (activeProf && Array.isArray(activeProf.addresses) && activeProf.addresses.length > 0) {
+                    loadedAddrs = activeProf.addresses
+                }
+
+                if (loadedAddrs.length === 0) {
+                    try {
+                        const userAddressesKey = `meraki_user_addresses_${cleanEmail}`
+                        const specificAddrs = localStorage.getItem(userAddressesKey) || sessionStorage.getItem(userAddressesKey)
+                        if (specificAddrs) {
+                            const parsed = JSON.parse(specificAddrs)
+                            if (Array.isArray(parsed)) loadedAddrs = parsed
+                        }
+                    } catch (e) {
+                        console.error(e)
                     }
                 }
-            } catch (e) {
-                console.error(e)
-            }
+
+                if (loadedAddrs.length === 0 && (activeProf?.street || activeProf?.address || activeProf?.cep)) {
+                    loadedAddrs.push({
+                        id: 'addr-default',
+                        label: 'Principal',
+                        cep: activeProf.cep || '',
+                        street: activeProf.street || activeProf.address || '',
+                        number: activeProf.number || '',
+                        complement: activeProf.complement || '',
+                        neighborhood: activeProf.neighborhood || '',
+                        city: activeProf.city || '',
+                        state: activeProf.state || activeProf.uf || ''
+                    })
+                }
+
+                if (loadedAddrs.length > 0) {
+                    localStorage.setItem(`meraki_user_addresses_${cleanEmail}`, JSON.stringify(loadedAddrs))
+                }
+                setUserAddresses(loadedAddrs)
+            })
         }
     }, [profile, user])
 
@@ -196,7 +223,7 @@ export default function AuthPage() {
         }
     }, [addrCep])
 
-    const handleSaveAddress = (e) => {
+    const handleSaveAddress = async (e) => {
         e.preventDefault()
         if (!addrCep || !addrStreet || !addrNumber) {
             showAlert('Preencha CEP, Rua e Número do endereço.')
@@ -232,7 +259,8 @@ export default function AuthPage() {
             updatedAddresses.push(newAddr)
         }
 
-        // Save strictly to user-specific sessionStorage
+        // Save PERMANENTLY in localStorage and sessionStorage
+        localStorage.setItem(`meraki_user_addresses_${cleanEmail}`, JSON.stringify(updatedAddresses))
         sessionStorage.setItem(`meraki_user_addresses_${cleanEmail}`, JSON.stringify(updatedAddresses))
 
         setUserAddresses(updatedAddresses)
@@ -246,15 +274,45 @@ export default function AuthPage() {
         setAddrBairro('')
         setAddrCity('')
         setAddrState('')
+
+        // Save directly to Supabase Database profile via UPSERT!
+        try {
+            await updateUserProfile(user.id, {
+                email: cleanEmail,
+                addresses: updatedAddresses,
+                address: addrStreet,
+                cep: addrCep,
+                number: addrNumber,
+                complement: addrComp,
+                neighborhood: addrBairro,
+                city: addrCity,
+                state: addrState
+            })
+        } catch (err) {
+            console.error('Erro ao sincronizar endereço no banco de dados:', err)
+        }
+
         showAlert('Endereço salvo com sucesso!', 'success')
     }
 
-    const handleDeleteAddress = (id) => {
+    const handleDeleteAddress = async (id) => {
         if (!user || !user.email) return
         const cleanEmail = user.email.trim().toLowerCase()
         const updated = userAddresses.filter(a => a.id !== id)
+        localStorage.setItem(`meraki_user_addresses_${cleanEmail}`, JSON.stringify(updated))
         sessionStorage.setItem(`meraki_user_addresses_${cleanEmail}`, JSON.stringify(updated))
         setUserAddresses(updated)
+
+        if (user?.id) {
+            try {
+                await updateUserProfile(user.id, {
+                    addresses: updated
+                })
+            } catch (e) {
+                console.error(e)
+            }
+        }
+
         showAlert('Endereço removido com sucesso!', 'success')
     }
 
