@@ -301,7 +301,7 @@ export default function CheckoutPage() {
             discount,
             total,
             coupon: appliedCoupon ? appliedCoupon.code : null,
-            status: 'Pendente',
+            status: paymentMethod === 'card' ? 'Pago' : 'Pendente',
             created_at: new Date().toISOString()
         }
 
