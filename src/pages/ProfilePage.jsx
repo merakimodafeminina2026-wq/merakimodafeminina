@@ -38,20 +38,22 @@ export default function ProfilePage() {
         }
 
         const cleanEmail = user.email?.trim().toLowerCase()
-        if (profile) {
-            setUserProfile(profile)
-            setFullName(profile.full_name || '')
-            setPhone(profile.phone || '')
-            setCpf(profile.cpf || '')
-        }
 
-        // Load addresses permanently from Supabase Database & localStorage
-        if (cleanEmail) {
+        // Fetch fresh profile and addresses directly from Supabase Database
+        getUserProfile(user.id).then(({ profile: freshProfile }) => {
+            const activeProfile = freshProfile || profile
+            if (activeProfile) {
+                setUserProfile(activeProfile)
+                setFullName(activeProfile.full_name || '')
+                setPhone(activeProfile.phone || '')
+                setCpf(activeProfile.cpf || '')
+            }
+
             let loadedAddrs = []
             
             // 1. Check profile.addresses array from Supabase Database
-            if (profile && Array.isArray(profile.addresses) && profile.addresses.length > 0) {
-                loadedAddrs = profile.addresses
+            if (activeProfile && Array.isArray(activeProfile.addresses) && activeProfile.addresses.length > 0) {
+                loadedAddrs = activeProfile.addresses
             }
 
             // 2. Check local storage if empty from database
@@ -70,17 +72,17 @@ export default function ProfilePage() {
             }
 
             // 3. Fallback: Check profile address fields if still empty
-            if (loadedAddrs.length === 0 && (profile?.street || profile?.address || profile?.cep)) {
+            if (loadedAddrs.length === 0 && (activeProfile?.street || activeProfile?.address || activeProfile?.cep)) {
                 loadedAddrs.push({
                     id: 'addr-default',
                     label: 'Principal',
-                    cep: profile.cep || '',
-                    street: profile.street || profile.address || '',
-                    number: profile.number || '',
-                    complement: profile.complement || '',
-                    neighborhood: profile.neighborhood || '',
-                    city: profile.city || '',
-                    state: profile.state || profile.uf || ''
+                    cep: activeProfile.cep || '',
+                    street: activeProfile.street || activeProfile.address || '',
+                    number: activeProfile.number || '',
+                    complement: activeProfile.complement || '',
+                    neighborhood: activeProfile.neighborhood || '',
+                    city: activeProfile.city || '',
+                    state: activeProfile.state || activeProfile.uf || ''
                 })
             }
 
@@ -109,7 +111,7 @@ export default function ProfilePage() {
                 localStorage.setItem(`meraki_user_addresses_${cleanEmail}`, JSON.stringify(loadedAddrs))
             }
             setAddresses(loadedAddrs)
-        }
+        })
 
         // Load orders
         const allOrders = JSON.parse(localStorage.getItem('meraki_orders') || '[]')
@@ -178,15 +180,18 @@ export default function ProfilePage() {
         }
         const updatedAddresses = [...addresses, newAddr]
         
-        // Save PERMANENTLY in localStorage and sessionStorage
-        localStorage.setItem(`meraki_user_addresses_${cleanEmail}`, JSON.stringify(updatedAddresses))
-        sessionStorage.setItem(`meraki_user_addresses_${cleanEmail}`, JSON.stringify(updatedAddresses))
+        // 1. Update UI component state immediately
         setAddresses(updatedAddresses)
         setShowAddressForm(false)
 
-        // Save directly to Supabase Database profile linked to User ID!
+        // 2. Save PERMANENTLY in localStorage and sessionStorage
+        localStorage.setItem(`meraki_user_addresses_${cleanEmail}`, JSON.stringify(updatedAddresses))
+        sessionStorage.setItem(`meraki_user_addresses_${cleanEmail}`, JSON.stringify(updatedAddresses))
+
+        // 3. Save directly to Supabase Database profile linked to User ID via UPSERT!
         try {
             const { profile: updated } = await updateUserProfile(user.id, {
+                email: cleanEmail,
                 addresses: updatedAddresses,
                 address: street,
                 cep,

@@ -142,14 +142,17 @@ export async function getUserProfile(userId) {
 
 export async function updateUserProfile(userId, updates) {
     try {
+        const payload = { id: userId, ...updates }
         const { data, error } = await supabase
             .from('profiles')
-            .update(updates)
-            .eq('id', userId)
+            .upsert(payload, { onConflict: 'id' })
             .select()
-            .single()
+            .maybeSingle()
             
-        if (error) throw error
+        if (error) {
+            console.error('Error updating user profile in Supabase:', error)
+            throw error
+        }
         return { profile: data, error: null }
     } catch (e) {
         return { profile: null, error: e }
