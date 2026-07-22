@@ -43,6 +43,17 @@ export default function CheckoutPage() {
     const [selectedAddressId, setSelectedAddressId] = useState('')
     const [addressLabel, setAddressLabel] = useState('Casa')
 
+    // Payment method state & Transparent Credit Card fields
+    const [paymentMethod, setPaymentMethod] = useState('pix')
+    const [cardNumber, setCardNumber] = useState('')
+    const [cardHolder, setCardHolder] = useState('')
+    const [cardExpiry, setCardExpiry] = useState('')
+    const [cardCvv, setCardCvv] = useState('')
+    const [installments, setInstallments] = useState('1')
+    const [appliedCoupon, setAppliedCoupon] = useState(null)
+    const [couponCode, setCouponCode] = useState('')
+    const [couponError, setCouponError] = useState('')
+
     // Load saved addresses and user data
     useEffect(() => {
         if (user) {
@@ -118,20 +129,8 @@ export default function CheckoutPage() {
     }
 
     // Payment states
-    const [paymentMethod, setPaymentMethod] = useState('pix') // pix, card, boleto
-
-    // Card details
-    const [cardNumber, setCardNumber] = useState('')
     const [cardName, setCardName] = useState('')
-    const [cardExpiry, setCardExpiry] = useState('')
-    const [cardCvv, setCardCvv] = useState('')
-    const [installments, setInstallments] = useState('1')
-
-    // Coupon states
-    const [couponCode, setCouponCode] = useState('')
-    const [appliedCoupon, setAppliedCoupon] = useState(null)
-    const [couponError, setCouponError] = useState('')
-
+    
     const subtotal = Math.max(0, rawSubtotal - comboDiscount)
 
     useEffect(() => {
@@ -671,12 +670,107 @@ export default function CheckoutPage() {
                                 </button>
                             </div>
 
-                            <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100/50 border border-gray-100 rounded-2xl flex gap-3 text-xs text-gray-500">
-                                <svg className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            {/* Formulário Transparente de Cartão de Crédito */}
+                            {paymentMethod === 'card' && (
+                                <div className="p-5 bg-gradient-to-br from-[#FFF9F6] to-white border border-[#7A3E4A]/20 rounded-2xl space-y-4 animate-[fadeIn_150ms_ease-out]">
+                                    <div className="flex items-center justify-between border-b border-[#E8E0D8] pb-3">
+                                        <span className="text-xs font-black uppercase text-[#7A3E4A] tracking-wider">Dados do Cartão de Crédito</span>
+                                        <div className="flex gap-1.5 text-xs font-bold text-gray-500">
+                                            <span>💳 Visa</span>
+                                            <span>💳 Master</span>
+                                            <span>💳 Elo</span>
+                                            <span>💳 Amex</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        <div>
+                                            <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Número do Cartão</label>
+                                            <input
+                                                type="text"
+                                                placeholder="0000 0000 0000 0000"
+                                                maxLength="19"
+                                                value={cardNumber}
+                                                onChange={(e) => {
+                                                    const raw = e.target.value.replace(/\D/g, '').slice(0, 16)
+                                                    const masked = raw.replace(/(\d{4})/g, '$1 ').trim()
+                                                    setCardNumber(masked)
+                                                }}
+                                                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-xs font-mono font-bold text-gray-800 outline-none focus:border-[#7A3E4A]"
+                                                required
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Nome Impresso no Cartão</label>
+                                            <input
+                                                type="text"
+                                                placeholder="NOME COMO ESTÁ NO CARTÃO"
+                                                value={cardHolder}
+                                                onChange={(e) => setCardHolder(e.target.value.toUpperCase())}
+                                                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-800 outline-none focus:border-[#7A3E4A]"
+                                                required
+                                            />
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Validade (MM/AA)</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="MM/AA"
+                                                    maxLength="5"
+                                                    value={cardExpiry}
+                                                    onChange={(e) => {
+                                                        const raw = e.target.value.replace(/\D/g, '').slice(0, 4)
+                                                        const masked = raw.length > 2 ? `${raw.slice(0, 2)}/${raw.slice(2)}` : raw
+                                                        setCardExpiry(masked)
+                                                    }}
+                                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-xs font-mono font-bold text-gray-800 outline-none focus:border-[#7A3E4A]"
+                                                    required
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Código CVV</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="123"
+                                                    maxLength="4"
+                                                    value={cardCvv}
+                                                    onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, ''))}
+                                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-xs font-mono font-bold text-gray-800 outline-none focus:border-[#7A3E4A]"
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Opções de Parcelamento</label>
+                                            <select
+                                                value={installments}
+                                                onChange={(e) => setInstallments(e.target.value)}
+                                                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-800 outline-none focus:border-[#7A3E4A]"
+                                            >
+                                                <option value="1">1x de {formatCurrency(total)} (Sem Juros)</option>
+                                                <option value="2">2x de {formatCurrency(total / 2)} (Sem Juros)</option>
+                                                <option value="3">3x de {formatCurrency(total / 3)} (Sem Juros)</option>
+                                                <option value="4">4x de {formatCurrency(total / 4)} (Sem Juros)</option>
+                                                <option value="5">5x de {formatCurrency(total / 5)} (Sem Juros)</option>
+                                                <option value="6">6x de {formatCurrency(total / 6)} (Sem Juros)</option>
+                                                <option value="10">10x de {formatCurrency(total / 10)}</option>
+                                                <option value="12">12x de {formatCurrency(total / 12)}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="p-4 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/60 rounded-2xl flex gap-3 text-xs text-emerald-900">
+                                <svg className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                                 </svg>
                                 <div>
-                                    Você será redirecionada de forma segura para o checkout da **InfinitePay** para concluir o seu pagamento com a opção escolhida.
+                                    <strong>Pagamento Directo e 100% Seguro:</strong> O processamento é feito diretamente no nosso site com criptografia de ponta a ponta sem nenhum redirecionamento externo.
                                 </div>
                             </div>
                         </div>
