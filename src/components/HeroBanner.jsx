@@ -141,23 +141,61 @@ export default function HeroBanner() {
         }
     }, [])
 
+    // Filter visible slides based on current viewport mode:
+    // On Desktop (!isMobile): show strictly slides with a non-empty desktop image (`image`). Mobile-only banners are excluded.
+    // On Mobile (isMobile): show slides with a mobile image (`mobile_image`) or desktop fallback.
+    const visibleSlides = useMemo(() => {
+        if (!Array.isArray(slides)) return []
+        return slides.filter(s => {
+            if (!s) return false
+            const hasDesk = Boolean(s.image && String(s.image).trim() !== '')
+            const hasMob = Boolean(s.mobile_image && String(s.mobile_image).trim() !== '')
+            if (isMobile) {
+                return hasMob || hasDesk
+            } else {
+                return hasDesk
+            }
+        })
+    }, [slides, isMobile])
+
+    // Safety effect: if current index exceeds visible slides count, reset to 0
+    useEffect(() => {
+        if (current >= visibleSlides.length && visibleSlides.length > 0) {
+            setCurrent(0)
+            setPrevious(null)
+            setIsTransitioning(false)
+        }
+    }, [visibleSlides.length, current])
+
     const navigate = useCallback((nextIndex, dir = 1) => {
-        if (isTransitioning || slides.length <= 1) return
+        if (isTransitioning || visibleSlides.length <= 1) return
         setDirection(dir)
         setPrevious(current)
         setIsTransitioning(true)
         setCurrent(nextIndex)
-    }, [current, slides.length, isTransitioning])
+    }, [current, visibleSlides.length, isTransitioning])
 
-    const next = useCallback(() => navigate((current + 1) % slides.length, 1), [navigate, current, slides.length])
-    const prev = useCallback(() => navigate((current - 1 + slides.length) % slides.length, -1), [navigate, current, slides.length])
-    const goTo = useCallback((index) => { if (index !== current) navigate(index, index > current ? 1 : -1) }, [navigate, current])
+    const next = useCallback(() => {
+        if (visibleSlides.length <= 1) return
+        navigate((current + 1) % visibleSlides.length, 1)
+    }, [navigate, current, visibleSlides.length])
+
+    const prev = useCallback(() => {
+        if (visibleSlides.length <= 1) return
+        navigate((current - 1 + visibleSlides.length) % visibleSlides.length, -1)
+    }, [navigate, current, visibleSlides.length])
+
+    const goTo = useCallback((index) => {
+        if (index !== current && index >= 0 && index < visibleSlides.length) {
+            navigate(index, index > current ? 1 : -1)
+        }
+    }, [navigate, current, visibleSlides.length])
 
     useEffect(() => {
-        if (slides.length <= 1) return
+        if (visibleSlides.length <= 1) return
         const interval = setInterval(next, 6000)
         return () => clearInterval(interval)
-    }, [next, slides.length])
+    }, [next, visibleSlides.length])
 
     useEffect(() => {
         if (previous !== null) {
@@ -184,13 +222,9 @@ export default function HeroBanner() {
         }
     }
 
-    // Desktop only shows slides that have a desktop image set.
-    // Mobile shows all slides (falls back to desktop image if no mobile image).
-    const visibleSlides = isMobile ? slides : slides.filter(s => s.image)
-
     if (!visibleSlides || visibleSlides.length === 0) return null
 
-    // Clamp current index in case visible slides count is less
+    // Clamp current index safely within visible slides
     const safeIndex = Math.min(current, visibleSlides.length - 1)
     const currentSlide = visibleSlides[safeIndex]
 
@@ -223,7 +257,7 @@ export default function HeroBanner() {
                             <div className="relative w-full h-full">
                                 {cells.map(cell => {
                                     const cellWidth = 100 / COLS, cellHeight = 100 / ROWS
-                                    const prevSlide = slides[previous]
+                                    const prevSlide = previous < visibleSlides.length ? visibleSlides[previous] : null
                                     const imagePath = prevSlide ? (isMobile && prevSlide.mobile_image ? prevSlide.mobile_image : prevSlide.image) : ''
                                     return (
                                         <motion.div
