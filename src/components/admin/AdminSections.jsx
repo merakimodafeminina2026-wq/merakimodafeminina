@@ -2155,6 +2155,14 @@ export function InstitutionalSection({ saving, setSaving, updateStoreConfig }) {
         { id: 'stores', label: 'Nossas Lojas', category: 'Lojas' }
     ]
 
+    const [customPagesList, setCustomPagesList] = useState(() => {
+        try {
+            const stored = localStorage.getItem('meraki_custom_pages_list')
+            if (stored) return JSON.parse(stored)
+        } catch {}
+        return []
+    })
+
     const [deletedPages, setDeletedPages] = useState(() => {
         try {
             const stored = localStorage.getItem('meraki_deleted_pages')
@@ -2163,28 +2171,113 @@ export function InstitutionalSection({ saving, setSaving, updateStoreConfig }) {
         return []
     })
 
+    // New Page Modal States
+    const [createModalOpen, setCreateModalOpen] = useState(false)
+    const [newPageTitle, setNewPageTitle] = useState('')
+    const [newPageCategory, setNewPageCategory] = useState('Atendimento')
+    const [newPageContent, setNewPageContent] = useState('')
+
+    const allMasterPagesList = useMemo(() => {
+        return [...masterPagesList, ...customPagesList]
+    }, [customPagesList])
+
     const pagesList = useMemo(() => {
-        return masterPagesList.filter(p => !deletedPages.includes(p.id))
-    }, [deletedPages])
+        return allMasterPagesList.filter(p => !deletedPages.includes(p.id))
+    }, [allMasterPagesList, deletedPages])
+
+    const handleCreatePage = async (e) => {
+        e.preventDefault()
+        const title = newPageTitle.trim()
+        if (!title) return
+
+        const slug = title
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)+/g, '') || `pagina-${Date.now()}`
+
+        const newPageObj = {
+            id: slug,
+            label: title,
+            category: newPageCategory.trim() || 'Atendimento',
+            isCustom: true
+        }
+
+        const updatedCustom = [...customPagesList.filter(p => p.id !== slug), newPageObj]
+        setCustomPagesList(updatedCustom)
+        localStorage.setItem('meraki_custom_pages_list', JSON.stringify(updatedCustom))
+
+        const initialContent = newPageContent.trim() || `Bem-vindo à página ${title}. Escreva aqui o seu texto.`
+        const updatedPagesData = {
+            ...pagesData,
+            [slug]: {
+                title: title,
+                content: initialContent,
+                category: newPageCategory.trim() || 'Atendimento',
+                updated_at: new Date().toISOString()
+            }
+        }
+        setPagesData(updatedPagesData)
+        localStorage.setItem('meraki_pages_content', JSON.stringify(updatedPagesData))
+        window.dispatchEvent(new Event('pagesContentUpdated'))
+
+        if (updateStoreConfig) {
+            const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+            await updateStoreConfig({
+                ...config,
+                custom_pages_list: updatedCustom,
+                pages_content: updatedPagesData
+            })
+        }
+
+        setSelectedPageId(slug)
+        setCreateModalOpen(false)
+        setNewPageTitle('')
+        setNewPageContent('')
+        setMessage(`Nova página "${title}" criada com sucesso!`)
+        setTimeout(() => setMessage(''), 4000)
+    }
 
     const handleDeletePage = async (pageId) => {
-        const pageObj = masterPagesList.find(p => p.id === pageId)
+        const pageObj = allMasterPagesList.find(p => p.id === pageId)
         const pageName = pageObj?.label || pageId
         if (!window.confirm(`Tem certeza que deseja excluir a página "${pageName}"?\nEla deixará de aparecer no site e no painel de administração.`)) {
             return
         }
 
-        const newDeleted = [...deletedPages, pageId]
-        setDeletedPages(newDeleted)
-        localStorage.setItem('meraki_deleted_pages', JSON.stringify(newDeleted))
-        window.dispatchEvent(new Event('pagesContentUpdated'))
+        if (pageObj?.isCustom) {
+            const updatedCustom = customPagesList.filter(p => p.id !== pageId)
+            setCustomPagesList(updatedCustom)
+            localStorage.setItem('meraki_custom_pages_list', JSON.stringify(updatedCustom))
 
-        if (updateStoreConfig) {
-            const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
-            await updateStoreConfig({ ...config, deleted_pages: newDeleted })
+            const updatedPagesData = { ...pagesData }
+            delete updatedPagesData[pageId]
+            setPagesData(updatedPagesData)
+            localStorage.setItem('meraki_pages_content', JSON.stringify(updatedPagesData))
+            window.dispatchEvent(new Event('pagesContentUpdated'))
+
+            if (updateStoreConfig) {
+                const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+                await updateStoreConfig({
+                    ...config,
+                    custom_pages_list: updatedCustom,
+                    pages_content: updatedPagesData
+                })
+            }
+        } else {
+            const newDeleted = [...deletedPages, pageId]
+            setDeletedPages(newDeleted)
+            localStorage.setItem('meraki_deleted_pages', JSON.stringify(newDeleted))
+            window.dispatchEvent(new Event('pagesContentUpdated'))
+
+            if (updateStoreConfig) {
+                const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+                await updateStoreConfig({ ...config, deleted_pages: newDeleted })
+            }
         }
 
-        const remaining = masterPagesList.filter(p => !newDeleted.includes(p.id))
+        const remaining = allMasterPagesList.filter(p => p.id !== pageId && !deletedPages.includes(p.id))
         if (remaining.length > 0) {
             setSelectedPageId(remaining[0].id)
         }
@@ -2193,7 +2286,7 @@ export function InstitutionalSection({ saving, setSaving, updateStoreConfig }) {
     }
 
     const handleRestorePage = async (pageId) => {
-        const pageObj = masterPagesList.find(p => p.id === pageId)
+        const pageObj = allMasterPagesList.find(p => p.id === pageId)
         const newDeleted = deletedPages.filter(id => id !== pageId)
         setDeletedPages(newDeleted)
         localStorage.setItem('meraki_deleted_pages', JSON.stringify(newDeleted))
@@ -2357,6 +2450,14 @@ export function InstitutionalSection({ saving, setSaving, updateStoreConfig }) {
                     <h2 className="text-xl font-bold text-gray-900">Páginas Institucionais & Atendimento</h2>
                     <p className="text-xs text-gray-500 mt-1">Edite textos com cartões, negrito, destaques e pré-visualização ao vivo igual ao site.</p>
                 </div>
+                <button
+                    type="button"
+                    onClick={() => setCreateModalOpen(true)}
+                    className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-[#7A3E4A] to-[#9A5060] text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:shadow-lg hover:shadow-[#7A3E4A]/30 transition-all cursor-pointer whitespace-nowrap shrink-0"
+                >
+                    <Icon path="M12 4v16m8-8H4" className="w-4 h-4" />
+                    Nova Página
+                </button>
             </div>
 
             {message && (
@@ -2369,7 +2470,10 @@ export function InstitutionalSection({ saving, setSaving, updateStoreConfig }) {
                 {/* Page Selector List */}
                 <div className="lg:col-span-4 bg-white p-4 rounded-2xl border border-[#EEEEEE] space-y-4">
                     <div>
-                        <h3 className="text-xs font-black text-gray-900 uppercase tracking-wider px-2 mb-3">Selecione a Página para Editar</h3>
+                        <div className="flex items-center justify-between px-2 mb-3">
+                            <h3 className="text-xs font-black text-gray-900 uppercase tracking-wider">Selecione a Página para Editar</h3>
+                            <span className="text-[10px] font-bold text-gray-400">({pagesList.length})</span>
+                        </div>
                         <div className="space-y-1 max-h-[450px] overflow-y-auto pr-1">
                             {pagesList.map(p => {
                                 const isSelected = selectedPageId === p.id
@@ -2384,8 +2488,8 @@ export function InstitutionalSection({ saving, setSaving, updateStoreConfig }) {
                                                     : 'bg-[#FAF9F5] text-gray-700 hover:bg-[#7A3E4A]/10 hover:text-[#7A3E4A]'
                                             }`}
                                         >
-                                            <span>{p.label}</span>
-                                            <span className={`text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md ${
+                                            <span className="truncate pr-1">{p.label}</span>
+                                            <span className={`text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md shrink-0 ${
                                                 isSelected ? 'bg-white/20 text-white' : 'bg-gray-200/60 text-gray-500'
                                             }`}>
                                                 {p.category}
@@ -2411,7 +2515,7 @@ export function InstitutionalSection({ saving, setSaving, updateStoreConfig }) {
                             <h4 className="text-[10px] font-black text-red-500 uppercase tracking-wider px-2 mb-2">Páginas Excluídas ({deletedPages.length})</h4>
                             <div className="space-y-1">
                                 {deletedPages.map(pageId => {
-                                    const pageObj = masterPagesList.find(p => p.id === pageId)
+                                    const pageObj = allMasterPagesList.find(p => p.id === pageId)
                                     return (
                                         <div key={pageId} className="flex items-center justify-between px-3 py-2 bg-red-50/50 rounded-xl border border-red-100 text-xs">
                                             <span className="font-semibold text-gray-600 line-through truncate max-w-[140px]">{pageObj?.label || pageId}</span>
@@ -2437,7 +2541,7 @@ export function InstitutionalSection({ saving, setSaving, updateStoreConfig }) {
                         <div>
                             <span className="text-[9px] font-bold text-[#7A3E4A] uppercase tracking-widest">Editando Página</span>
                             <h3 className="text-lg font-black text-gray-900">
-                                {masterPagesList.find(p => p.id === selectedPageId)?.label || pageTitle}
+                                {allMasterPagesList.find(p => p.id === selectedPageId)?.label || pageTitle}
                             </h3>
                         </div>
 
@@ -2766,7 +2870,83 @@ export function InstitutionalSection({ saving, setSaving, updateStoreConfig }) {
                     </form>
                 </div>
             </div>
+
+            {/* Modal: Criar Nova Página */}
+            {createModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-[fadeIn_150ms_ease-out]">
+                    <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full border border-gray-100 shadow-2xl space-y-6 animate-[scaleUp_200ms_ease-out]">
+                        <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+                            <div>
+                                <span className="text-[9px] font-bold text-[#C6A76A] uppercase tracking-widest">Nova Página Institucional</span>
+                                <h3 className="text-lg font-black text-gray-900">Criar Nova Página</h3>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setCreateModalOpen(false)}
+                                className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 font-bold flex items-center justify-center transition-all cursor-pointer"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleCreatePage} className="space-y-4">
+                            <div>
+                                <label className={labelCls}>Título da Página</label>
+                                <input
+                                    type="text"
+                                    value={newPageTitle}
+                                    onChange={(e) => setNewPageTitle(e.target.value)}
+                                    className={inputCls}
+                                    placeholder="Ex: Política de Cookies, Guia de Medidas..."
+                                    required
+                                    autoFocus
+                                />
+                            </div>
+
+                            <div>
+                                <label className={labelCls}>Categoria de Exibição no Site</label>
+                                <select
+                                    value={newPageCategory}
+                                    onChange={(e) => setNewPageCategory(e.target.value)}
+                                    className={inputCls}
+                                >
+                                    <option value="Atendimento">Atendimento</option>
+                                    <option value="Sobre">Sobre</option>
+                                    <option value="Conta">Conta</option>
+                                    <option value="Lojas">Lojas</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className={labelCls}>Texto / Conteúdo Inicial (Opcional)</label>
+                                <textarea
+                                    rows="5"
+                                    value={newPageContent}
+                                    onChange={(e) => setNewPageContent(e.target.value)}
+                                    className={inputCls}
+                                    placeholder="Escreva aqui o texto inicial da nova página..."
+                                />
+                            </div>
+
+                            <div className="flex justify-end gap-3 pt-3 border-t border-gray-100">
+                                <button
+                                    type="button"
+                                    onClick={() => setCreateModalOpen(false)}
+                                    className="px-5 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="px-6 py-3 bg-gradient-to-r from-[#7A3E4A] to-[#9A5060] text-white text-xs font-black uppercase tracking-wider rounded-xl hover:shadow-lg hover:shadow-[#7A3E4A]/30 transition-all cursor-pointer"
+                                >
+                                    Criar Página
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
-

@@ -145,6 +145,7 @@ export default function App() {
                 <Route path="/promotional-rules" element={<InfoPage tab="promotional-rules" />} />
                 <Route path="/stores" element={<InfoPage tab="stores" />} />
                 <Route path="/wishlist" element={<InfoPage tab="wishlist" />} />
+                <Route path="/info/:tab" element={<InfoPage />} />
             </Routes>
         </HashRouter>
     )

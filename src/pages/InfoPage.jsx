@@ -28,6 +28,14 @@ export default function InfoPage({ tab: propTab }) {
         return {}
     })
 
+    const [customPagesList, setCustomPagesList] = useState(() => {
+        try {
+            const stored = localStorage.getItem('meraki_custom_pages_list')
+            if (stored) return JSON.parse(stored)
+        } catch {}
+        return []
+    })
+
     const [deletedPages, setDeletedPages] = useState(() => {
         try {
             const stored = localStorage.getItem('meraki_deleted_pages')
@@ -53,6 +61,8 @@ export default function InfoPage({ tab: propTab }) {
                 if (storedPages) setCustomPages(JSON.parse(storedPages))
                 const storedDeleted = localStorage.getItem('meraki_deleted_pages')
                 if (storedDeleted) setDeletedPages(JSON.parse(storedDeleted))
+                const storedCustom = localStorage.getItem('meraki_custom_pages_list')
+                if (storedCustom) setCustomPagesList(JSON.parse(storedCustom))
             } catch {}
         }
         loadPages()
@@ -74,6 +84,7 @@ export default function InfoPage({ tab: propTab }) {
             setStoreConfig(config)
             if (config.pages_content) setCustomPages(config.pages_content)
             if (config.deleted_pages) setDeletedPages(config.deleted_pages)
+            if (config.custom_pages_list) setCustomPagesList(config.custom_pages_list)
         }
 
         return () => {
@@ -124,7 +135,8 @@ export default function InfoPage({ tab: propTab }) {
         { id: 'withdrawal', label: 'Direito de Arrependimento', category: 'Atendimento' },
         { id: 'privacy', label: 'Política de Privacidade', category: 'Atendimento' },
         { id: 'promotional-rules', label: 'Regras Promocionais', category: 'Atendimento' },
-        { id: 'stores', label: 'Nossas Lojas', category: 'Lojas' }
+        { id: 'stores', label: 'Nossas Lojas', category: 'Lojas' },
+        ...customPagesList
     ]
 
     const sections = masterSections.filter(s => !deletedPages.includes(s.id))
