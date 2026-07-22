@@ -151,7 +151,7 @@ export default function CartDrawer() {
 
             const city = data.localidade || ''
             const state = data.uf || ''
-            const isBonfinopolis = cleanCep.startsWith('75225') || city.toLowerCase().includes('bonfinópolis') || city.toLowerCase().includes('bonfinopolis')
+            const isBonfinopolis = cleanCep.startsWith('75195') || cleanCep.startsWith('75198') || cleanCep.startsWith('75225') || cleanCep.startsWith('7519') || city.toLowerCase().includes('bonfinópolis') || city.toLowerCase().includes('bonfinopolis')
 
             let calculatedOption = null
 
@@ -425,7 +425,7 @@ export default function CartDrawer() {
                                 <input
                                     type="text"
                                     maxLength="9"
-                                    placeholder="Digitar CEP (ex: 75225-000)"
+                                    placeholder="Digitar CEP (ex: 75195-000)"
                                     value={cepInput}
                                     onChange={(e) => setCepInput(e.target.value)}
                                     className="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-xs outline-none focus:border-[#7A3E4A] bg-gray-50/50"

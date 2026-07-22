@@ -84,7 +84,10 @@ export default function OrderTracker({ order, onCopyPix, pixCopied }) {
         const cleanCep = (cep || '').replace(/\D/g, '')
         
         return (
+            cleanCep.startsWith('75195') ||
+            cleanCep.startsWith('75198') ||
             cleanCep.startsWith('75225') ||
+            cleanCep.startsWith('7519') ||
             city.toLowerCase().includes('bonfinópolis') ||
             city.toLowerCase().includes('bonfinopolis')
         )

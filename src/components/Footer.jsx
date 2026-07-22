@@ -4,7 +4,7 @@ export default function Footer() {
     const [butterflySrc, setButterflySrc] = useState('/assets/borboleta-v2.png')
     const [config, setConfig] = useState({
         sac_phone: '(11) 2388-0403',
-        address: 'Avenida Alfredo Nasser, Qd. 14, Lt. 05 - Centro, Bonfinópolis - GO, CEP: 75225-000',
+        address: 'Avenida Alfredo Nasser, Qd. 14, Lt. 05 - Centro, Bonfinópolis - GO, CEP: 75195-000',
         cnpj: '57.484.768/0064-89',
         razao_social: 'Meraki Comércio de Vestuário Ltda'
     })
@@ -16,7 +16,7 @@ export default function Footer() {
                 if (stored) {
                     setConfig({
                         sac_phone: stored.sac_phone || '(11) 2388-0403',
-                        address: stored.address || 'Avenida Alfredo Nasser, Qd. 14, Lt. 05 - Centro, Bonfinópolis - GO, CEP: 75225-000',
+                        address: stored.address || 'Avenida Alfredo Nasser, Qd. 14, Lt. 05 - Centro, Bonfinópolis - GO, CEP: 75195-000',
                         cnpj: stored.cnpj || '57.484.768/0064-89',
                         razao_social: stored.razao_social || 'Meraki Comércio de Vestuário Ltda'
                     })

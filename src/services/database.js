@@ -213,7 +213,7 @@ export async function initSupabaseSync() {
                 id: 'default',
                 whatsapp: '551123880403',
                 sac_phone: '(11) 2388-0403',
-                address: 'Avenida Alfredo Nasser, Qd. 14, Lt. 05 - Centro, Bonfinópolis - GO, CEP: 75225-000',
+                address: 'Avenida Alfredo Nasser, Qd. 14, Lt. 05 - Centro, Bonfinópolis - GO, CEP: 75195-000',
                 cnpj: '57.484.768/0064-89',
                 infinitepay_handle: 'merakimodafeminina2026',
                 topbarMessages: [

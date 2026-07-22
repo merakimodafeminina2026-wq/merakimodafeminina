@@ -18,7 +18,7 @@ export default function InfoPage({ tab: propTab }) {
     const [storeConfig, setStoreConfig] = useState({
         whatsapp: '5511999999999',
         sac_phone: '(11) 2388-0403',
-        address: 'Avenida Alfredo Nasser, Qd. 14, Lt. 05 - Centro, Bonfinópolis - GO, CEP: 75225-000'
+        address: 'Avenida Alfredo Nasser, Qd. 14, Lt. 05 - Centro, Bonfinópolis - GO, CEP: 75195-000'
     })
 
     // Sync active tab with route param or prop

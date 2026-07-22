@@ -1751,10 +1751,10 @@ export function SettingsSection({ saving, setSaving, updateStoreConfig }) {
 
     const [whatsapp, setWhatsapp] = useState(config.whatsapp || '551123880403')
     const [sacPhone, setSacPhone] = useState(config.sac_phone || '(11) 2388-0403')
-    const [address, setAddress] = useState(config.address || 'Avenida Alfredo Nasser, Qd. 14, Lt. 05 - Centro, Bonfinópolis - GO, CEP: 75225-000')
+    const [address, setAddress] = useState(config.address || 'Avenida Alfredo Nasser, Qd. 14, Lt. 05 - Centro, Bonfinópolis - GO, CEP: 75195-000')
     const [cnpj, setCnpj] = useState(config.cnpj || '57.484.768/0064-89')
     const [razaoSocial, setRazaoSocial] = useState(config.razao_social || 'Meraki Comércio de Vestuário Ltda')
-    const [originCep, setOriginCep] = useState(config.origin_cep || '75225-000')
+    const [originCep, setOriginCep] = useState(config.origin_cep || '75195-000')
     const [metaPixelId, setMetaPixelId] = useState(config.meta_pixel_id || '')
     const [gaTrackingId, setGaTrackingId] = useState(config.ga_tracking_id || '')
     const [infinitepayHandle, setInfinitepayHandle] = useState(config.infinitepay_handle || 'nicolly_gomes')

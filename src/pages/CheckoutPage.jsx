@@ -328,10 +328,10 @@ export default function CheckoutPage() {
         // Clear cart
         clearCart()
 
-        // Check if customer is from Bonfinópolis (CEP 75225... or city Bonfinópolis)
+        // Check if customer is from Bonfinópolis (CEP 75195..., 75198..., 75225... or city Bonfinópolis)
         const cleanCep = (cep || '').replace(/\D/g, '')
         const normCity = (city || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-        const isBonfinopolis = cleanCep.startsWith('75225') || normCity.includes('bonfinopolis')
+        const isBonfinopolis = cleanCep.startsWith('75195') || cleanCep.startsWith('75198') || cleanCep.startsWith('75225') || cleanCep.startsWith('7519') || normCity.includes('bonfinopolis')
 
         // If PIX payment and Bonfinópolis customer, redirect directly to Order Tracker
         if (paymentMethod === 'pix' && isBonfinopolis) {
