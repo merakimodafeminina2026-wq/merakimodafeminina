@@ -184,21 +184,31 @@ export default function OrderTracker({ order, onCopyPix, pixCopied }) {
                                     const isCurrent = idx === activeStep
                                     return (
                                         <div key={step.key} className="flex flex-col items-center group">
-                                            {/* Step Circle */}
-                                            <div className={`w-11 h-11 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
-                                                isPassed
-                                                    ? 'bg-emerald-500 border-emerald-500 text-white shadow-md shadow-emerald-500/20'
-                                                    : 'bg-white border-gray-200 text-gray-400'
-                                            } ${isCurrent ? 'ring-4 ring-emerald-100 scale-110' : ''}`}>
-                                                {isPassed ? (
-                                                    <svg className="w-5 h-5 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                                    </svg>
-                                                ) : (
-                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d={step.icon} />
-                                                    </svg>
+                                            {/* Step Circle Container with Pulsing Effect */}
+                                            <div className="relative flex items-center justify-center">
+                                                {/* Continuous Pulsing Aura for active step */}
+                                                {isCurrent && (
+                                                    <>
+                                                        <span className="absolute inset-0 rounded-full bg-emerald-500/40 animate-ping opacity-75" />
+                                                        <span className="absolute -inset-2 rounded-full bg-emerald-400/30 animate-pulse" />
+                                                    </>
                                                 )}
+                                                
+                                                <div className={`relative z-10 w-11 h-11 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
+                                                    isPassed
+                                                        ? 'bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-500/30'
+                                                        : 'bg-white border-gray-200 text-gray-400'
+                                                } ${isCurrent ? 'ring-4 ring-emerald-200 scale-110' : ''}`}>
+                                                    {isPassed ? (
+                                                        <svg className="w-5 h-5 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                    ) : (
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d={step.icon} />
+                                                        </svg>
+                                                    )}
+                                                </div>
                                             </div>
 
                                             {/* Step Label */}
