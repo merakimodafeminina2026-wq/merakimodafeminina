@@ -14,7 +14,7 @@ const TABLE_COLUMNS = {
     returns: ['id', 'orderid', 'itemid', 'customeremail', 'type', 'postagecode', 'status', 'created_at'],
     categories: ['id', 'name', 'group', 'description', 'image', 'created_at'],
     products: [
-        'id', 'name', 'category', 'price', 'original_price', 'image', 'badge', 'section', 'sizes', 'description', 'stock', 'created_at',
+        'id', 'name', 'category', 'subcategory', 'price', 'original_price', 'image', 'badge', 'section', 'sizes', 'description', 'stock', 'created_at',
         'colors', 'inpromocombo', 'iscustomizable', 'custompricewith', 'custompricewithout', 'customfeeletter', 'customfeenumber', 'customfeeemoji', 'customizable_emojis'
     ],
     store_config: [

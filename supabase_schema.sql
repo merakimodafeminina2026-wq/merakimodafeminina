@@ -83,6 +83,7 @@ ALTER TABLE public.products ADD COLUMN IF NOT EXISTS customfeeletter NUMERIC(10,
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS customfeenumber NUMERIC(10, 2) DEFAULT 0.00;
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS customfeeemoji NUMERIC(10, 2) DEFAULT 0.00;
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS customizable_emojis TEXT[] DEFAULT '{}';
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS subcategory TEXT DEFAULT '';
 
 -- ====================================================================
 -- TABELA: categories (Categorias da Loja)
