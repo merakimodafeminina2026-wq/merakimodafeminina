@@ -243,8 +243,48 @@ export default function OrderSuccessPage() {
                     </div>
                 )}
 
-                {/* Credit Card Payment 100% In-Site Container */}
-                {order.paymentMethod === 'card' && (
+                {/* Credit Card Payment Container via InfinitePay */}
+                {order.paymentMethod === 'card' && order.status === 'Pendente' && (
+                    <div className="bg-gradient-to-br from-[#FFF9F6] via-white to-[#FDF4EC] border border-[#E8E0D8] rounded-3xl p-6 sm:p-10 space-y-6 text-center shadow-xl relative overflow-hidden">
+                        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#7A3E4A] via-[#C6A76A] to-[#7A3E4A]" />
+
+                        <div className="flex flex-col items-center gap-2 pt-2">
+                            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#7A3E4A]/10 border border-[#7A3E4A]/20 text-[#7A3E4A] text-[10px] font-black uppercase tracking-[0.2em]">
+                                💳 PAGAMENTO NO CARTÃO DE CRÉDITO VIA INFINITEPAY
+                            </span>
+                            <h3 className="font-sans text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
+                                Autorize a Cobrança no seu Cartão
+                            </h3>
+                        </div>
+
+                        <div className="bg-[#7A3E4A]/10 border border-[#7A3E4A]/20 rounded-2xl px-6 py-3.5 inline-block mx-auto">
+                            <span className="text-xs text-gray-500 font-medium block uppercase tracking-wider">Valor Total a Cobrar</span>
+                            <span className="text-2xl sm:text-3xl font-black text-[#7A3E4A]">
+                                {(order.total || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                            </span>
+                        </div>
+
+                        <div className="max-w-md mx-auto space-y-4">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    const cents = Math.round((order.total || 0) * 100)
+                                    window.location.href = `https://pay.infinitepay.io/${infinitePayHandle}/${cents}`
+                                }}
+                                className="w-full py-4 px-6 bg-gradient-to-r from-[#7A3E4A] to-[#603039] hover:from-[#603039] text-white text-xs font-black uppercase tracking-widest rounded-2xl transition-all cursor-pointer shadow-lg hover:shadow-[#7A3E4A]/30 flex items-center justify-center gap-2 active:scale-98"
+                            >
+                                ⚡ Processar Cobrança de {(order.total || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} na InfinitePay
+                            </button>
+
+                            <p className="text-xs text-gray-500 font-medium leading-relaxed">
+                                Para efetuar a cobrança real no seu cartão de crédito e receber a notificação do seu banco, clique no botão acima para concluir o pagamento via <strong>InfinitePay</strong>.
+                            </p>
+                        </div>
+                    </div>
+                )}
+
+                {/* Credit Card Approved Container */}
+                {order.paymentMethod === 'card' && (order.status === 'Pago' || order.status === 'Aprovado') && (
                     <div className="bg-gradient-to-br from-[#F0FDF4] via-white to-[#DCFCE7] border border-[#BBF7D0] rounded-3xl p-6 sm:p-10 space-y-6 text-center shadow-xl relative overflow-hidden">
                         <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#10B981] via-[#059669] to-[#10B981]" />
 
@@ -253,7 +293,7 @@ export default function OrderSuccessPage() {
                                 ✅ PAGAMENTO NO CARTÃO APROVADO COM SUCESSO
                             </span>
                             <h3 className="font-sans text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
-                                Transação Processada Direto no Site!
+                                Cobrança Efetuada e Confirmada!
                             </h3>
                         </div>
 
@@ -261,15 +301,6 @@ export default function OrderSuccessPage() {
                             <span className="text-xs text-emerald-700 font-medium block uppercase tracking-wider">Valor Autorizado no Cartão</span>
                             <span className="text-2xl sm:text-3xl font-black text-emerald-800">
                                 {(order.total || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                            </span>
-                        </div>
-
-                        <div className="max-w-md mx-auto space-y-2">
-                            <p className="text-xs sm:text-sm text-gray-600 font-medium leading-relaxed">
-                                Seu pagamento por cartão de crédito foi processado e aprovado com total segurança <strong>diretamente no nosso site</strong> sem nenhum redirecionamento.
-                            </p>
-                            <span className="inline-block text-[11px] font-bold text-emerald-700 bg-emerald-100/60 px-3 py-1 rounded-lg">
-                                🚀 Seu pedido já entrou na fila de preparação e envio!
                             </span>
                         </div>
                     </div>
