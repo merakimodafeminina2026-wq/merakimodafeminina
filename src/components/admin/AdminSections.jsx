@@ -2395,9 +2395,9 @@ export function InstitutionalSection({ saving, setSaving, updateStoreConfig }) {
                                             type="button"
                                             onClick={() => handleDeletePage(p.id)}
                                             title="Excluir esta página do site"
-                                            className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all cursor-pointer opacity-70 group-hover:opacity-100 shrink-0"
+                                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all cursor-pointer opacity-60 group-hover:opacity-100 shrink-0"
                                         >
-                                            🗑️
+                                            <Icon path="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" className="w-4 h-4" />
                                         </button>
                                     </div>
                                 )
@@ -2420,7 +2420,8 @@ export function InstitutionalSection({ saving, setSaving, updateStoreConfig }) {
                                                 onClick={() => handleRestorePage(pageId)}
                                                 className="text-[10px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg border border-emerald-200 transition-all cursor-pointer flex items-center gap-1"
                                             >
-                                                🔄 Restaurar
+                                                <Icon path="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" className="w-3 h-3" />
+                                                Restaurar
                                             </button>
                                         </div>
                                     )
@@ -2471,10 +2472,11 @@ export function InstitutionalSection({ saving, setSaving, updateStoreConfig }) {
                             <button
                                 type="button"
                                 onClick={() => handleDeletePage(selectedPageId)}
-                                className="px-3 py-2 bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1 shrink-0"
+                                className="px-3.5 py-2 bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
                                 title="Excluir esta página"
                             >
-                                🗑️ Excluir Página
+                                <Icon path="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" className="w-4 h-4" />
+                                Excluir Página
                             </button>
                         </div>
                     </div>
@@ -2749,7 +2751,8 @@ export function InstitutionalSection({ saving, setSaving, updateStoreConfig }) {
                                 onClick={() => handleDeletePage(selectedPageId)}
                                 className="px-5 py-3.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
                             >
-                                🗑️ Excluir Página
+                                <Icon path="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" className="w-4 h-4" />
+                                Excluir Página
                             </button>
 
                             <button
