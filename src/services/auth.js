@@ -142,19 +142,45 @@ export async function getUserProfile(userId) {
 
 export async function updateUserProfile(userId, updates) {
     try {
-        const payload = { id: userId, ...updates }
-        const { data, error } = await supabase
+        const allowedColumns = [
+            'id', 'email', 'full_name', 'phone', 'cpf', 'address', 
+            'cep', 'number', 'complement', 'neighborhood', 'city', 'state', 
+            'addresses', 'tipo_user', 'created_at'
+        ]
+        const cleanPayload = {}
+        Object.keys(updates || {}).forEach(key => {
+            if (allowedColumns.includes(key)) {
+                cleanPayload[key] = updates[key]
+            }
+        })
+
+        // 1. Try to update existing profile row in Supabase
+        const { data: updatedData, error: updateError } = await supabase
             .from('profiles')
-            .upsert(payload, { onConflict: 'id' })
+            .update(cleanPayload)
+            .eq('id', userId)
             .select()
             .maybeSingle()
-            
-        if (error) {
-            console.error('Error updating user profile in Supabase:', error)
-            throw error
+
+        if (!updateError && updatedData) {
+            return { profile: updatedData, error: null }
         }
-        return { profile: data, error: null }
+
+        // 2. If profile row doesn't exist yet, insert it
+        const insertPayload = { id: userId, ...cleanPayload }
+        const { data: insertedData, error: insertError } = await supabase
+            .from('profiles')
+            .insert([insertPayload])
+            .select()
+            .maybeSingle()
+
+        if (insertError) {
+            console.error('Error inserting user profile in Supabase:', insertError)
+            throw insertError
+        }
+        return { profile: insertedData, error: null }
     } catch (e) {
+        console.error('Error updating user profile in Supabase:', e)
         return { profile: null, error: e }
     }
 }
