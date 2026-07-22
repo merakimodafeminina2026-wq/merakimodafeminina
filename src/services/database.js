@@ -18,7 +18,7 @@ const TABLE_COLUMNS = {
         'colors', 'inpromocombo', 'iscustomizable', 'custompricewith', 'custompricewithout', 'customfeeletter', 'customfeenumber', 'customfeeemoji', 'customizable_emojis'
     ],
     store_config: [
-        'id', 'whatsapp', 'sac_phone', 'address', 'cnpj', 'razao_social', 'origin_cep', 'meta_pixel_id', 'ga_tracking_id', 'infinitepay_handle',
+        'id', 'whatsapp', 'sac_phone', 'address', 'cnpj', 'razao_social', 'origin_cep', 'meta_pixel_id', 'ga_tracking_id', 'infinitepay_handle', 'pix_key', 'pixkey',
         'topbarmessages', 'topbarstyle', 'promocombo', 'editorial', 'available_colors', 'available_emojis', 'shipping_message',
         'available_badges', 'installment_text', 'banner_transition', 'reward_bar', 'category_styles', 'pages_content'
     ],
@@ -54,7 +54,8 @@ const FIELD_MAPPING = {
     shipping_message: ['shippingMessage', 'shipping_message'],
     available_badges: ['availableBadges', 'available_badges'],
     installment_text: ['installmentText', 'installment_text'],
-    banner_transition: ['bannerTransition', 'banner_transition']
+    banner_transition: ['bannerTransition', 'banner_transition'],
+    pix_key: ['pixKey', 'pix_key', 'pixkey']
 }
 
 // Normalize a category value (object or string) to its name string
@@ -86,6 +87,12 @@ function mapDbToFrontend(table, item) {
         if (item.postagecode !== undefined) mapped.postageCode = item.postagecode
     } else if (table === 'coupons') {
         if (item.minpurchase !== undefined) mapped.minPurchase = item.minpurchase
+    } else if (table === 'store_config') {
+        if (item.pix_key !== undefined) mapped.pix_key = item.pix_key
+        if (item.pixkey !== undefined) mapped.pix_key = item.pixkey
+        if (item.infinitepay_handle !== undefined) mapped.infinitepay_handle = item.infinitepay_handle
+        if (item.infinitepayhandle !== undefined) mapped.infinitepay_handle = item.infinitepayhandle
+        mapped.pixKey = mapped.pix_key
     } else if (table === 'products') {
         mapped.category = normalizeCategoryName(item.category)
         if (item.inpromocombo !== undefined) mapped.inPromoCombo = item.inpromocombo
