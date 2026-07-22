@@ -2140,3 +2140,184 @@ export function SettingsSection({ saving, setSaving, updateStoreConfig }) {
     )
 }
 
+export function InstitutionalSection({ saving, setSaving, updateStoreConfig }) {
+    const pagesList = [
+        { id: 'story', label: 'Nossa História', category: 'Sobre' },
+        { id: 'revenda', label: 'Seja um Revendedor', category: 'Sobre' },
+        { id: 'connect', label: 'Conecte-se (Contatos & Redes)', category: 'Sobre' },
+        { id: 'security', label: 'Compra Segura', category: 'Atendimento' },
+        { id: 'payment', label: 'Formas de Pagamento', category: 'Atendimento' },
+        { id: 'delivery', label: 'Entrega e Frete', category: 'Atendimento' },
+        { id: 'returns', label: 'Política de Troca', category: 'Atendimento' },
+        { id: 'withdrawal', label: 'Direito de Arrependimento', category: 'Atendimento' },
+        { id: 'privacy', label: 'Política de Privacidade', category: 'Atendimento' },
+        { id: 'promotional-rules', label: 'Regras Promocionais', category: 'Atendimento' },
+        { id: 'stores', label: 'Nossas Lojas', category: 'Lojas' }
+    ]
+
+    const [selectedPageId, setSelectedPageId] = useState('story')
+    const [pagesData, setPagesData] = useState(() => {
+        try {
+            const stored = localStorage.getItem('meraki_pages_content')
+            if (stored) return JSON.parse(stored)
+        } catch (e) { console.error(e) }
+        return {
+            story: {
+                title: 'Nossa História',
+                content: `A Meraki nasceu do desejo de celebrar a beleza autêntica e a sofisticação da mulher moderna. Fundada em 2023, nossa marca tem como propósito criar lingeries que oferecem o equilíbrio perfeito entre sensualidade, conforto e qualidade excepcional.\n\nO termo grego "Meraki" significa fazer algo com alma, criatividade ou amor; colocar uma parte de si em tudo o que faz. Essa filosofia está presente em cada detalhe de nosso processo: desde a escolha cuidadosa das rendas francesas de toque macio até o design das costuras e acabamentos manuais de luxo.\n\n"Acreditamos que a primeira camada de roupa que uma mulher veste tem o poder de transformar como ela se sente por fora e por dentro."\n\nHoje, contamos com ateliê próprio e coleções exclusivas criadas para abraçar a diversidade dos corpos femininos com caimento impecável e modelagem inteligente.`
+            },
+            revenda: {
+                title: 'Seja um Revendedor',
+                content: `Aumente sua renda revendendo lingeries premium de altíssima aceitação. O programa de revendedoras da Meraki foi desenvolvido para quem busca flexibilidade de horários, independência financeira e um produto com design autoral diferenciado.\n\nMargens de Lucro:\nCondições comerciais e descontos progressivos atrativos para compras no atacado.\n\nFotos & Catálogos:\nAcesso completo a materiais fotográficos de alta qualidade para divulgação nas suas redes sociais.\n\nSem Burocracia:\nPedido mínimo inicial reduzido e reposição rápida de peças conforme a sua demanda.\n\nPara receber nosso catálogo de atacado e a tabela de valores de revenda, envie um e-mail para revenda@merakistore.com.br ou entre em contato pelo nosso WhatsApp de atendimento comercial.`
+            },
+            connect: {
+                title: 'Conecte-se',
+                content: `Acompanhe de perto as nossas novidades, coleções exclusivas e bastidores da marca em nossos canais oficiais de comunicação.\n\nInstagram:\n@merakistore.oficial\n\nWhatsApp VIP:\n(11) 2388-0403\n\nAtendimento Geral:\ncontato@merakistore.com.br`
+            }
+        }
+    })
+
+    const [pageTitle, setPageTitle] = useState('')
+    const [pageContent, setPageContent] = useState('')
+    const [message, setMessage] = useState('')
+
+    useEffect(() => {
+        const current = pagesData[selectedPageId] || {}
+        const defaultPage = pagesList.find(p => p.id === selectedPageId)
+        setPageTitle(current.title || defaultPage?.label || '')
+        setPageContent(current.content || '')
+    }, [selectedPageId, pagesData])
+
+    const handleSavePage = async (e) => {
+        e.preventDefault()
+        setSaving?.(true)
+        setMessage('')
+        try {
+            const updated = {
+                ...pagesData,
+                [selectedPageId]: {
+                    title: pageTitle,
+                    content: pageContent,
+                    updated_at: new Date().toISOString()
+                }
+            }
+            setPagesData(updated)
+            localStorage.setItem('meraki_pages_content', JSON.stringify(updated))
+            window.dispatchEvent(new Event('pagesContentUpdated'))
+
+            if (updateStoreConfig) {
+                const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+                await updateStoreConfig({ ...config, pages_content: updated })
+            }
+
+            setMessage('Página atualizada com sucesso no site!')
+            setTimeout(() => setMessage(''), 3000)
+        } catch (err) {
+            setMessage('Erro ao salvar página: ' + err.message)
+        } finally {
+            setSaving?.(false)
+        }
+    }
+
+    const inputCls = "w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-sm text-gray-800 outline-none focus:border-[#7A3E4A] focus:ring-2 focus:ring-[#7A3E4A]/10 transition-all font-medium placeholder-gray-400"
+    const labelCls = "block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5"
+
+    return (
+        <div className="space-y-6 font-sans">
+            <div className="bg-white p-6 rounded-2xl border border-[#EEEEEE] flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <span className="text-[10px] font-bold text-[#C6A76A] uppercase tracking-widest">Gerenciador de Conteúdo</span>
+                    <h2 className="text-xl font-bold text-gray-900">Páginas Institucionais & Atendimento</h2>
+                    <p className="text-xs text-gray-500 mt-1">Edite textos, títulos e informações das páginas "História", "Revendedor", "Compra Segura", etc.</p>
+                </div>
+            </div>
+
+            {message && (
+                <div className="p-4 text-xs font-bold rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 shadow-sm animate-[fadeIn_200ms_ease-out]">
+                    {message}
+                </div>
+            )}
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                {/* Page Selector List */}
+                <div className="lg:col-span-4 bg-white p-4 rounded-2xl border border-[#EEEEEE] space-y-2">
+                    <h3 className="text-xs font-black text-gray-900 uppercase tracking-wider px-2 mb-3">Selecione a Página para Editar</h3>
+                    <div className="space-y-1 max-h-[500px] overflow-y-auto pr-1">
+                        {pagesList.map(p => {
+                            const isSelected = selectedPageId === p.id
+                            return (
+                                <button
+                                    key={p.id}
+                                    type="button"
+                                    onClick={() => setSelectedPageId(p.id)}
+                                    className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-left text-xs font-bold transition-all cursor-pointer ${
+                                        isSelected
+                                            ? 'bg-gradient-to-r from-[#7A3E4A] to-[#9A5060] text-white shadow-md shadow-[#7A3E4A]/20'
+                                            : 'bg-[#FAF9F5] text-gray-700 hover:bg-[#7A3E4A]/10 hover:text-[#7A3E4A]'
+                                    }`}
+                                >
+                                    <span>{p.label}</span>
+                                    <span className={`text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md ${
+                                        isSelected ? 'bg-white/20 text-white' : 'bg-gray-200/60 text-gray-500'
+                                    }`}>
+                                        {p.category}
+                                    </span>
+                                </button>
+                            )
+                        })}
+                    </div>
+                </div>
+
+                {/* Page Content Form */}
+                <div className="lg:col-span-8 bg-white p-6 rounded-2xl border border-[#EEEEEE] space-y-5">
+                    <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+                        <div>
+                            <span className="text-[9px] font-bold text-[#7A3E4A] uppercase tracking-widest">Editando Página</span>
+                            <h3 className="text-lg font-black text-gray-900">
+                                {pagesList.find(p => p.id === selectedPageId)?.label}
+                            </h3>
+                        </div>
+                    </div>
+
+                    <form onSubmit={handleSavePage} className="space-y-4">
+                        <div>
+                            <label className={labelCls}>Título da Página</label>
+                            <input
+                                type="text"
+                                value={pageTitle}
+                                onChange={(e) => setPageTitle(e.target.value)}
+                                className={inputCls}
+                                placeholder="Ex: Nossa História"
+                                required
+                            />
+                        </div>
+
+                        <div>
+                            <label className={labelCls}>Conteúdo / Texto Principal (Separe parágrafos com pulo de linha)</label>
+                            <textarea
+                                rows="12"
+                                value={pageContent}
+                                onChange={(e) => setPageContent(e.target.value)}
+                                className={`${inputCls} resize-y leading-relaxed font-sans`}
+                                placeholder="Escreva aqui o texto completo que aparecerá na página..."
+                                required
+                            />
+                            <p className="text-[10px] text-gray-400 mt-1">Dica: Cada parágrafo separado por duas quebras de linha será formatado como um bloco de texto elegante no site.</p>
+                        </div>
+
+                        <div className="flex justify-end pt-2">
+                            <button
+                                type="submit"
+                                disabled={saving}
+                                className="px-8 py-3.5 bg-gradient-to-r from-[#7A3E4A] to-[#9A5060] text-white text-xs font-black uppercase tracking-widest rounded-xl hover:shadow-lg hover:shadow-[#7A3E4A]/30 transition-all cursor-pointer disabled:opacity-50"
+                            >
+                                {saving ? 'Salvando Página...' : 'Salvar Alterações na Página'}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    )
+}
+

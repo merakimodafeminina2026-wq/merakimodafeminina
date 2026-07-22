@@ -20,6 +20,13 @@ export default function InfoPage({ tab: propTab }) {
         sac_phone: '(11) 2388-0403',
         address: 'Avenida Alfredo Nasser, Qd. 14, Lt. 05 - Centro, Bonfinópolis - GO, CEP: 75195-000'
     })
+    const [customPages, setCustomPages] = useState(() => {
+        try {
+            const stored = localStorage.getItem('meraki_pages_content')
+            if (stored) return JSON.parse(stored)
+        } catch {}
+        return {}
+    })
 
     // Sync active tab with route param or prop
     useEffect(() => {
@@ -30,8 +37,18 @@ export default function InfoPage({ tab: propTab }) {
         }
     }, [urlTab, propTab])
 
-    // Load wishlist, products, and cart counts
+    // Load wishlist, products, cart counts, and pages content
     useEffect(() => {
+        const loadPages = () => {
+            try {
+                const storedPages = localStorage.getItem('meraki_pages_content')
+                if (storedPages) setCustomPages(JSON.parse(storedPages))
+            } catch {}
+        }
+        loadPages()
+        window.addEventListener('pagesContentUpdated', loadPages)
+        window.addEventListener('storage', loadPages)
+
         const storedWishlist = JSON.parse(localStorage.getItem('meraki_wishlist') || '[]')
         setWishlist(storedWishlist)
         setWishlistCount(storedWishlist.length)
@@ -45,6 +62,12 @@ export default function InfoPage({ tab: propTab }) {
         const config = JSON.parse(localStorage.getItem('meraki_store_config'))
         if (config) {
             setStoreConfig(config)
+            if (config.pages_content) setCustomPages(config.pages_content)
+        }
+
+        return () => {
+            window.removeEventListener('pagesContentUpdated', loadPages)
+            window.removeEventListener('storage', loadPages)
         }
     }, [])
 
@@ -95,6 +118,23 @@ export default function InfoPage({ tab: propTab }) {
 
     // Content definitions
     const renderContent = () => {
+        const custom = customPages[activeTab]
+        if (custom && custom.content) {
+            const paragraphs = custom.content.split('\n\n').filter(Boolean)
+            return (
+                <div className="space-y-6 animate-[fadeIn_200ms_ease-out]">
+                    <h2 className="text-2xl font-bold text-gray-900 border-b pb-4">
+                        {custom.title || sections.find(s => s.id === activeTab)?.label}
+                    </h2>
+                    {paragraphs.map((p, idx) => (
+                        <p key={idx} className="text-sm leading-relaxed text-gray-600 whitespace-pre-line">
+                            {p}
+                        </p>
+                    ))}
+                </div>
+            )
+        }
+
         switch (activeTab) {
             case 'story':
                 return (
