@@ -1870,9 +1870,6 @@ export function SettingsSection({ saving, setSaving, updateStoreConfig }) {
             localStorage.setItem('meraki_reward_bar', JSON.stringify(rewardBar))
             window.dispatchEvent(new Event('storeConfigUpdated'))
             
-            // Direct Supabase upsert
-            await supabase.from('store_config').upsert(updatedConfig)
-
             if (updateStoreConfig) {
                 await updateStoreConfig(updatedConfig)
             }

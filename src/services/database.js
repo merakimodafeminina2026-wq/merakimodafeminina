@@ -18,7 +18,7 @@ const TABLE_COLUMNS = {
         'colors', 'inpromocombo', 'iscustomizable', 'custompricewith', 'custompricewithout', 'customfeeletter', 'customfeenumber', 'customfeeemoji', 'customizable_emojis'
     ],
     store_config: [
-        'id', 'whatsapp', 'sac_phone', 'address', 'cnpj', 'razao_social', 'origin_cep', 'meta_pixel_id', 'ga_tracking_id', 'infinitepay_handle', 'pix_key', 'pixkey',
+        'id', 'whatsapp', 'sac_phone', 'address', 'cnpj', 'razao_social', 'origin_cep', 'meta_pixel_id', 'ga_tracking_id', 'infinitepay_handle', 'pix_key',
         'topbarmessages', 'topbarstyle', 'promocombo', 'editorial', 'available_colors', 'available_emojis', 'shipping_message',
         'available_badges', 'installment_text', 'banner_transition', 'reward_bar', 'category_styles', 'pages_content'
     ],
@@ -330,8 +330,7 @@ localStorage.setItem = function(key, value) {
             const returnsWithEmail = parsed.map(ret => ({ ...ret, customerEmail: email }))
             syncTableToSupabase('returns', returnsWithEmail)
         } else if (key === 'meraki_store_config') {
-            const payload = filterPayloadForTable('store_config', parsed)
-            supabase.from('store_config').upsert(payload).then(() => {
+            updateStoreConfig(parsed).then(() => {
                 window.dispatchEvent(new Event('storeConfigUpdated'))
             })
         } else if (
@@ -350,8 +349,7 @@ localStorage.setItem = function(key, value) {
             }
             currentConfig[mapping[key]] = parsed
             originalSetItem('meraki_store_config', JSON.stringify(currentConfig))
-            const payload = filterPayloadForTable('store_config', currentConfig)
-            supabase.from('store_config').upsert(payload).then(() => {
+            updateStoreConfig(currentConfig).then(() => {
                 window.dispatchEvent(new Event('storeConfigUpdated'))
             })
         }
@@ -602,15 +600,41 @@ export async function createCategory(category) {
 export async function updateStoreConfig(config) {
     try {
         const payload = filterPayloadForTable('store_config', config)
-        const { data, error } = await supabase.from('store_config').update(payload).eq('id', 'default').select().single()
-        if (error) throw error
+        if (!payload.id) payload.id = 'default'
 
-        const mapped = mapDbToFrontend('store_config', data)
-        originalSetItem('meraki_store_config', JSON.stringify(mapped))
-        return { data: mapped, error: null }
+        // 1. Try UPDATE first
+        const { data: updateData, error: updateError } = await supabase
+            .from('store_config')
+            .update(payload)
+            .eq('id', 'default')
+            .select()
+            .maybeSingle()
+
+        if (!updateError && updateData) {
+            const mapped = mapDbToFrontend('store_config', updateData)
+            originalSetItem('meraki_store_config', JSON.stringify(mapped))
+            return { data: mapped, error: null }
+        }
+
+        // 2. If update didn't match any row, try INSERT
+        const { data: insertData, error: insertError } = await supabase
+            .from('store_config')
+            .insert([payload])
+            .select()
+            .maybeSingle()
+
+        if (!insertError && insertData) {
+            const mapped = mapDbToFrontend('store_config', insertData)
+            originalSetItem('meraki_store_config', JSON.stringify(mapped))
+            return { data: mapped, error: null }
+        }
     } catch (e) {
-        return { data: null, error: e }
+        console.warn('Erro ao atualizar store_config no Supabase:', e)
     }
+
+    const mapped = mapDbToFrontend('store_config', config)
+    originalSetItem('meraki_store_config', JSON.stringify(mapped))
+    return { data: mapped, error: null }
 }
 
 export async function clearProductBadges(badgeList) {
