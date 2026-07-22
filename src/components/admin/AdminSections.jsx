@@ -1758,6 +1758,7 @@ export function SettingsSection({ saving, setSaving, updateStoreConfig }) {
     const [metaPixelId, setMetaPixelId] = useState(config.meta_pixel_id || '')
     const [gaTrackingId, setGaTrackingId] = useState(config.ga_tracking_id || '')
     const [infinitepayHandle, setInfinitepayHandle] = useState(config.infinitepay_handle || 'nicolly_gomes')
+    const [pixKey, setPixKey] = useState(config.pix_key || 'merakifemme.lingerie@gmail.com')
     
     const [rewardBar, setRewardBar] = useState(() => {
         try {
@@ -1836,6 +1837,7 @@ export function SettingsSection({ saving, setSaving, updateStoreConfig }) {
                 meta_pixel_id: metaPixelId,
                 ga_tracking_id: gaTrackingId,
                 infinitepay_handle: infinitepayHandle,
+                pix_key: pixKey,
                 reward_bar: rewardBar,
                 rewardBar
             }
@@ -1973,18 +1975,31 @@ export function SettingsSection({ saving, setSaving, updateStoreConfig }) {
                 {/* 3. Pagamento */}
                 <div className="bg-white p-6 rounded-2xl border border-[#EEEEEE] space-y-4">
                     <h4 className="text-xs font-black text-[#7A3E4A] uppercase tracking-wider flex items-center gap-2">
-                        💳 Gateway de Pagamento
+                        💳 Gateway & Chave PIX de Pagamento
                     </h4>
-                    <div>
-                        <label className={labelCls}>InfiniteTag / Handle da InfinitePay (Sem o $)</label>
-                        <input
-                            type="text"
-                            value={infinitepayHandle}
-                            onChange={(e) => setInfinitepayHandle(e.target.value)}
-                            className={inputCls}
-                            placeholder="nicolly_gomes"
-                            required
-                        />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className={labelCls}>InfiniteTag / Handle da InfinitePay (Sem o $)</label>
+                            <input
+                                type="text"
+                                value={infinitepayHandle}
+                                onChange={(e) => setInfinitepayHandle(e.target.value)}
+                                className={inputCls}
+                                placeholder="nicolly_gomes"
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label className={labelCls}>Chave PIX Oficial da Conta (E-mail, CNPJ, CPF ou EVP)</label>
+                            <input
+                                type="text"
+                                value={pixKey}
+                                onChange={(e) => setPixKey(e.target.value)}
+                                className={inputCls}
+                                placeholder="merakifemme.lingerie@gmail.com"
+                                required
+                            />
+                        </div>
                     </div>
                 </div>
 

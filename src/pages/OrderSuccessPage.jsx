@@ -101,18 +101,25 @@ export default function OrderSuccessPage() {
         }
     }, [orderId])
 
+    const storePixKey = useMemo(() => {
+        try {
+            const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+            return config.pix_key || 'merakifemme.lingerie@gmail.com'
+        } catch {
+            return 'merakifemme.lingerie@gmail.com'
+        }
+    }, [])
+
     const pixPayload = useMemo(() => {
         if (!order) return ''
-        const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
-        const pixKey = config.infinitepay_handle || config.pix_key || 'merakimodafeminina@gmail.com'
         return generatePixPayload({
-            pixKey: pixKey,
+            pixKey: storePixKey,
             receiverName: 'MERAKI FEMME',
             receiverCity: 'BONFINOPOLIS',
             amount: order.total || 0,
             txid: order.id
         })
-    }, [order])
+    }, [order, storePixKey])
 
     const qrCodeUrl = useMemo(() => {
         if (!pixPayload) return ''
@@ -185,19 +192,43 @@ export default function OrderSuccessPage() {
                             Abra o aplicativo do seu banco no celular (Nubank, Itaú, Bradesco, Mercado Pago, Inter, Caixa, etc.), selecione <strong>PIX &rarr; Ler QR Code</strong> ou utilize a chave <strong>Pix Copia e Cola</strong> abaixo:
                         </p>
 
-                        <div className="max-w-lg mx-auto flex items-center border border-[#E8E0D8] rounded-2xl overflow-hidden bg-white shadow-sm ring-1 ring-black/5">
-                            <input
-                                type="text"
-                                readOnly
-                                value={pixPayload}
-                                className="flex-1 px-4 py-4 text-xs font-mono text-gray-600 outline-none bg-transparent select-all"
-                            />
-                            <button
-                                onClick={handleCopyPix}
-                                className="px-7 py-4 bg-gradient-to-r from-[#7A3E4A] to-[#603039] hover:from-[#603039] text-white text-xs font-extrabold uppercase tracking-widest transition-all cursor-pointer shadow-sm shrink-0 flex items-center gap-1.5"
-                            >
-                                {copied ? '✅ Copiado!' : '📋 Copiar Chave'}
-                            </button>
+                        <div className="max-w-lg mx-auto space-y-2">
+                            <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest">Código Pix Copia e Cola (EMV)</label>
+                            <div className="flex items-center border border-[#E8E0D8] rounded-2xl overflow-hidden bg-white shadow-sm ring-1 ring-black/5">
+                                <input
+                                    type="text"
+                                    readOnly
+                                    value={pixPayload}
+                                    className="flex-1 px-4 py-4 text-xs font-mono text-gray-600 outline-none bg-transparent select-all"
+                                />
+                                <button
+                                    onClick={handleCopyPix}
+                                    className="px-7 py-4 bg-gradient-to-r from-[#7A3E4A] to-[#603039] hover:from-[#603039] text-white text-xs font-extrabold uppercase tracking-widest transition-all cursor-pointer shadow-sm shrink-0 flex items-center gap-1.5"
+                                >
+                                    {copied ? '✅ Copiado!' : '📋 Copiar Código'}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Direct PIX Key box */}
+                        <div className="pt-4 border-t border-[#E8E0D8] max-w-lg mx-auto space-y-2">
+                            <span className="text-[10px] font-bold text-[#7A3E4A] uppercase tracking-widest block">Ou pague usando a Chave Pix Direta da Conta:</span>
+                            <div className="p-3.5 bg-white border border-[#C6A76A]/40 rounded-2xl flex items-center justify-between shadow-2xs">
+                                <div className="text-left">
+                                    <span className="text-[10px] font-bold text-gray-400 block uppercase">Chave Pix (E-mail):</span>
+                                    <span className="text-xs font-mono font-bold text-gray-900">{storePixKey}</span>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(storePixKey)
+                                        showNotification('Chave Pix da conta copiada!')
+                                    }}
+                                    className="px-4 py-2 bg-[#7A3E4A]/10 hover:bg-[#7A3E4A]/20 text-[#7A3E4A] text-[10px] font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+                                >
+                                    Copiar Chave
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}
