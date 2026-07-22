@@ -103,17 +103,14 @@ export default function InfoPage({ tab: propTab }) {
     // List of tabs/sections
     const sections = [
         { id: 'story', label: 'História', category: 'Sobre' },
-        { id: 'revenda', label: 'Seja um Revendedor', category: 'Sobre' },
         { id: 'connect', label: 'Conecte-se', category: 'Sobre' },
         { id: 'wishlist', label: 'Favoritos (Wishlist)', category: 'Conta' },
         { id: 'security', label: 'Compra Segura', category: 'Atendimento' },
         { id: 'payment', label: 'Formas de Pagamento', category: 'Atendimento' },
         { id: 'delivery', label: 'Entrega e Frete', category: 'Atendimento' },
         { id: 'returns', label: 'Política de Troca', category: 'Atendimento' },
-        { id: 'withdrawal', label: 'Direito de Arrependimento', category: 'Atendimento' },
         { id: 'privacy', label: 'Política de Privacidade', category: 'Atendimento' },
-        { id: 'promotional-rules', label: 'Regras Promocionais', category: 'Atendimento' },
-        { id: 'stores', label: 'Nossas Lojas', category: 'Lojas' }
+        { id: 'promotional-rules', label: 'Regras Promocionais', category: 'Atendimento' }
     ]
 
     // Content definitions
@@ -470,7 +467,7 @@ export default function InfoPage({ tab: propTab }) {
                     
                     {/* Left Sidebar Navigator (Desktop) */}
                     <aside className="hidden md:block md:col-span-3 bg-white rounded-xl p-5 border border-gray-100 shadow-2xs space-y-6">
-                        {['Sobre', 'Conta', 'Atendimento', 'Lojas'].map(cat => {
+                        {['Sobre', 'Conta', 'Atendimento'].map(cat => {
                             const catTabs = sections.filter(s => s.category === cat)
                             if (catTabs.length === 0) return null
                             return (

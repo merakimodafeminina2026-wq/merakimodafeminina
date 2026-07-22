@@ -89,13 +89,12 @@ export default function Footer() {
                 </div>
 
                 {/* Grid Links Section */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-8 mb-12">
                     {/* Column 1: Sobre */}
                     <div>
                         <h4 className="font-heading text-xs font-bold tracking-widest text-[#7A3E4A] mb-4 uppercase">Sobre</h4>
                         <ul className="flex flex-col gap-2 text-xs text-gray-500 font-medium">
                             <li><a href="#/story" className="hover:text-[#7A3E4A] transition-colors">História</a></li>
-                            <li><a href="#/revenda" className="hover:text-[#7A3E4A] transition-colors">Seja um revendedor</a></li>
                             <li><a href="#/connect" className="hover:text-[#7A3E4A] transition-colors">Conecte-se</a></li>
                         </ul>
                     </div>
@@ -119,17 +118,8 @@ export default function Footer() {
                             <li><a href="#/payment" className="hover:text-[#7A3E4A] transition-colors">Formas de Pagamento</a></li>
                             <li><a href="#/delivery" className="hover:text-[#7A3E4A] transition-colors">Entrega e Frete</a></li>
                             <li><a href="#/returns" className="hover:text-[#7A3E4A] transition-colors">Política de Troca</a></li>
-                            <li><a href="#/withdrawal" className="hover:text-[#7A3E4A] transition-colors">Direito de Arrependimento</a></li>
                             <li><a href="#/privacy" className="hover:text-[#7A3E4A] transition-colors">Política de Privacidade</a></li>
                             <li><a href="#/promotional-rules" className="hover:text-[#7A3E4A] transition-colors">Regras promocionais</a></li>
-                        </ul>
-                    </div>
-
-                    {/* Column 4: Nossas Lojas */}
-                    <div>
-                        <h4 className="font-heading text-xs font-bold tracking-widest text-[#7A3E4A] mb-4 uppercase">Nossas Lojas</h4>
-                        <ul className="flex flex-col gap-2 text-xs text-gray-500 font-medium">
-                            <li><a href="#/stores" className="hover:text-[#7A3E4A] transition-colors">Encontre a loja mais próxima</a></li>
                         </ul>
                     </div>
                 </div>

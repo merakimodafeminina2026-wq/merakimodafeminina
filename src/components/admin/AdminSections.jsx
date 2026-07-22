@@ -2143,16 +2143,13 @@ export function SettingsSection({ saving, setSaving, updateStoreConfig }) {
 export function InstitutionalSection({ saving, setSaving, updateStoreConfig }) {
     const pagesList = [
         { id: 'story', label: 'Nossa História', category: 'Sobre' },
-        { id: 'revenda', label: 'Seja um Revendedor', category: 'Sobre' },
         { id: 'connect', label: 'Conecte-se (Contatos & Redes)', category: 'Sobre' },
         { id: 'security', label: 'Compra Segura', category: 'Atendimento' },
         { id: 'payment', label: 'Formas de Pagamento', category: 'Atendimento' },
         { id: 'delivery', label: 'Entrega e Frete', category: 'Atendimento' },
         { id: 'returns', label: 'Política de Troca', category: 'Atendimento' },
-        { id: 'withdrawal', label: 'Direito de Arrependimento', category: 'Atendimento' },
         { id: 'privacy', label: 'Política de Privacidade', category: 'Atendimento' },
-        { id: 'promotional-rules', label: 'Regras Promocionais', category: 'Atendimento' },
-        { id: 'stores', label: 'Nossas Lojas', category: 'Lojas' }
+        { id: 'promotional-rules', label: 'Regras Promocionais', category: 'Atendimento' }
     ]
 
     const defaultPagesData = {
