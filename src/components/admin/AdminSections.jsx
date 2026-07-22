@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { supabase } from '../../services/supabase.js'
 import { getAssetUrl } from '../../utils/assets.js'
 import MediaDisplay from '../MediaDisplay.jsx'
