@@ -45,58 +45,69 @@ export default function ProfilePage() {
             setCpf(profile.cpf || '')
         }
 
-        // Load addresses permanently from localStorage
+        // Load addresses permanently from Supabase Database & localStorage
         if (cleanEmail) {
             let loadedAddrs = []
-            try {
-                const storedLocal = localStorage.getItem(`meraki_user_addresses_${cleanEmail}`)
-                const storedSession = sessionStorage.getItem(`meraki_user_addresses_${cleanEmail}`)
-                if (storedLocal) {
-                    loadedAddrs = JSON.parse(storedLocal)
-                } else if (storedSession) {
-                    loadedAddrs = JSON.parse(storedSession)
-                    localStorage.setItem(`meraki_user_addresses_${cleanEmail}`, JSON.stringify(loadedAddrs))
-                }
-            } catch (e) {
-                console.error(e)
+            
+            // 1. Check profile.addresses array from Supabase Database
+            if (profile && Array.isArray(profile.addresses) && profile.addresses.length > 0) {
+                loadedAddrs = profile.addresses
             }
 
-            // Fallback: Check user profile address fields or last order if addresses list is empty
+            // 2. Check local storage if empty from database
             if (loadedAddrs.length === 0) {
-                if (profile?.street || profile?.address || profile?.cep) {
-                    loadedAddrs.push({
-                        id: 'addr-default',
-                        label: 'Principal',
-                        cep: profile.cep || '',
-                        street: profile.street || profile.address || '',
-                        number: profile.number || '',
-                        complement: profile.complement || '',
-                        neighborhood: profile.neighborhood || '',
-                        city: profile.city || '',
-                        state: profile.state || profile.uf || ''
-                    })
-                    localStorage.setItem(`meraki_user_addresses_${cleanEmail}`, JSON.stringify(loadedAddrs))
-                } else {
-                    const allOrders = JSON.parse(localStorage.getItem('meraki_orders') || '[]')
-                    const userOrder = allOrders.find(o => o.customerEmail?.trim().toLowerCase() === cleanEmail && o.shippingAddress)
-                    if (userOrder && userOrder.shippingAddress) {
-                        const sa = userOrder.shippingAddress
-                        loadedAddrs.push({
-                            id: 'addr-order-1',
-                            label: 'Entrega Recente',
-                            cep: sa.cep || '',
-                            street: sa.street || '',
-                            number: sa.number || '',
-                            complement: sa.complement || '',
-                            neighborhood: sa.neighborhood || '',
-                            city: sa.city || '',
-                            state: sa.state || ''
-                        })
-                        localStorage.setItem(`meraki_user_addresses_${cleanEmail}`, JSON.stringify(loadedAddrs))
+                try {
+                    const storedLocal = localStorage.getItem(`meraki_user_addresses_${cleanEmail}`)
+                    const storedSession = sessionStorage.getItem(`meraki_user_addresses_${cleanEmail}`)
+                    if (storedLocal) {
+                        loadedAddrs = JSON.parse(storedLocal)
+                    } else if (storedSession) {
+                        loadedAddrs = JSON.parse(storedSession)
                     }
+                } catch (e) {
+                    console.error(e)
                 }
             }
 
+            // 3. Fallback: Check profile address fields if still empty
+            if (loadedAddrs.length === 0 && (profile?.street || profile?.address || profile?.cep)) {
+                loadedAddrs.push({
+                    id: 'addr-default',
+                    label: 'Principal',
+                    cep: profile.cep || '',
+                    street: profile.street || profile.address || '',
+                    number: profile.number || '',
+                    complement: profile.complement || '',
+                    neighborhood: profile.neighborhood || '',
+                    city: profile.city || '',
+                    state: profile.state || profile.uf || ''
+                })
+            }
+
+            // 4. Fallback: Check user's last order shipping address if still empty
+            if (loadedAddrs.length === 0) {
+                const allOrders = JSON.parse(localStorage.getItem('meraki_orders') || '[]')
+                const userOrder = allOrders.find(o => o.customerEmail?.trim().toLowerCase() === cleanEmail && o.shippingAddress)
+                if (userOrder && userOrder.shippingAddress) {
+                    const sa = userOrder.shippingAddress
+                    loadedAddrs.push({
+                        id: 'addr-order-1',
+                        label: 'Entrega Recente',
+                        cep: sa.cep || '',
+                        street: sa.street || '',
+                        number: sa.number || '',
+                        complement: sa.complement || '',
+                        neighborhood: sa.neighborhood || '',
+                        city: sa.city || '',
+                        state: sa.state || ''
+                    })
+                }
+            }
+
+            // Keep local storage in sync
+            if (loadedAddrs.length > 0) {
+                localStorage.setItem(`meraki_user_addresses_${cleanEmail}`, JSON.stringify(loadedAddrs))
+            }
             setAddresses(loadedAddrs)
         }
 
@@ -173,9 +184,10 @@ export default function ProfilePage() {
         setAddresses(updatedAddresses)
         setShowAddressForm(false)
 
-        // Save to Supabase profile in cloud
+        // Save directly to Supabase Database profile linked to User ID!
         try {
-            await updateUserProfile(user.id, {
+            const { profile: updated } = await updateUserProfile(user.id, {
+                addresses: updatedAddresses,
                 address: street,
                 cep,
                 number,
@@ -184,8 +196,9 @@ export default function ProfilePage() {
                 city,
                 state: uf
             })
+            if (updated) setUserProfile(updated)
         } catch (err) {
-            console.error('Erro ao sincronizar endereço no perfil:', err)
+            console.error('Erro ao sincronizar endereço no banco de dados:', err)
         }
 
         // Reset form
@@ -199,13 +212,24 @@ export default function ProfilePage() {
         setAddressLabel('Casa')
     }
 
-    const handleDeleteAddress = (id) => {
+    const handleDeleteAddress = async (id) => {
         if (!user?.email) return
         const cleanEmail = user.email.trim().toLowerCase()
         const updatedAddresses = addresses.filter(a => a.id !== id)
         localStorage.setItem(`meraki_user_addresses_${cleanEmail}`, JSON.stringify(updatedAddresses))
         sessionStorage.setItem(`meraki_user_addresses_${cleanEmail}`, JSON.stringify(updatedAddresses))
         setAddresses(updatedAddresses)
+
+        if (user?.id) {
+            try {
+                const { profile: updated } = await updateUserProfile(user.id, {
+                    addresses: updatedAddresses
+                })
+                if (updated) setUserProfile(updated)
+            } catch (err) {
+                console.error(err)
+            }
+        }
     }
 
     if (!user) return null
