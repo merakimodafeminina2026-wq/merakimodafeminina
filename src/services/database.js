@@ -193,10 +193,15 @@ export async function initSupabaseSync() {
         const dbConfig = dbConfigRaw ? mapDbToFrontend('store_config', dbConfigRaw) : null
         
         if (dbConfig) {
-            if (dbConfig.topbarStyle && dbConfig.topbarStyle.default_category_image) {
-                dbConfig.default_category_image = dbConfig.topbarStyle.default_category_image
+            const existingLocal = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+            const mergedConfig = { ...existingLocal, ...dbConfig }
+            if (existingLocal.pix_key) mergedConfig.pix_key = existingLocal.pix_key
+            if (existingLocal.pixKey) mergedConfig.pixKey = existingLocal.pixKey
+
+            if (mergedConfig.topbarStyle && mergedConfig.topbarStyle.default_category_image) {
+                mergedConfig.default_category_image = mergedConfig.topbarStyle.default_category_image
             }
-            localStorage.setItem('meraki_store_config', JSON.stringify(dbConfig))
+            localStorage.setItem('meraki_store_config', JSON.stringify(mergedConfig))
             // Extract and sync visual keys to individual localStorage items
             if (dbConfig.topbarMessages) localStorage.setItem('meraki_topbar_messages', JSON.stringify(dbConfig.topbarMessages))
             if (dbConfig.topbarStyle) {

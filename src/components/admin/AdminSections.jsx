@@ -1771,6 +1771,12 @@ export function SettingsSection({ saving, setSaving, updateStoreConfig }) {
     useEffect(() => {
         const fetchDbConfig = async () => {
             try {
+                const storedConfig = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+                const storedKey = storedConfig.pix_key || storedConfig.pixKey
+                if (storedKey && storedKey.trim()) {
+                    setPixKey(storedKey.trim())
+                }
+
                 const { data } = await supabase.from('store_config').select('*').eq('id', 'default').maybeSingle()
                 if (data) {
                     if (data.whatsapp) setWhatsapp(data.whatsapp)
@@ -1783,7 +1789,9 @@ export function SettingsSection({ saving, setSaving, updateStoreConfig }) {
                     if (data.ga_tracking_id) setGaTrackingId(data.ga_tracking_id)
                     if (data.infinitepay_handle) setInfinitepayHandle(data.infinitepay_handle)
                     const dbKey = data.pix_key || data.pixkey
-                    if (dbKey && String(dbKey).trim()) setPixKey(String(dbKey).trim())
+                    if (dbKey && String(dbKey).trim() && !storedKey) {
+                        setPixKey(String(dbKey).trim())
+                    }
                 }
             } catch (err) {
                 console.warn('Erro ao carregar configuracoes do Supabase:', err)
