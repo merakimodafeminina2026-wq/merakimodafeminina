@@ -2474,22 +2474,22 @@ export function InstitutionalSection({ saving, setSaving, updateStoreConfig }) {
                             <h3 className="text-xs font-black text-gray-900 uppercase tracking-wider">Selecione a Página para Editar</h3>
                             <span className="text-[10px] font-bold text-gray-400">({pagesList.length})</span>
                         </div>
-                        <div className="space-y-1 max-h-[450px] overflow-y-auto pr-1">
+                        <div className="space-y-1.5 max-h-[480px] overflow-y-auto overflow-x-hidden pr-1">
                             {pagesList.map(p => {
                                 const isSelected = selectedPageId === p.id
                                 return (
-                                    <div key={p.id} className="flex items-center gap-1 group">
+                                    <div key={p.id} className={`w-full flex items-center justify-between gap-1 p-1 rounded-xl transition-all ${
+                                        isSelected
+                                            ? 'bg-gradient-to-r from-[#7A3E4A] to-[#9A5060] text-white shadow-md shadow-[#7A3E4A]/20'
+                                            : 'bg-[#FAF9F5] hover:bg-[#7A3E4A]/10 text-gray-700'
+                                    }`}>
                                         <button
                                             type="button"
                                             onClick={() => setSelectedPageId(p.id)}
-                                            className={`flex-1 flex items-center justify-between px-3.5 py-3 rounded-xl text-left text-xs font-bold transition-all cursor-pointer ${
-                                                isSelected
-                                                    ? 'bg-gradient-to-r from-[#7A3E4A] to-[#9A5060] text-white shadow-md shadow-[#7A3E4A]/20'
-                                                    : 'bg-[#FAF9F5] text-gray-700 hover:bg-[#7A3E4A]/10 hover:text-[#7A3E4A]'
-                                            }`}
+                                            className="flex-1 flex items-center justify-between min-w-0 py-1.5 px-2.5 text-left font-bold cursor-pointer"
                                         >
-                                            <span className="truncate pr-1">{p.label}</span>
-                                            <span className={`text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md shrink-0 ${
+                                            <span className="truncate text-xs">{p.label}</span>
+                                            <span className={`text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md shrink-0 ml-1 ${
                                                 isSelected ? 'bg-white/20 text-white' : 'bg-gray-200/60 text-gray-500'
                                             }`}>
                                                 {p.category}
@@ -2499,9 +2499,11 @@ export function InstitutionalSection({ saving, setSaving, updateStoreConfig }) {
                                             type="button"
                                             onClick={() => handleDeletePage(p.id)}
                                             title="Excluir esta página do site"
-                                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all cursor-pointer opacity-60 group-hover:opacity-100 shrink-0"
+                                            className={`p-1.5 rounded-lg transition-all cursor-pointer shrink-0 ${
+                                                isSelected ? 'text-white/70 hover:text-white hover:bg-white/20' : 'text-gray-400 hover:text-red-600 hover:bg-red-50'
+                                            }`}
                                         >
-                                            <Icon path="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" className="w-4 h-4" />
+                                            <Icon path="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" className="w-3.5 h-3.5" />
                                         </button>
                                     </div>
                                 )

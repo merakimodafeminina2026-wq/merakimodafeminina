@@ -17,14 +17,37 @@ export default function Footer() {
         return []
     })
 
+    const [customPagesList, setCustomPagesList] = useState(() => {
+        try {
+            const stored = localStorage.getItem('meraki_custom_pages_list')
+            if (stored) return JSON.parse(stored)
+        } catch {}
+        return []
+    })
+
+    const [customPagesContent, setCustomPagesContent] = useState(() => {
+        try {
+            const stored = localStorage.getItem('meraki_pages_content')
+            if (stored) return JSON.parse(stored)
+        } catch {}
+        return {}
+    })
+
     useEffect(() => {
         const loadConfig = () => {
             try {
                 const storedDeleted = localStorage.getItem('meraki_deleted_pages')
                 if (storedDeleted) setDeletedPages(JSON.parse(storedDeleted))
+                const storedCustom = localStorage.getItem('meraki_custom_pages_list')
+                if (storedCustom) setCustomPagesList(JSON.parse(storedCustom))
+                const storedContent = localStorage.getItem('meraki_pages_content')
+                if (storedContent) setCustomPagesContent(JSON.parse(storedContent))
+
                 const stored = JSON.parse(localStorage.getItem('meraki_store_config'))
                 if (stored) {
                     if (stored.deleted_pages) setDeletedPages(stored.deleted_pages)
+                    if (stored.custom_pages_list) setCustomPagesList(stored.custom_pages_list)
+                    if (stored.pages_content) setCustomPagesContent(stored.pages_content)
                     setConfig({
                         sac_phone: stored.sac_phone || '(11) 2388-0403',
                         address: stored.address || 'Avenida Alfredo Nasser, Qd. 14, Lt. 05 - Centro, Bonfinópolis - GO, CEP: 75195-000',
@@ -77,24 +100,51 @@ export default function Footer() {
         }
     }, [])
 
+    const allCustomPages = (() => {
+        const standardIds = ['story', 'revenda', 'connect', 'wishlist', 'security', 'payment', 'delivery', 'returns', 'withdrawal', 'privacy', 'promotional-rules', 'stores']
+        const pageKeys = Object.keys(customPagesContent || {})
+        const listFromContent = []
+        for (const key of pageKeys) {
+            if (!standardIds.includes(key) && !customPagesList.some(p => p.id === key)) {
+                const item = customPagesContent[key]
+                if (item && (item.title || item.content)) {
+                    listFromContent.push({
+                        id: key,
+                        label: item.title || key,
+                        category: item.category || 'Atendimento',
+                        isCustom: true
+                    })
+                }
+            }
+        }
+        return [...customPagesList, ...listFromContent]
+    })()
+
+    const customSobre = allCustomPages.filter(p => p.category === 'Sobre').map(p => ({ id: p.id, href: `#/info/${p.id}`, label: p.label }))
+    const customAtendimento = allCustomPages.filter(p => p.category === 'Atendimento').map(p => ({ id: p.id, href: `#/info/${p.id}`, label: p.label }))
+    const customStores = allCustomPages.filter(p => p.category === 'Lojas').map(p => ({ id: p.id, href: `#/info/${p.id}`, label: p.label }))
+
     const sobreLinks = [
         { id: 'story', href: '#/story', label: 'História' },
         { id: 'revenda', href: '#/revenda', label: 'Seja um revendedor' },
-        { id: 'connect', href: '#/connect', label: 'Conecte-se' }
+        { id: 'connect', href: '#/connect', label: 'Conecte-se' },
+        ...customSobre
     ].filter(l => !deletedPages.includes(l.id))
 
     const atendimentoLinks = [
         { id: 'security', href: '#/security', label: 'Compra Segura' },
         { id: 'payment', href: '#/payment', label: 'Formas de Pagamento' },
         { id: 'delivery', href: '#/delivery', label: 'Entrega e Frete' },
-        { id: 'returns', href: '#/returns', label: 'Política de Troca' },
+        { id: 'returns', label: 'Política de Troca', href: '#/returns' },
         { id: 'withdrawal', href: '#/withdrawal', label: 'Direito de Arrependimento' },
         { id: 'privacy', href: '#/privacy', label: 'Política de Privacidade' },
-        { id: 'promotional-rules', href: '#/promotional-rules', label: 'Regras promocionais' }
+        { id: 'promotional-rules', href: '#/promotional-rules', label: 'Regras promocionais' },
+        ...customAtendimento
     ].filter(l => !deletedPages.includes(l.id))
 
     const storesLinks = [
-        { id: 'stores', href: '#/stores', label: 'Encontre a loja mais próxima' }
+        { id: 'stores', href: '#/stores', label: 'Encontre a loja mais próxima' },
+        ...customStores
     ].filter(l => !deletedPages.includes(l.id))
 
     return (

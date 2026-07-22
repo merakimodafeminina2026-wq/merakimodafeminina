@@ -122,6 +122,27 @@ export default function InfoPage({ tab: propTab }) {
         window.dispatchEvent(new Event('cartUpdated'))
     }
 
+    // Dynamically combine custom pages from customPagesList & customPages content
+    const allCustomSections = useMemo(() => {
+        const standardIds = ['story', 'revenda', 'connect', 'wishlist', 'security', 'payment', 'delivery', 'returns', 'withdrawal', 'privacy', 'promotional-rules', 'stores']
+        const pageKeys = Object.keys(customPages || {})
+        const listFromContent = []
+        for (const key of pageKeys) {
+            if (!standardIds.includes(key) && !customPagesList.some(p => p.id === key)) {
+                const item = customPages[key]
+                if (item && (item.title || item.content)) {
+                    listFromContent.push({
+                        id: key,
+                        label: item.title || key,
+                        category: item.category || 'Atendimento',
+                        isCustom: true
+                    })
+                }
+            }
+        }
+        return [...customPagesList, ...listFromContent]
+    }, [customPages, customPagesList])
+
     // List of tabs/sections
     const masterSections = [
         { id: 'story', label: 'História', category: 'Sobre' },
@@ -136,7 +157,7 @@ export default function InfoPage({ tab: propTab }) {
         { id: 'privacy', label: 'Política de Privacidade', category: 'Atendimento' },
         { id: 'promotional-rules', label: 'Regras Promocionais', category: 'Atendimento' },
         { id: 'stores', label: 'Nossas Lojas', category: 'Lojas' },
-        ...customPagesList
+        ...allCustomSections
     ]
 
     const sections = masterSections.filter(s => !deletedPages.includes(s.id))
