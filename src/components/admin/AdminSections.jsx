@@ -1758,7 +1758,31 @@ export function SettingsSection({ saving, setSaving, updateStoreConfig }) {
     const [metaPixelId, setMetaPixelId] = useState(config.meta_pixel_id || '')
     const [gaTrackingId, setGaTrackingId] = useState(config.ga_tracking_id || '')
     const [infinitepayHandle, setInfinitepayHandle] = useState(config.infinitepay_handle || 'nicolly_gomes')
-    const [pixKey, setPixKey] = useState(config.pix_key || 'merakifemme.lingerie@gmail.com')
+    const [pixKey, setPixKey] = useState(config.pix_key || config.pixkey || 'merakifemme.lingerie@gmail.com')
+
+    // Sync with Supabase on mount
+    useEffect(() => {
+        const fetchDbConfig = async () => {
+            try {
+                const { data } = await supabase.from('store_config').select('*').eq('id', 'default').maybeSingle()
+                if (data) {
+                    if (data.whatsapp) setWhatsapp(data.whatsapp)
+                    if (data.sac_phone) setSacPhone(data.sac_phone)
+                    if (data.address) setAddress(data.address)
+                    if (data.cnpj) setCnpj(data.cnpj)
+                    if (data.razao_social) setRazaoSocial(data.razao_social)
+                    if (data.origin_cep) setOriginCep(data.origin_cep)
+                    if (data.meta_pixel_id) setMetaPixelId(data.meta_pixel_id)
+                    if (data.ga_tracking_id) setGaTrackingId(data.ga_tracking_id)
+                    if (data.infinitepay_handle) setInfinitepayHandle(data.infinitepay_handle)
+                    if (data.pix_key || data.pixkey) setPixKey(data.pix_key || data.pixkey)
+                }
+            } catch (err) {
+                console.warn('Erro ao carregar configuracoes do Supabase:', err)
+            }
+        }
+        fetchDbConfig()
+    }, [])
     
     const [rewardBar, setRewardBar] = useState(() => {
         try {
@@ -1838,12 +1862,17 @@ export function SettingsSection({ saving, setSaving, updateStoreConfig }) {
                 ga_tracking_id: gaTrackingId,
                 infinitepay_handle: infinitepayHandle,
                 pix_key: pixKey,
+                pixkey: pixKey,
                 reward_bar: rewardBar,
                 rewardBar
             }
             localStorage.setItem('meraki_store_config', JSON.stringify(updatedConfig))
             localStorage.setItem('meraki_reward_bar', JSON.stringify(rewardBar))
             window.dispatchEvent(new Event('storeConfigUpdated'))
+            
+            // Direct Supabase upsert
+            await supabase.from('store_config').upsert(updatedConfig)
+
             if (updateStoreConfig) {
                 await updateStoreConfig(updatedConfig)
             }

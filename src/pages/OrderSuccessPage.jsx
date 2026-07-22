@@ -6,6 +6,7 @@ import WhatsAppButton from '../components/WhatsAppButton.jsx'
 import Notification from '../components/Notification.jsx'
 import OrderTracker from '../components/OrderTracker.jsx'
 import FireworksEffect from '../components/FireworksEffect.jsx'
+import { supabase } from '../services/supabase.js'
 
 function generatePixPayload({ pixKey = 'merakimodafeminina@gmail.com', receiverName = 'MERAKI FEMME', receiverCity = 'BONFINOPOLIS', amount = 0, txid = '' }) {
     const cleanKey = (pixKey || 'merakimodafeminina@gmail.com').trim()
@@ -101,14 +102,32 @@ export default function OrderSuccessPage() {
         }
     }, [orderId])
 
+    const [dbPixKey, setDbPixKey] = useState('')
+
+    useEffect(() => {
+        const fetchPixKeyFromDb = async () => {
+            try {
+                const { data } = await supabase.from('store_config').select('*').eq('id', 'default').maybeSingle()
+                if (data) {
+                    const key = data.pix_key || data.pixkey
+                    if (key) setDbPixKey(key)
+                }
+            } catch (e) {
+                console.warn('Erro ao buscar pix_key do banco:', e)
+            }
+        }
+        fetchPixKeyFromDb()
+    }, [])
+
     const storePixKey = useMemo(() => {
+        if (dbPixKey) return dbPixKey
         try {
             const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
-            return config.pix_key || 'merakifemme.lingerie@gmail.com'
+            return config.pix_key || config.pixkey || 'merakifemme.lingerie@gmail.com'
         } catch {
             return 'merakifemme.lingerie@gmail.com'
         }
-    }, [])
+    }, [dbPixKey])
 
     const pixPayload = useMemo(() => {
         if (!order) return ''
