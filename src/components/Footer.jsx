@@ -9,11 +9,22 @@ export default function Footer() {
         razao_social: 'Meraki Comércio de Vestuário Ltda'
     })
 
+    const [deletedPages, setDeletedPages] = useState(() => {
+        try {
+            const stored = localStorage.getItem('meraki_deleted_pages')
+            if (stored) return JSON.parse(stored)
+        } catch {}
+        return []
+    })
+
     useEffect(() => {
         const loadConfig = () => {
             try {
+                const storedDeleted = localStorage.getItem('meraki_deleted_pages')
+                if (storedDeleted) setDeletedPages(JSON.parse(storedDeleted))
                 const stored = JSON.parse(localStorage.getItem('meraki_store_config'))
                 if (stored) {
+                    if (stored.deleted_pages) setDeletedPages(stored.deleted_pages)
                     setConfig({
                         sac_phone: stored.sac_phone || '(11) 2388-0403',
                         address: stored.address || 'Avenida Alfredo Nasser, Qd. 14, Lt. 05 - Centro, Bonfinópolis - GO, CEP: 75195-000',
@@ -26,9 +37,11 @@ export default function Footer() {
             }
         }
         loadConfig()
+        window.addEventListener('pagesContentUpdated', loadConfig)
         window.addEventListener('storeConfigUpdated', loadConfig)
         window.addEventListener('storage', loadConfig)
         return () => {
+            window.removeEventListener('pagesContentUpdated', loadConfig)
             window.removeEventListener('storeConfigUpdated', loadConfig)
             window.removeEventListener('storage', loadConfig)
         }
@@ -64,6 +77,26 @@ export default function Footer() {
         }
     }, [])
 
+    const sobreLinks = [
+        { id: 'story', href: '#/story', label: 'História' },
+        { id: 'revenda', href: '#/revenda', label: 'Seja um revendedor' },
+        { id: 'connect', href: '#/connect', label: 'Conecte-se' }
+    ].filter(l => !deletedPages.includes(l.id))
+
+    const atendimentoLinks = [
+        { id: 'security', href: '#/security', label: 'Compra Segura' },
+        { id: 'payment', href: '#/payment', label: 'Formas de Pagamento' },
+        { id: 'delivery', href: '#/delivery', label: 'Entrega e Frete' },
+        { id: 'returns', href: '#/returns', label: 'Política de Troca' },
+        { id: 'withdrawal', href: '#/withdrawal', label: 'Direito de Arrependimento' },
+        { id: 'privacy', href: '#/privacy', label: 'Política de Privacidade' },
+        { id: 'promotional-rules', href: '#/promotional-rules', label: 'Regras promocionais' }
+    ].filter(l => !deletedPages.includes(l.id))
+
+    const storesLinks = [
+        { id: 'stores', href: '#/stores', label: 'Encontre a loja mais próxima' }
+    ].filter(l => !deletedPages.includes(l.id))
+
     return (
         <footer className="bg-[#FAF9F5] pt-16 pb-12 text-gray-600 font-sans">
             <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -89,15 +122,18 @@ export default function Footer() {
                 </div>
 
                 {/* Grid Links Section */}
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-8 mb-12">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
                     {/* Column 1: Sobre */}
-                    <div>
-                        <h4 className="font-heading text-xs font-bold tracking-widest text-[#7A3E4A] mb-4 uppercase">Sobre</h4>
-                        <ul className="flex flex-col gap-2 text-xs text-gray-500 font-medium">
-                            <li><a href="#/story" className="hover:text-[#7A3E4A] transition-colors">História</a></li>
-                            <li><a href="#/connect" className="hover:text-[#7A3E4A] transition-colors">Conecte-se</a></li>
-                        </ul>
-                    </div>
+                    {sobreLinks.length > 0 && (
+                        <div>
+                            <h4 className="font-heading text-xs font-bold tracking-widest text-[#7A3E4A] mb-4 uppercase">Sobre</h4>
+                            <ul className="flex flex-col gap-2 text-xs text-gray-500 font-medium">
+                                {sobreLinks.map(l => (
+                                    <li key={l.id}><a href={l.href} className="hover:text-[#7A3E4A] transition-colors">{l.label}</a></li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
 
                     {/* Column 2: Conta */}
                     <div>
@@ -111,17 +147,28 @@ export default function Footer() {
                     </div>
 
                     {/* Column 3: Atendimento */}
-                    <div>
-                        <h4 className="font-heading text-xs font-bold tracking-widest text-[#7A3E4A] mb-4 uppercase">Atendimento</h4>
-                        <ul className="flex flex-col gap-2 text-xs text-gray-500 font-medium">
-                            <li><a href="#/security" className="hover:text-[#7A3E4A] transition-colors">Compra Segura</a></li>
-                            <li><a href="#/payment" className="hover:text-[#7A3E4A] transition-colors">Formas de Pagamento</a></li>
-                            <li><a href="#/delivery" className="hover:text-[#7A3E4A] transition-colors">Entrega e Frete</a></li>
-                            <li><a href="#/returns" className="hover:text-[#7A3E4A] transition-colors">Política de Troca</a></li>
-                            <li><a href="#/privacy" className="hover:text-[#7A3E4A] transition-colors">Política de Privacidade</a></li>
-                            <li><a href="#/promotional-rules" className="hover:text-[#7A3E4A] transition-colors">Regras promocionais</a></li>
-                        </ul>
-                    </div>
+                    {atendimentoLinks.length > 0 && (
+                        <div>
+                            <h4 className="font-heading text-xs font-bold tracking-widest text-[#7A3E4A] mb-4 uppercase">Atendimento</h4>
+                            <ul className="flex flex-col gap-2 text-xs text-gray-500 font-medium">
+                                {atendimentoLinks.map(l => (
+                                    <li key={l.id}><a href={l.href} className="hover:text-[#7A3E4A] transition-colors">{l.label}</a></li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
+                    {/* Column 4: Nossas Lojas */}
+                    {storesLinks.length > 0 && (
+                        <div>
+                            <h4 className="font-heading text-xs font-bold tracking-widest text-[#7A3E4A] mb-4 uppercase">Nossas Lojas</h4>
+                            <ul className="flex flex-col gap-2 text-xs text-gray-500 font-medium">
+                                {storesLinks.map(l => (
+                                    <li key={l.id}><a href={l.href} className="hover:text-[#7A3E4A] transition-colors">{l.label}</a></li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
                 </div>
 
                 {/* Social and SAC Info */}

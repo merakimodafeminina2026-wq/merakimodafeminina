@@ -2141,16 +2141,73 @@ export function SettingsSection({ saving, setSaving, updateStoreConfig }) {
 }
 
 export function InstitutionalSection({ saving, setSaving, updateStoreConfig }) {
-    const pagesList = [
+    const masterPagesList = [
         { id: 'story', label: 'Nossa História', category: 'Sobre' },
+        { id: 'revenda', label: 'Seja um Revendedor', category: 'Sobre' },
         { id: 'connect', label: 'Conecte-se (Contatos & Redes)', category: 'Sobre' },
         { id: 'security', label: 'Compra Segura', category: 'Atendimento' },
         { id: 'payment', label: 'Formas de Pagamento', category: 'Atendimento' },
         { id: 'delivery', label: 'Entrega e Frete', category: 'Atendimento' },
         { id: 'returns', label: 'Política de Troca', category: 'Atendimento' },
+        { id: 'withdrawal', label: 'Direito de Arrependimento', category: 'Atendimento' },
         { id: 'privacy', label: 'Política de Privacidade', category: 'Atendimento' },
-        { id: 'promotional-rules', label: 'Regras Promocionais', category: 'Atendimento' }
+        { id: 'promotional-rules', label: 'Regras Promocionais', category: 'Atendimento' },
+        { id: 'stores', label: 'Nossas Lojas', category: 'Lojas' }
     ]
+
+    const [deletedPages, setDeletedPages] = useState(() => {
+        try {
+            const stored = localStorage.getItem('meraki_deleted_pages')
+            if (stored) return JSON.parse(stored)
+        } catch {}
+        return []
+    })
+
+    const pagesList = useMemo(() => {
+        return masterPagesList.filter(p => !deletedPages.includes(p.id))
+    }, [deletedPages])
+
+    const handleDeletePage = async (pageId) => {
+        const pageObj = masterPagesList.find(p => p.id === pageId)
+        const pageName = pageObj?.label || pageId
+        if (!window.confirm(`Tem certeza que deseja excluir a página "${pageName}"?\nEla deixará de aparecer no site e no painel de administração.`)) {
+            return
+        }
+
+        const newDeleted = [...deletedPages, pageId]
+        setDeletedPages(newDeleted)
+        localStorage.setItem('meraki_deleted_pages', JSON.stringify(newDeleted))
+        window.dispatchEvent(new Event('pagesContentUpdated'))
+
+        if (updateStoreConfig) {
+            const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+            await updateStoreConfig({ ...config, deleted_pages: newDeleted })
+        }
+
+        const remaining = masterPagesList.filter(p => !newDeleted.includes(p.id))
+        if (remaining.length > 0) {
+            setSelectedPageId(remaining[0].id)
+        }
+        setMessage(`Página "${pageName}" excluída com sucesso!`)
+        setTimeout(() => setMessage(''), 4000)
+    }
+
+    const handleRestorePage = async (pageId) => {
+        const pageObj = masterPagesList.find(p => p.id === pageId)
+        const newDeleted = deletedPages.filter(id => id !== pageId)
+        setDeletedPages(newDeleted)
+        localStorage.setItem('meraki_deleted_pages', JSON.stringify(newDeleted))
+        window.dispatchEvent(new Event('pagesContentUpdated'))
+
+        if (updateStoreConfig) {
+            const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+            await updateStoreConfig({ ...config, deleted_pages: newDeleted })
+        }
+
+        setSelectedPageId(pageId)
+        setMessage(`Página "${pageObj?.label || pageId}" restaurada com sucesso!`)
+        setTimeout(() => setMessage(''), 4000)
+    }
 
     const defaultPagesData = {
         story: {
@@ -2310,67 +2367,114 @@ export function InstitutionalSection({ saving, setSaving, updateStoreConfig }) {
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {/* Page Selector List */}
-                <div className="lg:col-span-4 bg-white p-4 rounded-2xl border border-[#EEEEEE] space-y-2">
-                    <h3 className="text-xs font-black text-gray-900 uppercase tracking-wider px-2 mb-3">Selecione a Página para Editar</h3>
-                    <div className="space-y-1 max-h-[550px] overflow-y-auto pr-1">
-                        {pagesList.map(p => {
-                            const isSelected = selectedPageId === p.id
-                            return (
-                                <button
-                                    key={p.id}
-                                    type="button"
-                                    onClick={() => setSelectedPageId(p.id)}
-                                    className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-left text-xs font-bold transition-all cursor-pointer ${
-                                        isSelected
-                                            ? 'bg-gradient-to-r from-[#7A3E4A] to-[#9A5060] text-white shadow-md shadow-[#7A3E4A]/20'
-                                            : 'bg-[#FAF9F5] text-gray-700 hover:bg-[#7A3E4A]/10 hover:text-[#7A3E4A]'
-                                    }`}
-                                >
-                                    <span>{p.label}</span>
-                                    <span className={`text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md ${
-                                        isSelected ? 'bg-white/20 text-white' : 'bg-gray-200/60 text-gray-500'
-                                    }`}>
-                                        {p.category}
-                                    </span>
-                                </button>
-                            )
-                        })}
+                <div className="lg:col-span-4 bg-white p-4 rounded-2xl border border-[#EEEEEE] space-y-4">
+                    <div>
+                        <h3 className="text-xs font-black text-gray-900 uppercase tracking-wider px-2 mb-3">Selecione a Página para Editar</h3>
+                        <div className="space-y-1 max-h-[450px] overflow-y-auto pr-1">
+                            {pagesList.map(p => {
+                                const isSelected = selectedPageId === p.id
+                                return (
+                                    <div key={p.id} className="flex items-center gap-1 group">
+                                        <button
+                                            type="button"
+                                            onClick={() => setSelectedPageId(p.id)}
+                                            className={`flex-1 flex items-center justify-between px-3.5 py-3 rounded-xl text-left text-xs font-bold transition-all cursor-pointer ${
+                                                isSelected
+                                                    ? 'bg-gradient-to-r from-[#7A3E4A] to-[#9A5060] text-white shadow-md shadow-[#7A3E4A]/20'
+                                                    : 'bg-[#FAF9F5] text-gray-700 hover:bg-[#7A3E4A]/10 hover:text-[#7A3E4A]'
+                                            }`}
+                                        >
+                                            <span>{p.label}</span>
+                                            <span className={`text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md ${
+                                                isSelected ? 'bg-white/20 text-white' : 'bg-gray-200/60 text-gray-500'
+                                            }`}>
+                                                {p.category}
+                                            </span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleDeletePage(p.id)}
+                                            title="Excluir esta página do site"
+                                            className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all cursor-pointer opacity-70 group-hover:opacity-100 shrink-0"
+                                        >
+                                            🗑️
+                                        </button>
+                                    </div>
+                                )
+                            })}
+                        </div>
                     </div>
+
+                    {/* Deleted Pages Restore Section */}
+                    {deletedPages.length > 0 && (
+                        <div className="pt-3 border-t border-gray-100">
+                            <h4 className="text-[10px] font-black text-red-500 uppercase tracking-wider px-2 mb-2">Páginas Excluídas ({deletedPages.length})</h4>
+                            <div className="space-y-1">
+                                {deletedPages.map(pageId => {
+                                    const pageObj = masterPagesList.find(p => p.id === pageId)
+                                    return (
+                                        <div key={pageId} className="flex items-center justify-between px-3 py-2 bg-red-50/50 rounded-xl border border-red-100 text-xs">
+                                            <span className="font-semibold text-gray-600 line-through truncate max-w-[140px]">{pageObj?.label || pageId}</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRestorePage(pageId)}
+                                                className="text-[10px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg border border-emerald-200 transition-all cursor-pointer flex items-center gap-1"
+                                            >
+                                                🔄 Restaurar
+                                            </button>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Page Content Form & Live Preview */}
                 <div className="lg:col-span-8 bg-white p-6 rounded-2xl border border-[#EEEEEE] space-y-5">
-                    <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-100 pb-4 gap-3">
                         <div>
                             <span className="text-[9px] font-bold text-[#7A3E4A] uppercase tracking-widest">Editando Página</span>
                             <h3 className="text-lg font-black text-gray-900">
-                                {pagesList.find(p => p.id === selectedPageId)?.label}
+                                {masterPagesList.find(p => p.id === selectedPageId)?.label || pageTitle}
                             </h3>
                         </div>
 
-                        {/* Editor / Preview Toggle */}
-                        <div className="flex items-center bg-[#FAF9F5] p-1 rounded-xl border border-gray-200">
+                        <div className="flex items-center gap-2">
+                            {/* Editor / Preview Toggle */}
+                            <div className="flex items-center bg-[#FAF9F5] p-1 rounded-xl border border-gray-200">
+                                <button
+                                    type="button"
+                                    onClick={() => setEditorMode('editor')}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                                        editorMode === 'editor'
+                                            ? 'bg-[#7A3E4A] text-white shadow-sm'
+                                            : 'text-gray-500 hover:text-gray-800'
+                                    }`}
+                                >
+                                    ✏️ Editar
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setEditorMode('preview')}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                                        editorMode === 'preview'
+                                            ? 'bg-[#7A3E4A] text-white shadow-sm'
+                                            : 'text-gray-500 hover:text-gray-800'
+                                    }`}
+                                >
+                                    👁️ Pré-visualizar
+                                </button>
+                            </div>
+
+                            {/* Delete Page Button Header */}
                             <button
                                 type="button"
-                                onClick={() => setEditorMode('editor')}
-                                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                                    editorMode === 'editor'
-                                        ? 'bg-[#7A3E4A] text-white shadow-sm'
-                                        : 'text-gray-500 hover:text-gray-800'
-                                }`}
+                                onClick={() => handleDeletePage(selectedPageId)}
+                                className="px-3 py-2 bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1 shrink-0"
+                                title="Excluir esta página"
                             >
-                                ✏️ Editar Texto
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setEditorMode('preview')}
-                                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                                    editorMode === 'preview'
-                                        ? 'bg-[#7A3E4A] text-white shadow-sm'
-                                        : 'text-gray-500 hover:text-gray-800'
-                                }`}
-                            >
-                                👁️ Ver como Fica no Site
+                                🗑️ Excluir Página
                             </button>
                         </div>
                     </div>
@@ -2639,7 +2743,15 @@ export function InstitutionalSection({ saving, setSaving, updateStoreConfig }) {
                             </div>
                         )}
 
-                        <div className="flex justify-end pt-2">
+                        <div className="flex items-center justify-between pt-2">
+                            <button
+                                type="button"
+                                onClick={() => handleDeletePage(selectedPageId)}
+                                className="px-5 py-3.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
+                            >
+                                🗑️ Excluir Página
+                            </button>
+
                             <button
                                 type="submit"
                                 disabled={saving}

@@ -28,6 +28,14 @@ export default function InfoPage({ tab: propTab }) {
         return {}
     })
 
+    const [deletedPages, setDeletedPages] = useState(() => {
+        try {
+            const stored = localStorage.getItem('meraki_deleted_pages')
+            if (stored) return JSON.parse(stored)
+        } catch {}
+        return []
+    })
+
     // Sync active tab with route param or prop
     useEffect(() => {
         if (propTab) {
@@ -43,6 +51,8 @@ export default function InfoPage({ tab: propTab }) {
             try {
                 const storedPages = localStorage.getItem('meraki_pages_content')
                 if (storedPages) setCustomPages(JSON.parse(storedPages))
+                const storedDeleted = localStorage.getItem('meraki_deleted_pages')
+                if (storedDeleted) setDeletedPages(JSON.parse(storedDeleted))
             } catch {}
         }
         loadPages()
@@ -63,6 +73,7 @@ export default function InfoPage({ tab: propTab }) {
         if (config) {
             setStoreConfig(config)
             if (config.pages_content) setCustomPages(config.pages_content)
+            if (config.deleted_pages) setDeletedPages(config.deleted_pages)
         }
 
         return () => {
@@ -101,17 +112,22 @@ export default function InfoPage({ tab: propTab }) {
     }
 
     // List of tabs/sections
-    const sections = [
+    const masterSections = [
         { id: 'story', label: 'História', category: 'Sobre' },
+        { id: 'revenda', label: 'Seja um Revendedor', category: 'Sobre' },
         { id: 'connect', label: 'Conecte-se', category: 'Sobre' },
         { id: 'wishlist', label: 'Favoritos (Wishlist)', category: 'Conta' },
         { id: 'security', label: 'Compra Segura', category: 'Atendimento' },
         { id: 'payment', label: 'Formas de Pagamento', category: 'Atendimento' },
         { id: 'delivery', label: 'Entrega e Frete', category: 'Atendimento' },
         { id: 'returns', label: 'Política de Troca', category: 'Atendimento' },
+        { id: 'withdrawal', label: 'Direito de Arrependimento', category: 'Atendimento' },
         { id: 'privacy', label: 'Política de Privacidade', category: 'Atendimento' },
-        { id: 'promotional-rules', label: 'Regras Promocionais', category: 'Atendimento' }
+        { id: 'promotional-rules', label: 'Regras Promocionais', category: 'Atendimento' },
+        { id: 'stores', label: 'Nossas Lojas', category: 'Lojas' }
     ]
+
+    const sections = masterSections.filter(s => !deletedPages.includes(s.id))
 
     // Content definitions
     const renderContent = () => {
@@ -467,7 +483,7 @@ export default function InfoPage({ tab: propTab }) {
                     
                     {/* Left Sidebar Navigator (Desktop) */}
                     <aside className="hidden md:block md:col-span-3 bg-white rounded-xl p-5 border border-gray-100 shadow-2xs space-y-6">
-                        {['Sobre', 'Conta', 'Atendimento'].map(cat => {
+                        {['Sobre', 'Conta', 'Atendimento', 'Lojas'].map(cat => {
                             const catTabs = sections.filter(s => s.category === cat)
                             if (catTabs.length === 0) return null
                             return (
