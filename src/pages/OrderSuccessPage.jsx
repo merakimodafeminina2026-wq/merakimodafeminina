@@ -10,6 +10,9 @@ import FireworksEffect from '../components/FireworksEffect.jsx'
 export default function OrderSuccessPage() {
     const { orderId } = useParams()
     const [order, setOrder] = useState(null)
+    const [copied, setCopied] = useState(false)
+    const [notification, setNotification] = useState({ message: '', visible: false })
+    const [showFireworks, setShowFireworks] = useState(false)
     const [infinitePayModalOpen, setInfinitePayModalOpen] = useState(false)
     const [infinitePayHandle, setInfinitePayHandle] = useState(() => {
         try {
