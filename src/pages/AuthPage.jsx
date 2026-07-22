@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { createReturnInDb } from '../services/database.js'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.js'
 import { signIn, signUp, signOut, getUserProfile, updateUserProfile, signInWithProvider, resetPasswordForEmail, updatePassword } from '../services/auth.js'
@@ -485,11 +486,19 @@ export default function AuthPage() {
         setSubmitting(true)
         try {
             await updateUserProfile(user.id, {
+                email: user.email?.trim().toLowerCase(),
                 full_name: editName,
                 phone: editPhone,
-                cpf: editCpf
+                cpf: editCpf,
+                address: editAddress,
+                cep: editCep,
+                number: editNum,
+                complement: editComp,
+                neighborhood: editBairro,
+                city: editCity,
+                state: editState
             })
-            showAlert('Dados atualizados com sucesso!', 'success')
+            showAlert('Dados atualizados com sucesso no banco de dados!', 'success')
             window.dispatchEvent(new Event('storage'))
         } catch (err) {
             console.error(err)
@@ -499,7 +508,7 @@ export default function AuthPage() {
         }
     }
 
-    function handleRequestReturn(e) {
+    async function handleRequestReturn(e) {
         e.preventDefault()
         if (!returnOrderId) {
             showAlert('Selecione um pedido para continuar.')
@@ -514,6 +523,7 @@ export default function AuthPage() {
             id: 'RET-' + Date.now(),
             orderId: returnOrderId,
             itemId: returnItemId,
+            customerEmail: user.email?.trim().toLowerCase(),
             type: returnType,
             reason: returnReason,
             date: new Date().toISOString(),
@@ -524,6 +534,10 @@ export default function AuthPage() {
         const updatedReturns = [newReturn, ...returnsList]
         setReturnsList(updatedReturns)
         localStorage.setItem(`meraki_returns_${user.email}`, JSON.stringify(updatedReturns))
+
+        // Save directly into Supabase returns table
+        await createReturnInDb(newReturn)
+
         setReturnReason('')
         setReturnOrderId('')
         setReturnItemId('')
