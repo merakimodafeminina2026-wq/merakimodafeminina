@@ -345,8 +345,7 @@ CREATE POLICY "Orders insert policy" ON public.orders FOR INSERT WITH CHECK (tru
 DROP POLICY IF EXISTS "Orders select policy" ON public.orders;
 CREATE POLICY "Orders select policy" ON public.orders FOR SELECT
 USING (
-    customer_email = auth.jwt() ->> 'email' 
-    OR user_id = auth.uid() 
+    customeremail = auth.jwt() ->> 'email' 
     OR public.is_admin()
 );
 
