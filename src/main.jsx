@@ -7,6 +7,12 @@ import { applyTransparentButterflyFavicon } from './utils/favicon.js'
 // Automatically apply transparent Meraki butterfly favicon in browser tab
 applyTransparentButterflyFavicon()
 
+// Security Purge: Ensure sensitive user data is never stored in persistent localStorage
+try {
+    localStorage.removeItem('meraki_users')
+    localStorage.removeItem('meraki_session')
+} catch (e) {}
+
 // Auto-recover from stale Vercel asset 404s after new deployments
 window.addEventListener('error', (event) => {
     const src = event?.target?.src || event?.filename || ''

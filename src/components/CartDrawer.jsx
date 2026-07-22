@@ -42,12 +42,6 @@ export default function CartDrawer() {
                     return
                 }
             }
-
-            const storedUsers = JSON.parse(localStorage.getItem('meraki_users') || '[]')
-            const currentDbUser = storedUsers.find(u => u.email?.trim().toLowerCase() === cleanEmail)
-            if (currentDbUser && Array.isArray(currentDbUser.addresses)) {
-                setSavedAddresses(currentDbUser.addresses)
-            }
         } catch (e) {
             console.error(e)
         }

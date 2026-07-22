@@ -326,7 +326,6 @@ export default function AdminPage() {
         getProfiles().then(({ data }) => {
             if (data) {
                 setCustomers(data)
-                localStorage.setItem('meraki_users', JSON.stringify(data))
             }
         }).catch(console.error)
 

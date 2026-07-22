@@ -146,13 +146,6 @@ export default function AuthPage() {
                         return
                     }
                 }
-
-                // 2. Fallback to meraki_users array
-                const storedUsers = JSON.parse(localStorage.getItem('meraki_users') || '[]')
-                const currentDbUser = storedUsers.find(u => u.email?.trim().toLowerCase() === cleanEmail)
-                if (currentDbUser && Array.isArray(currentDbUser.addresses)) {
-                    setUserAddresses(currentDbUser.addresses)
-                }
             } catch (e) {
                 console.error(e)
             }
@@ -216,9 +209,6 @@ export default function AuthPage() {
         }
 
         const cleanEmail = user.email.trim().toLowerCase()
-        const storedUsers = JSON.parse(localStorage.getItem('meraki_users') || '[]')
-        let userIndex = storedUsers.findIndex(u => u.email?.trim().toLowerCase() === cleanEmail)
-
         let updatedAddresses = [...userAddresses]
 
         if (editingAddressId) {
@@ -242,23 +232,7 @@ export default function AuthPage() {
             updatedAddresses.push(newAddr)
         }
 
-        // Always save/update in meraki_users
-        if (userIndex === -1) {
-            storedUsers.push({
-                id: user.id || 'usr-' + Date.now(),
-                email: cleanEmail,
-                full_name: profile?.full_name || 'Cliente',
-                phone: profile?.phone || '',
-                cpf: profile?.cpf || '',
-                addresses: updatedAddresses
-            })
-        } else {
-            storedUsers[userIndex].addresses = updatedAddresses
-        }
-
-        localStorage.setItem('meraki_users', JSON.stringify(storedUsers))
-
-        // ALSO save to user-specific fail-safe key
+        // Save strictly to user-specific key
         localStorage.setItem(`meraki_user_addresses_${cleanEmail}`, JSON.stringify(updatedAddresses))
 
         setUserAddresses(updatedAddresses)
@@ -279,14 +253,6 @@ export default function AuthPage() {
         if (!user || !user.email) return
         const cleanEmail = user.email.trim().toLowerCase()
         const updated = userAddresses.filter(a => a.id !== id)
-
-        const storedUsers = JSON.parse(localStorage.getItem('meraki_users') || '[]')
-        const index = storedUsers.findIndex(u => u.email?.trim().toLowerCase() === cleanEmail)
-        if (index !== -1) {
-            storedUsers[index].addresses = updated
-            localStorage.setItem('meraki_users', JSON.stringify(storedUsers))
-        }
-
         localStorage.setItem(`meraki_user_addresses_${cleanEmail}`, JSON.stringify(updated))
         setUserAddresses(updated)
         showAlert('Endereço removido com sucesso!', 'success')
@@ -457,33 +423,22 @@ export default function AuthPage() {
 
     async function handleSaveProfile(e) {
         e.preventDefault()
+        if (!user) return
         setSubmitting(true)
-        const users = JSON.parse(localStorage.getItem('meraki_users') || '[]')
-        const idx = users.findIndex(u => u.email === user.email)
-        if (idx !== -1) {
-            users[idx].full_name = editName
-            users[idx].phone = editPhone
-            users[idx].cpf = editCpf
-            users[idx].address = editAddress
-            users[idx].cep = editCep
-            users[idx].number = editNum
-            users[idx].complement = editComp
-            users[idx].neighborhood = editBairro
-            users[idx].city = editCity
-            users[idx].state = editState
-            localStorage.setItem('meraki_users', JSON.stringify(users))
-            
-            const sessionData = JSON.parse(localStorage.getItem('meraki_session') || '{}')
-            if (sessionData.user) {
-                sessionData.user.user_metadata = { ...sessionData.user.user_metadata, full_name: editName }
-                localStorage.setItem('meraki_session', JSON.stringify(sessionData))
-            }
+        try {
+            await updateUserProfile(user.id, {
+                full_name: editName,
+                phone: editPhone,
+                cpf: editCpf
+            })
             showAlert('Dados atualizados com sucesso!', 'success')
             window.dispatchEvent(new Event('storage'))
-        } else {
-            showAlert('Erro ao atualizar perfil.')
+        } catch (err) {
+            console.error(err)
+            showAlert('Erro ao atualizar perfil.', 'error')
+        } finally {
+            setSubmitting(false)
         }
-        setSubmitting(false)
     }
 
     function handleRequestReturn(e) {

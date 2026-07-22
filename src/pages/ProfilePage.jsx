@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.js'
+import { updateUserProfile } from '../services/auth.js'
 import Header from '../components/Header.jsx'
 import Footer from '../components/Footer.jsx'
 import WhatsAppButton from '../components/WhatsAppButton.jsx'
 import { getAssetUrl } from '../utils/assets.js'
 
 export default function ProfilePage() {
-    const { user, signOut } = useAuth()
+    const { user, profile, signOut } = useAuth()
     const navigate = useNavigate()
     const [activeTab, setActiveTab] = useState('orders') // orders, addresses, account
     const [orders, setOrders] = useState([])
@@ -36,39 +37,49 @@ export default function ProfilePage() {
             return
         }
 
-        // Load profile and addresses
-        const storedUsers = JSON.parse(localStorage.getItem('meraki_users') || '[]')
-        const currentDbUser = storedUsers.find(u => u.email === user.email)
-        if (currentDbUser) {
-            setUserProfile(currentDbUser)
-            setFullName(currentDbUser.full_name || '')
-            setPhone(currentDbUser.phone || '')
-            setCpf(currentDbUser.cpf || '')
-            setAddresses(currentDbUser.addresses || [])
+        const cleanEmail = user.email?.trim().toLowerCase()
+        if (profile) {
+            setUserProfile(profile)
+            setFullName(profile.full_name || '')
+            setPhone(profile.phone || '')
+            setCpf(profile.cpf || '')
+        }
+
+        // Load addresses safely from user-specific key
+        if (cleanEmail) {
+            const userAddrs = localStorage.getItem(`meraki_user_addresses_${cleanEmail}`)
+            if (userAddrs) {
+                try { setAddresses(JSON.parse(userAddrs)) } catch {}
+            }
         }
 
         // Load orders
         const allOrders = JSON.parse(localStorage.getItem('meraki_orders') || '[]')
-        const userOrders = allOrders.filter(o => o.customerEmail?.trim().toLowerCase() === user.email?.trim().toLowerCase())
+        const userOrders = allOrders.filter(o => o.customerEmail?.trim().toLowerCase() === cleanEmail)
         setOrders(userOrders)
-    }, [user, navigate])
+    }, [user, profile, navigate])
 
     const handleSignOutClick = async () => {
         await signOut()
         navigate('/')
     }
 
-    const handleUpdateProfile = (e) => {
+    const handleUpdateProfile = async (e) => {
         e.preventDefault()
-        const storedUsers = JSON.parse(localStorage.getItem('meraki_users') || '[]')
-        const index = storedUsers.findIndex(u => u.email === user.email)
-        if (index !== -1) {
-            storedUsers[index].full_name = fullName
-            storedUsers[index].phone = phone
-            storedUsers[index].cpf = cpf
-            localStorage.setItem('meraki_users', JSON.stringify(storedUsers))
-            setUserProfile(storedUsers[index])
-            alert('Cadastro atualizado com sucesso!')
+        if (!user) return
+        try {
+            const { profile: updated } = await updateUserProfile(user.id, {
+                full_name: fullName,
+                phone: phone,
+                cpf: cpf
+            })
+            if (updated) {
+                setUserProfile(updated)
+                alert('Cadastro atualizado com sucesso!')
+            }
+        } catch (err) {
+            console.error(err)
+            alert('Erro ao atualizar cadastro: ' + err.message)
         }
     }
 
@@ -93,48 +104,41 @@ export default function ProfilePage() {
 
     const handleAddAddress = (e) => {
         e.preventDefault()
-        if (!cep || !street || !number) return
+        if (!cep || !street || !number || !user?.email) return
 
-        const storedUsers = JSON.parse(localStorage.getItem('meraki_users') || '[]')
-        const index = storedUsers.findIndex(u => u.email === user.email)
-        if (index !== -1) {
-            const newAddr = {
-                id: 'addr-' + Date.now(),
-                label: addressLabel,
-                cep,
-                street,
-                number,
-                complement,
-                neighborhood,
-                city,
-                state: uf
-            }
-            const updatedAddresses = [...addresses, newAddr]
-            storedUsers[index].addresses = updatedAddresses
-            localStorage.setItem('meraki_users', JSON.stringify(storedUsers))
-            setAddresses(updatedAddresses)
-            setShowAddressForm(false)
-            // Reset form
-            setCep('')
-            setStreet('')
-            setNumber('')
-            setComplement('')
-            setNeighborhood('')
-            setCity('')
-            setUf('')
-            setAddressLabel('Casa')
+        const cleanEmail = user.email.trim().toLowerCase()
+        const newAddr = {
+            id: 'addr-' + Date.now(),
+            label: addressLabel,
+            cep,
+            street,
+            number,
+            complement,
+            neighborhood,
+            city,
+            state: uf
         }
+        const updatedAddresses = [...addresses, newAddr]
+        localStorage.setItem(`meraki_user_addresses_${cleanEmail}`, JSON.stringify(updatedAddresses))
+        setAddresses(updatedAddresses)
+        setShowAddressForm(false)
+        // Reset form
+        setCep('')
+        setStreet('')
+        setNumber('')
+        setComplement('')
+        setNeighborhood('')
+        setCity('')
+        setUf('')
+        setAddressLabel('Casa')
     }
 
     const handleDeleteAddress = (id) => {
-        const storedUsers = JSON.parse(localStorage.getItem('meraki_users') || '[]')
-        const index = storedUsers.findIndex(u => u.email === user.email)
-        if (index !== -1) {
-            const updatedAddresses = addresses.filter(a => a.id !== id)
-            storedUsers[index].addresses = updatedAddresses
-            localStorage.setItem('meraki_users', JSON.stringify(storedUsers))
-            setAddresses(updatedAddresses)
-        }
+        if (!user?.email) return
+        const cleanEmail = user.email.trim().toLowerCase()
+        const updatedAddresses = addresses.filter(a => a.id !== id)
+        localStorage.setItem(`meraki_user_addresses_${cleanEmail}`, JSON.stringify(updatedAddresses))
+        setAddresses(updatedAddresses)
     }
 
     if (!user) return null

@@ -14,6 +14,7 @@ export const supabase = createClient(
     hasValidCreds ? supabaseAnonKey : 'placeholder-anon-key',
     {
         auth: {
+            storage: typeof window !== 'undefined' ? window.sessionStorage : undefined,
             autoRefreshToken: true,
             persistSession: true,
             detectSessionInUrl: true
