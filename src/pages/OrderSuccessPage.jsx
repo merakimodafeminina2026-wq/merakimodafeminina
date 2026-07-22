@@ -61,14 +61,22 @@ export default function OrderSuccessPage() {
                 
                 {/* Pix / Boleto Payment Banner when Payment is Pending */}
                 {order.paymentMethod === 'pix' && order.status === 'Pendente' && (
-                    <div className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-3xl p-6 sm:p-8 space-y-6 text-center shadow-sm">
-                        <div className="flex items-center justify-center gap-2 text-emerald-800">
-                            <span className="text-xl">⚡</span>
-                            <h3 className="font-heading text-lg font-bold">Aguardando Pagamento via PIX</h3>
+                    <div className="bg-gradient-to-br from-[#FFF9F6] via-white to-[#FDF4EC] border border-[#E8E0D8] rounded-3xl p-6 sm:p-10 space-y-6 text-center shadow-xl relative overflow-hidden">
+                        {/* Elegant accent border */}
+                        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#7A3E4A] via-[#C6A76A] to-[#7A3E4A]" />
+
+                        <div className="flex flex-col items-center gap-2 pt-2">
+                            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#7A3E4A]/10 border border-[#7A3E4A]/20 text-[#7A3E4A] text-[10px] font-black uppercase tracking-[0.2em]">
+                                ⚡ Pagamento Instantâneo
+                            </span>
+                            <h3 className="font-sans text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
+                                Aguardando Pagamento via PIX
+                            </h3>
                         </div>
                         
-                        <div className="w-44 h-44 bg-white border border-gray-200 rounded-2xl p-3 mx-auto shadow-sm flex items-center justify-center">
-                            <svg className="w-full h-full text-gray-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
+                        {/* QR Code Container */}
+                        <div className="relative w-48 h-48 bg-white border-2 border-[#C6A76A]/30 rounded-2xl p-4 mx-auto shadow-md flex items-center justify-center group transition-all hover:border-[#7A3E4A]/50">
+                            <svg className="w-full h-full text-[#1A1A1A]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
                                 <rect x="2" y="2" width="6" height="6" />
                                 <rect x="16" y="2" width="6" height="6" />
                                 <rect x="2" y="16" width="6" height="6" />
@@ -79,48 +87,59 @@ export default function OrderSuccessPage() {
                             </svg>
                         </div>
 
-                        <p className="text-xs text-gray-600 max-w-sm mx-auto leading-relaxed">
-                            Escaneie o QR Code acima pelo app do seu banco ou utilize a chave Pix copia-e-cola abaixo.
+                        <p className="text-xs sm:text-sm text-gray-600 font-medium max-w-md mx-auto leading-relaxed">
+                            Escaneie o QR Code acima pelo app do seu banco ou utilize a chave <strong>Pix copia-e-cola</strong> abaixo.
                         </p>
 
-                        <div className="max-w-md mx-auto flex items-center border border-gray-200 rounded-xl overflow-hidden bg-white shadow-xs">
+                        <div className="max-w-lg mx-auto flex items-center border border-[#E8E0D8] rounded-2xl overflow-hidden bg-white shadow-sm ring-1 ring-black/5">
                             <input
                                 type="text"
                                 readOnly
                                 value="00020126580014BR.GOV.BCB.PIX0136e4f387b..."
-                                className="flex-1 px-4 py-3.5 text-xs text-gray-500 outline-none bg-transparent"
+                                className="flex-1 px-4 py-4 text-xs font-mono text-gray-600 outline-none bg-transparent select-all"
                             />
                             <button
                                 onClick={handleCopyPix}
-                                className="px-6 py-3.5 bg-[#7A3E4A] hover:bg-[#63303a] text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
+                                className="px-7 py-4 bg-gradient-to-r from-[#7A3E4A] to-[#603039] hover:from-[#603039] hover:to-[#4A2027] text-white text-xs font-extrabold uppercase tracking-widest transition-all cursor-pointer shadow-sm flex items-center gap-1.5 shrink-0"
                             >
-                                {copied ? 'Copiado!' : 'Copiar'}
+                                {copied ? '✅ Copiado!' : 'Copiar Chave'}
                             </button>
                         </div>
                     </div>
                 )}
 
                 {order.paymentMethod === 'boleto' && order.status === 'Pendente' && (
-                    <div className="bg-gray-50 border border-gray-200 rounded-3xl p-6 sm:p-8 text-center space-y-4 shadow-sm">
-                        <h3 className="font-heading text-lg font-bold text-gray-900">Boleto Bancário Gerado</h3>
-                        <p className="text-xs text-gray-600 max-w-sm mx-auto">
-                            O boleto foi enviado para o seu e-mail. Utilize a linha digitável abaixo para pagamento.
+                    <div className="bg-gradient-to-br from-[#FFF9F6] via-white to-[#FDF4EC] border border-[#E8E0D8] rounded-3xl p-6 sm:p-10 text-center space-y-6 shadow-xl relative overflow-hidden">
+                        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#7A3E4A] via-[#C6A76A] to-[#7A3E4A]" />
+
+                        <div className="flex flex-col items-center gap-2 pt-2">
+                            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#7A3E4A]/10 border border-[#7A3E4A]/20 text-[#7A3E4A] text-[10px] font-black uppercase tracking-[0.2em]">
+                                📄 Boleto Bancário
+                            </span>
+                            <h3 className="font-sans text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
+                                Boleto Bancário Gerado
+                            </h3>
+                        </div>
+
+                        <p className="text-xs sm:text-sm text-gray-600 font-medium max-w-md mx-auto leading-relaxed">
+                            O boleto foi enviado para o seu e-mail. Utilize a linha digitável abaixo para realizar o pagamento.
                         </p>
-                        <div className="max-w-md mx-auto flex items-center border border-gray-200 rounded-xl overflow-hidden bg-white">
+
+                        <div className="max-w-lg mx-auto flex items-center border border-[#E8E0D8] rounded-2xl overflow-hidden bg-white shadow-sm ring-1 ring-black/5">
                             <input
                                 type="text"
                                 readOnly
                                 value="34191.79001 01043.513184 91020.150008 7 987600000"
-                                className="flex-1 px-4 py-3.5 text-xs text-gray-500 outline-none bg-transparent"
+                                className="flex-1 px-4 py-4 text-xs font-mono text-gray-600 outline-none bg-transparent select-all"
                             />
                             <button
                                 onClick={() => {
                                     navigator.clipboard.writeText("34191.7900101043513184910201500087987600000")
                                     showNotification('Código de barras copiado com sucesso!')
                                 }}
-                                className="px-6 py-3.5 bg-[#7A3E4A] hover:bg-[#63303a] text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
+                                className="px-7 py-4 bg-gradient-to-r from-[#7A3E4A] to-[#603039] hover:from-[#603039] hover:to-[#4A2027] text-white text-xs font-extrabold uppercase tracking-widest transition-all cursor-pointer shadow-sm flex items-center gap-1.5 shrink-0"
                             >
-                                Copiar
+                                Copiar Código
                             </button>
                         </div>
                     </div>
