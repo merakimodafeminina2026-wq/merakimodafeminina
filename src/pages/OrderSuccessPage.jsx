@@ -151,75 +151,59 @@ export default function OrderSuccessPage() {
 
             <main className="max-w-6xl mx-auto px-4 py-12 flex-grow w-full space-y-8">
                 
-                {/* Card Payment InfinitePay Banner */}
+                {/* Card Payment InfinitePay Embedded */}
                 {order.paymentMethod === 'card' && order.status === 'Pendente' && (
-                    <div className="bg-gradient-to-br from-[#FFF9F6] via-white to-[#FDF4EC] border border-[#E8E0D8] rounded-3xl p-6 sm:p-10 text-center space-y-6 shadow-xl relative overflow-hidden">
+                    <div className="bg-white border border-[#E8E0D8] rounded-3xl p-4 sm:p-8 space-y-4 text-center shadow-xl relative overflow-hidden">
                         <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#7A3E4A] via-[#C6A76A] to-[#7A3E4A]" />
 
-                        <div className="flex flex-col items-center gap-2 pt-2">
+                        <div className="flex flex-col items-center gap-1 pt-2">
                             <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#7A3E4A]/10 border border-[#7A3E4A]/20 text-[#7A3E4A] text-[10px] font-black uppercase tracking-[0.2em]">
                                 💳 Pagamento Seguro InfinitePay
                             </span>
                             <h3 className="font-sans text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
-                                Efetuar Pagamento no Cartão de Crédito
+                                Pagamento no Cartão de Crédito
                             </h3>
+                            <p className="text-xs text-gray-500 font-medium">
+                                Preencha os dados do seu cartão com total segurança diretamente no checkout seguro da InfinitePay abaixo:
+                            </p>
                         </div>
 
-                        <p className="text-xs sm:text-sm text-gray-600 font-medium max-w-md mx-auto leading-relaxed">
-                            Seu pedido foi pré-reservado! Abra a janela de pagamento da <strong>InfinitePay</strong> para concluir o pagamento com total segurança.
-                        </p>
-
-                        <button
-                            onClick={() => setInfinitePayModalOpen(true)}
-                            className="px-8 py-4 bg-gradient-to-r from-[#7A3E4A] to-[#603039] hover:from-[#603039] hover:to-[#4A2027] text-white text-xs font-black uppercase tracking-widest rounded-2xl transition-all cursor-pointer shadow-lg hover:shadow-[#7A3E4A]/30 flex items-center justify-center gap-2 mx-auto"
-                        >
-                            💳 Pagar com InfinitePay Agora
-                        </button>
+                        <div className="w-full max-w-xl mx-auto h-[620px] rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 shadow-inner">
+                            <iframe
+                                src={`https://pay.infinitepay.io/${infinitePayHandle}/${Math.round((order.total || 0) * 100)}`}
+                                className="w-full h-full border-0"
+                                title="Pagamento Cartão InfinitePay"
+                                allow="payment"
+                            />
+                        </div>
                     </div>
                 )}
                 
-                {/* Pix Payment Banner with InfinitePay Direct Checkout */}
+                {/* Pix Payment InfinitePay Embedded Directly in Page */}
                 {order.paymentMethod === 'pix' && order.status === 'Pendente' && (
-                    <div className="bg-gradient-to-br from-[#FFF9F6] via-white to-[#FDF4EC] border border-[#E8E0D8] rounded-3xl p-6 sm:p-10 space-y-6 text-center shadow-xl relative overflow-hidden">
-                        {/* Elegant accent border */}
+                    <div className="bg-white border border-[#E8E0D8] rounded-3xl p-4 sm:p-8 space-y-4 text-center shadow-xl relative overflow-hidden">
                         <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#7A3E4A] via-[#C6A76A] to-[#7A3E4A]" />
 
-                        <div className="flex flex-col items-center gap-2 pt-2">
+                        <div className="flex flex-col items-center gap-1 pt-2">
                             <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#7A3E4A]/10 border border-[#7A3E4A]/20 text-[#7A3E4A] text-[10px] font-black uppercase tracking-[0.2em]">
                                 ⚡ Pagamento Instantâneo InfinitePay
                             </span>
                             <h3 className="font-sans text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
-                                Pagar via PIX com a InfinitePay
+                                Finalizar Pagamento via PIX
                             </h3>
+                            <p className="text-xs text-gray-500 font-medium">
+                                Escaneie o QR Code abaixo pelo app do seu banco ou copie a chave PIX diretamente na tela da InfinitePay:
+                            </p>
                         </div>
 
-                        <div className="bg-[#7A3E4A]/10 border border-[#7A3E4A]/20 rounded-2xl px-5 py-3 inline-block mx-auto">
-                            <span className="text-xs text-gray-500 font-medium block">Valor Total a Pagar</span>
-                            <span className="text-2xl font-black text-[#7A3E4A]">
-                                {(order.total || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                            </span>
-                        </div>
-
-                        <p className="text-xs sm:text-sm text-gray-600 font-medium max-w-md mx-auto leading-relaxed">
-                            Para gerar o <strong>QR Code oficial com confirmação automática</strong> e sem erros no aplicativo do seu banco, abra a tela da <strong>InfinitePay</strong>:
-                        </p>
-
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                            <a
-                                href={`https://pay.infinitepay.io/${infinitePayHandle}/${Math.round((order.total || 0) * 100)}`}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-[#7A3E4A] to-[#603039] hover:from-[#603039] hover:to-[#4A2027] text-white text-xs font-black uppercase tracking-widest rounded-2xl transition-all cursor-pointer shadow-lg hover:shadow-[#7A3E4A]/30 flex items-center justify-center gap-2"
-                            >
-                                ⚡ Gerar PIX Oficial no InfinitePay
-                            </a>
-                            <button
-                                type="button"
-                                onClick={() => setInfinitePayModalOpen(true)}
-                                className="w-full sm:w-auto px-6 py-4 bg-white hover:bg-gray-50 text-[#7A3E4A] border border-[#7A3E4A]/30 text-xs font-bold uppercase tracking-widest rounded-2xl transition-all cursor-pointer shadow-xs"
-                            >
-                                🖼️ Abrir nesta Tela
-                            </button>
+                        {/* Embedded Official InfinitePay Payment Container */}
+                        <div className="w-full max-w-xl mx-auto h-[620px] rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 shadow-inner">
+                            <iframe
+                                src={`https://pay.infinitepay.io/${infinitePayHandle}/${Math.round((order.total || 0) * 100)}`}
+                                className="w-full h-full border-0"
+                                title="Pagamento PIX InfinitePay"
+                                allow="payment"
+                            />
                         </div>
                     </div>
                 )}
