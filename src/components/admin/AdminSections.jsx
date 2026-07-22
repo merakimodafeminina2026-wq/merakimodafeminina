@@ -1480,32 +1480,27 @@ export function ReturnsSection({
 }
 
 // ─── SECTION 8: STORE SETTINGS ────────────────────────────────────────────────
-export function SettingsSection({ saving, setSaving }) {
-    const [whatsapp, setWhatsapp] = useState(() => {
-        const stored = JSON.parse(localStorage.getItem('meraki_store_config'))
-        return stored?.whatsapp || '551123880403'
+export function SettingsSection({ saving, setSaving, updateStoreConfig }) {
+    const [config, setConfig] = useState(() => {
+        try {
+            return JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+        } catch { return {} }
     })
-    const [sacPhone, setSacPhone] = useState(() => {
-        const stored = JSON.parse(localStorage.getItem('meraki_store_config'))
-        return stored?.sac_phone || '(11) 2388-0403'
-    })
-    const [address, setAddress] = useState(() => {
-        const stored = JSON.parse(localStorage.getItem('meraki_store_config'))
-        return stored?.address || 'Avenida Alfredo Nasser, Qd. 14, Lt. 05 - Centro, Bonfinópolis - GO, CEP: 75225-000'
-    })
-    const [cnpj, setCnpj] = useState(() => {
-        const stored = JSON.parse(localStorage.getItem('meraki_store_config'))
-        return stored?.cnpj || '57.484.768/0064-89'
-    })
-    const [infinitepayHandle, setInfinitepayHandle] = useState(() => {
-        const stored = JSON.parse(localStorage.getItem('meraki_store_config'))
-        return stored?.infinitepay_handle || 'nicolly_gomes'
-    })
+
+    const [whatsapp, setWhatsapp] = useState(config.whatsapp || '551123880403')
+    const [sacPhone, setSacPhone] = useState(config.sac_phone || '(11) 2388-0403')
+    const [address, setAddress] = useState(config.address || 'Avenida Alfredo Nasser, Qd. 14, Lt. 05 - Centro, Bonfinópolis - GO, CEP: 75225-000')
+    const [cnpj, setCnpj] = useState(config.cnpj || '57.484.768/0064-89')
+    const [razaoSocial, setRazaoSocial] = useState(config.razao_social || 'Meraki Comércio de Vestuário Ltda')
+    const [originCep, setOriginCep] = useState(config.origin_cep || '75225-000')
+    const [metaPixelId, setMetaPixelId] = useState(config.meta_pixel_id || '')
+    const [gaTrackingId, setGaTrackingId] = useState(config.ga_tracking_id || '')
+    const [infinitepayHandle, setInfinitepayHandle] = useState(config.infinitepay_handle || 'nicolly_gomes')
+    
     const [rewardBar, setRewardBar] = useState(() => {
         try {
-            const storedConfig = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
             const storedReward = JSON.parse(localStorage.getItem('meraki_reward_bar') || 'null')
-            return storedReward || storedConfig.rewardBar || {
+            return storedReward || config.rewardBar || {
                 enabled: true,
                 target_type: 'value',
                 target_value: 299.99,
@@ -1534,19 +1529,19 @@ export function SettingsSection({ saving, setSaving }) {
 
     const handlePasswordChange = async (e) => {
         e.preventDefault()
-        setSaving(true)
+        setSaving?.(true)
         setPwdMessage('')
         setPwdError(false)
         if (newPassword !== confirmPassword) {
             setPwdMessage('As senhas não coincidem.')
             setPwdError(true)
-            setSaving(false)
+            setSaving?.(false)
             return
         }
         if (newPassword.length < 6) {
             setPwdMessage('A senha deve ter no mínimo 6 caracteres.')
             setPwdError(true)
-            setSaving(false)
+            setSaving?.(false)
             return
         }
         const { error } = await supabase.auth.updateUser({ password: newPassword })
@@ -1559,216 +1554,276 @@ export function SettingsSection({ saving, setSaving }) {
             setConfirmPassword('')
             setTimeout(() => setPwdMessage(''), 3000)
         }
-        setSaving(false)
+        setSaving?.(false)
     }
 
     const handleSave = async (e) => {
         e.preventDefault()
-        setSaving(true)
+        setSaving?.(true)
         setMessage('')
         try {
-            const newConfig = {
+            const updatedConfig = {
+                ...config,
                 id: 'default',
                 whatsapp,
                 sac_phone: sacPhone,
                 address,
                 cnpj,
+                razao_social: razaoSocial,
+                origin_cep: originCep,
+                meta_pixel_id: metaPixelId,
+                ga_tracking_id: gaTrackingId,
                 infinitepay_handle: infinitepayHandle,
                 reward_bar: rewardBar,
                 rewardBar
             }
-            localStorage.setItem('meraki_store_config', JSON.stringify(newConfig))
+            localStorage.setItem('meraki_store_config', JSON.stringify(updatedConfig))
             localStorage.setItem('meraki_reward_bar', JSON.stringify(rewardBar))
             window.dispatchEvent(new Event('storeConfigUpdated'))
+            if (updateStoreConfig) {
+                await updateStoreConfig(updatedConfig)
+            }
             setMessage('Configurações salvas com sucesso!')
             setTimeout(() => setMessage(''), 3000)
         } catch (err) {
             console.error(err)
         }
-        setSaving(false)
+        setSaving?.(false)
     }
+
+    const inputCls = "w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-sm outline-none focus:border-[#7A3E4A] focus:ring-2 focus:ring-[#7A3E4A]/10 transition-all font-medium"
+    const labelCls = "block text-[10px] font-bold text-gray-700 mb-1.5 uppercase tracking-wider"
 
     return (
         <div className="space-y-6">
             <div className="bg-white p-6 rounded-2xl border border-[#EEEEEE]">
                 <div>
-                    <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider mb-1">Configurações de Contato e Endereço da Loja</h3>
-                    <p className="text-xs text-gray-400">Configure as informações de SAC, WhatsApp de atendimento e Endereço que aparecem no rodapé do site.</p>
+                    <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider mb-1">Configurações Gerais da Loja</h3>
+                    <p className="text-xs text-gray-400">Gerencie contatos, dados jurídicos do rodapé, pixels de anúncios, chave de pagamento e frete em um único lugar.</p>
                 </div>
             </div>
 
-            <form onSubmit={handleSave} className="bg-white p-6 rounded-2xl border border-[#EEEEEE] space-y-4">
+            <form onSubmit={handleSave} className="space-y-6">
                 {message && (
-                    <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold rounded-xl">
-                        {message}
+                    <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold rounded-xl animate-[fadeIn_200ms_ease-out]">
+                        ✓ {message}
                     </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* 1. Dados Jurídicos & SAC */}
+                <div className="bg-white p-6 rounded-2xl border border-[#EEEEEE] space-y-4">
+                    <h4 className="text-xs font-black text-[#7A3E4A] uppercase tracking-wider flex items-center gap-2">
+                        🏛️ Dados da Empresa & SAC (Rodapé)
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className={labelCls}>Número do WhatsApp (Com DDD - Apenas Números)</label>
+                            <input
+                                type="text"
+                                value={whatsapp}
+                                onChange={(e) => setWhatsapp(e.target.value)}
+                                className={inputCls}
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label className={labelCls}>Telefone do SAC (Exibido formatado)</label>
+                            <input
+                                type="text"
+                                value={sacPhone}
+                                onChange={(e) => setSacPhone(e.target.value)}
+                                className={inputCls}
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label className={labelCls}>Razão Social</label>
+                            <input
+                                type="text"
+                                value={razaoSocial}
+                                onChange={(e) => setRazaoSocial(e.target.value)}
+                                className={inputCls}
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label className={labelCls}>CNPJ da Empresa</label>
+                            <input
+                                type="text"
+                                value={cnpj}
+                                onChange={(e) => setCnpj(e.target.value)}
+                                className={inputCls}
+                                required
+                            />
+                        </div>
+                        <div className="md:col-span-2">
+                            <label className={labelCls}>Endereço Completo do Showroom / Loja Física</label>
+                            <input
+                                type="text"
+                                value={address}
+                                onChange={(e) => setAddress(e.target.value)}
+                                className={inputCls}
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label className={labelCls}>CEP de Origem (Saída dos Envios)</label>
+                            <input
+                                type="text"
+                                value={originCep}
+                                onChange={(e) => setOriginCep(e.target.value)}
+                                className={inputCls}
+                                required
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* 2. Marketing & Pixels */}
+                <div className="bg-white p-6 rounded-2xl border border-[#EEEEEE] space-y-4">
+                    <h4 className="text-xs font-black text-[#7A3E4A] uppercase tracking-wider flex items-center gap-2">
+                        📊 Rastreamento & Marketing (Pixels)
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className={labelCls}>ID do Meta Pixel (Facebook / Instagram Ads)</label>
+                            <input
+                                type="text"
+                                placeholder="Ex: 123456789012345"
+                                value={metaPixelId}
+                                onChange={(e) => setMetaPixelId(e.target.value)}
+                                className={inputCls}
+                            />
+                        </div>
+                        <div>
+                            <label className={labelCls}>ID do Google Analytics 4 (GA4)</label>
+                            <input
+                                type="text"
+                                placeholder="Ex: G-XXXXXXXXXX"
+                                value={gaTrackingId}
+                                onChange={(e) => setGaTrackingId(e.target.value)}
+                                className={inputCls}
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* 3. Pagamento */}
+                <div className="bg-white p-6 rounded-2xl border border-[#EEEEEE] space-y-4">
+                    <h4 className="text-xs font-black text-[#7A3E4A] uppercase tracking-wider flex items-center gap-2">
+                        💳 Gateway de Pagamento
+                    </h4>
                     <div>
-                        <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-wider">Número do WhatsApp (Com DDD - Apenas Números)</label>
+                        <label className={labelCls}>InfiniteTag / Handle da InfinitePay (Sem o $)</label>
                         <input
                             type="text"
-                            value={whatsapp}
-                            onChange={(e) => setWhatsapp(e.target.value)}
-                            className="w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-sm outline-none focus:border-[#7A3E4A] focus:ring-2 focus:ring-[#7A3E4A]/10 transition-all font-medium"
+                            value={infinitepayHandle}
+                            onChange={(e) => setInfinitepayHandle(e.target.value)}
+                            className={inputCls}
+                            placeholder="nicolly_gomes"
                             required
                         />
                     </div>
-                    <div>
-                        <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-wider">Telefone do SAC (Exibido formatado)</label>
-                        <input
-                            type="text"
-                            value={sacPhone}
-                            onChange={(e) => setSacPhone(e.target.value)}
-                            className="w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-sm outline-none focus:border-[#7A3E4A] focus:ring-2 focus:ring-[#7A3E4A]/10 transition-all font-medium"
-                            required
-                        />
-                    </div>
                 </div>
 
-                <div>
-                    <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-wider">Endereço Completo do Showroom / Loja Física</label>
-                    <textarea
-                        value={address}
-                        onChange={(e) => setAddress(e.target.value)}
-                        rows={3}
-                        className="w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-sm outline-none focus:border-[#7A3E4A] focus:ring-2 focus:ring-[#7A3E4A]/10 transition-all font-medium"
-                        required
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-wider">CNPJ da Empresa</label>
-                    <input
-                        type="text"
-                        value={cnpj}
-                        onChange={(e) => setCnpj(e.target.value)}
-                        className="w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-sm outline-none focus:border-[#7A3E4A] focus:ring-2 focus:ring-[#7A3E4A]/10 transition-all font-medium"
-                        required
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-wider">InfiniteTag / Handle da InfinitePay (Sem o $)</label>
-                    <input
-                        type="text"
-                        value={infinitepayHandle}
-                        onChange={(e) => setInfinitepayHandle(e.target.value)}
-                        className="w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-sm outline-none focus:border-[#7A3E4A] focus:ring-2 focus:ring-[#7A3E4A]/10 transition-all font-medium"
-                        placeholder="nicolly_gomes"
-                        required
-                    />
-                </div>
-
-                <div className="flex gap-2 justify-end pt-2">
-                    <button
-                        type="submit"
-                        disabled={saving}
-                        className="px-6 py-3 bg-gradient-to-r from-[#7A3E4A] to-[#9A5060] text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:shadow-lg hover:shadow-[#7A3E4A]/30 transition-all cursor-pointer disabled:opacity-50"
-                    >
-                        {saving ? 'Salvando...' : 'Salvar Alterações'}
-                    </button>
-                </div>
-            </form>
-
-            {/* Barra de Progresso / Recompensas do Carrinho */}
-            <form onSubmit={handleSave} className="bg-white p-6 rounded-2xl border border-[#EEEEEE] space-y-4">
-                <div className="flex items-center justify-between border-b border-[#F5F5F5] pb-4">
-                    <div>
-                        <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider mb-1 flex items-center gap-2">
-                            <span>🎁</span> Barra de Progresso / Recompensas no Carrinho
-                        </h3>
-                        <p className="text-xs text-gray-400">Configure metas de valor ou quantidade para liberar Frete Grátis, Brindes ou Descontos no carrinho.</p>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                            type="checkbox"
-                            checked={rewardBar.enabled}
-                            onChange={(e) => setRewardBar(prev => ({ ...prev, enabled: e.target.checked }))}
-                            className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#7A3E4A]"></div>
-                        <span className="ml-2 text-xs font-bold text-gray-700">{rewardBar.enabled ? 'Ativada' : 'Desativada'}</span>
-                    </label>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div>
-                        <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-wider">Tipo de Bônus / Recompensa</label>
-                        <select
-                            value={rewardBar.reward_type || 'frete_gratis'}
-                            onChange={(e) => setRewardBar(prev => ({ 
-                                ...prev, 
-                                reward_type: e.target.value,
-                                reward_title: e.target.value === 'frete_gratis' ? 'Frete Grátis' : (e.target.value === 'brinde' ? 'Brinde Especial' : 'Desconto Especial')
-                            }))}
-                            className="w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-xs outline-none focus:border-[#7A3E4A] transition-all font-medium"
-                        >
-                            <option value="frete_gratis">🚚 Frete Grátis</option>
-                            <option value="brinde">🎁 Brinde Especial (ex: Batom/Mimo)</option>
-                            <option value="desconto">🏷️ Desconto Especial</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-wider">Tipo de Meta</label>
-                        <select
-                            value={rewardBar.target_type}
-                            onChange={(e) => setRewardBar(prev => ({ ...prev, target_type: e.target.value }))}
-                            className="w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-xs outline-none focus:border-[#7A3E4A] transition-all font-medium"
-                        >
-                            <option value="value">Valor Mínimo da Compra (R$)</option>
-                            <option value="quantity">Quantidade Mínima de Produtos (Qtd)</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-wider">
-                            {rewardBar.target_type === 'quantity' ? 'Quantidade Meta (ex: 3)' : 'Valor Meta R$ (ex: 299.99)'}
+                {/* 4. Barra de Progresso / Recompensas no Carrinho */}
+                <div className="bg-white p-6 rounded-2xl border border-[#EEEEEE] space-y-4">
+                    <div className="flex items-center justify-between border-b border-[#F5F5F5] pb-4">
+                        <div>
+                            <h4 className="text-xs font-black text-[#7A3E4A] uppercase tracking-wider flex items-center gap-2">
+                                🎁 Barra de Progresso / Recompensas no Carrinho
+                            </h4>
+                            <p className="text-xs text-gray-400 mt-0.5">Configure metas de valor ou quantidade para liberar Frete Grátis, Brindes ou Descontos.</p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={rewardBar.enabled}
+                                onChange={(e) => setRewardBar(prev => ({ ...prev, enabled: e.target.checked }))}
+                                className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#7A3E4A]"></div>
+                            <span className="ml-2 text-xs font-bold text-gray-700">{rewardBar.enabled ? 'Ativada' : 'Desativada'}</span>
                         </label>
-                        <input
-                            type="number"
-                            step="any"
-                            value={rewardBar.target_value}
-                            onChange={(e) => setRewardBar(prev => ({ ...prev, target_value: parseFloat(e.target.value) || 0 }))}
-                            className="w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-xs outline-none focus:border-[#7A3E4A] transition-all font-medium"
-                            required
-                        />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label className={labelCls}>Tipo de Bônus / Recompensa</label>
+                            <select
+                                value={rewardBar.reward_type || 'frete_gratis'}
+                                onChange={(e) => setRewardBar(prev => ({ 
+                                    ...prev, 
+                                    reward_type: e.target.value,
+                                    reward_title: e.target.value === 'frete_gratis' ? 'Frete Grátis' : (e.target.value === 'brinde' ? 'Brinde Especial' : 'Desconto Especial')
+                                }))}
+                                className={inputCls}
+                            >
+                                <option value="frete_gratis">🚚 Frete Grátis</option>
+                                <option value="brinde">🎁 Brinde Especial (ex: Batom/Mimo)</option>
+                                <option value="desconto">🏷️ Desconto Especial</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className={labelCls}>Tipo de Meta</label>
+                            <select
+                                value={rewardBar.target_type}
+                                onChange={(e) => setRewardBar(prev => ({ ...prev, target_type: e.target.value }))}
+                                className={inputCls}
+                            >
+                                <option value="value">Valor Mínimo da Compra (R$)</option>
+                                <option value="quantity">Quantidade Mínima de Produtos (Qtd)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className={labelCls}>
+                                {rewardBar.target_type === 'quantity' ? 'Quantidade Meta (ex: 3)' : 'Valor Meta R$ (ex: 299.99)'}
+                            </label>
+                            <input
+                                type="number"
+                                step="any"
+                                value={rewardBar.target_value}
+                                onChange={(e) => setRewardBar(prev => ({ ...prev, target_value: parseFloat(e.target.value) || 0 }))}
+                                className={inputCls}
+                                required
+                            />
+                        </div>
+
+                        <div>
+                            <label className={labelCls}>Título da Recompensa</label>
+                            <input
+                                type="text"
+                                value={rewardBar.reward_title}
+                                onChange={(e) => setRewardBar(prev => ({ ...prev, reward_title: e.target.value }))}
+                                className={inputCls}
+                                placeholder="Ex: Frete Grátis ou Batom de Brinde"
+                                required
+                            />
+                        </div>
                     </div>
 
                     <div>
-                        <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-wider">Título da Recompensa</label>
+                        <label className={labelCls}>Mensagem de Comemoração (Ao atingir a meta)</label>
                         <input
                             type="text"
-                            value={rewardBar.reward_title}
-                            onChange={(e) => setRewardBar(prev => ({ ...prev, reward_title: e.target.value }))}
-                            className="w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-xs outline-none focus:border-[#7A3E4A] transition-all font-medium"
-                            placeholder="Ex: Frete Grátis ou Batom de Brinde"
+                            value={rewardBar.success_message}
+                            onChange={(e) => setRewardBar(prev => ({ ...prev, success_message: e.target.value }))}
+                            className={inputCls}
+                            placeholder="Ex: Parabéns! Você ganhou Frete Grátis!"
                             required
                         />
                     </div>
-                </div>
-
-                <div>
-                    <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-wider">Mensagem de Comemoração (Ao atingir a meta)</label>
-                    <input
-                        type="text"
-                        value={rewardBar.success_message}
-                        onChange={(e) => setRewardBar(prev => ({ ...prev, success_message: e.target.value }))}
-                        className="w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-sm outline-none focus:border-[#7A3E4A] transition-all font-medium"
-                        placeholder="Ex: Parabéns! Você ganhou Frete Grátis!"
-                        required
-                    />
                 </div>
 
                 <div className="flex gap-2 justify-end pt-2">
                     <button
                         type="submit"
                         disabled={saving}
-                        className="px-6 py-3 bg-gradient-to-r from-[#7A3E4A] to-[#9A5060] text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:shadow-lg hover:shadow-[#7A3E4A]/30 transition-all cursor-pointer disabled:opacity-50"
+                        className="px-8 py-3.5 bg-gradient-to-r from-[#7A3E4A] to-[#9A5060] text-white text-xs font-black uppercase tracking-widest rounded-xl hover:shadow-lg hover:shadow-[#7A3E4A]/30 transition-all cursor-pointer disabled:opacity-50"
                     >
-                        {saving ? 'Salvando...' : 'Salvar Recompensas do Carrinho'}
+                        {saving ? 'Salvando...' : 'Salvar Configurações da Loja'}
                     </button>
                 </div>
             </form>
@@ -1788,22 +1843,22 @@ export function SettingsSection({ saving, setSaving }) {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-wider">Nova Senha (Mínimo 6 caracteres)</label>
+                        <label className={labelCls}>Nova Senha (Mínimo 6 caracteres)</label>
                         <input
                             type="password"
                             value={newPassword}
                             onChange={(e) => setNewPassword(e.target.value)}
-                            className="w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-sm outline-none focus:border-[#7A3E4A] focus:ring-2 focus:ring-[#7A3E4A]/10 transition-all font-medium"
+                            className={inputCls}
                             required
                         />
                     </div>
                     <div>
-                        <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-wider">Confirmar Nova Senha</label>
+                        <label className={labelCls}>Confirmar Nova Senha</label>
                         <input
                             type="password"
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
-                            className="w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-sm outline-none focus:border-[#7A3E4A] focus:ring-2 focus:ring-[#7A3E4A]/10 transition-all font-medium"
+                            className={inputCls}
                             required
                         />
                     </div>
@@ -1816,164 +1871,6 @@ export function SettingsSection({ saving, setSaving }) {
                         className="px-6 py-3 bg-gradient-to-r from-[#7A3E4A] to-[#9A5060] text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:shadow-lg hover:shadow-[#7A3E4A]/30 transition-all cursor-pointer disabled:opacity-50"
                     >
                         {saving ? 'Alterando...' : 'Alterar Senha'}
-                    </button>
-                </div>
-            </form>
-        </div>
-    )
-}
-
-// ─── SECTION: PRODUCTION & MARKETING CONFIG ───────────────────────────────────
-export function ProductionSettingsSection({ updateStoreConfig }) {
-    const [config, setConfig] = useState(() => {
-        try {
-            return JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
-        } catch { return {} }
-    })
-    const [savedMsg, setSavedMsg] = useState(false)
-
-    const handleSubmit = async (e) => {
-        e.preventDefault()
-        localStorage.setItem('meraki_store_config', JSON.stringify(config))
-        window.dispatchEvent(new Event('storeConfigUpdated'))
-        if (updateStoreConfig) {
-            await updateStoreConfig(config)
-        }
-        setSavedMsg(true)
-        setTimeout(() => setSavedMsg(false), 3000)
-    }
-
-    const inputCls = "w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-sm outline-none focus:border-[#7A3E4A] focus:ring-2 focus:ring-[#7A3E4A]/10 transition-all font-medium"
-    const labelCls = "block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider"
-
-    return (
-        <div className="space-y-6">
-            <div>
-                <h2 className="text-sm font-black text-gray-900">Configurações de Produção & Marketing</h2>
-                <p className="text-[10px] text-gray-400 font-medium">Gerencie pixels de anúncios, dados jurídicos do rodapé e integrações de pagamento/frete.</p>
-            </div>
-
-            {savedMsg && (
-                <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold rounded-xl animate-[fadeIn_200ms_ease-out]">
-                    ✓ Configurações salvas com sucesso! As alterações já estão ativas na loja.
-                </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-6">
-                {/* 1. Marketing & Pixels */}
-                <div className="bg-white p-5 rounded-2xl border border-[#EEEEEE] space-y-4">
-                    <h3 className="text-xs font-black text-[#7A3E4A] uppercase tracking-wider flex items-center gap-2">
-                        📊 Rastreamento & Marketing (Pixels)
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label className={labelCls}>ID do Meta Pixel (Facebook / Instagram)</label>
-                            <input
-                                type="text"
-                                placeholder="Ex: 123456789012345"
-                                value={config.meta_pixel_id || ''}
-                                onChange={e => setConfig(prev => ({ ...prev, meta_pixel_id: e.target.value }))}
-                                className={inputCls}
-                            />
-                            <p className="text-[9px] text-gray-400 mt-1">Rastreia automaticamente PageView, AddToCart, InitiateCheckout e Purchase.</p>
-                        </div>
-                        <div>
-                            <label className={labelCls}>ID do Google Analytics 4 (GA4)</label>
-                            <input
-                                type="text"
-                                placeholder="Ex: G-XXXXXXXXXX"
-                                value={config.ga_tracking_id || ''}
-                                onChange={e => setConfig(prev => ({ ...prev, ga_tracking_id: e.target.value }))}
-                                className={inputCls}
-                            />
-                            <p className="text-[9px] text-gray-400 mt-1">Tag de medição do Google Analytics para e-commerce.</p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* 2. Dados Legais da Empresa */}
-                <div className="bg-white p-5 rounded-2xl border border-[#EEEEEE] space-y-4">
-                    <h3 className="text-xs font-black text-[#7A3E4A] uppercase tracking-wider flex items-center gap-2">
-                        🏛️ Dados Jurídicos do Rodapé (Lei do E-commerce)
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label className={labelCls}>CNPJ da Empresa</label>
-                            <input
-                                type="text"
-                                placeholder="Ex: 57.484.768/0064-89"
-                                value={config.cnpj || ''}
-                                onChange={e => setConfig(prev => ({ ...prev, cnpj: e.target.value }))}
-                                className={inputCls}
-                            />
-                        </div>
-                        <div>
-                            <label className={labelCls}>Razão Social</label>
-                            <input
-                                type="text"
-                                placeholder="Ex: Meraki Comércio de Vestuário Ltda"
-                                value={config.razao_social || ''}
-                                onChange={e => setConfig(prev => ({ ...prev, razao_social: e.target.value }))}
-                                className={inputCls}
-                            />
-                        </div>
-                        <div className="md:col-span-2">
-                            <label className={labelCls}>Endereço Físico Completo</label>
-                            <input
-                                type="text"
-                                placeholder="Ex: Avenida Alfredo Nasser, Qd. 14, Lt. 05 - Centro, Bonfinópolis - GO"
-                                value={config.address || ''}
-                                onChange={e => setConfig(prev => ({ ...prev, address: e.target.value }))}
-                                className={inputCls}
-                            />
-                        </div>
-                        <div>
-                            <label className={labelCls}>Telefone SAC / Suporte</label>
-                            <input
-                                type="text"
-                                placeholder="Ex: (11) 2388-0403"
-                                value={config.sac_phone || ''}
-                                onChange={e => setConfig(prev => ({ ...prev, sac_phone: e.target.value }))}
-                                className={inputCls}
-                            />
-                        </div>
-                        <div>
-                            <label className={labelCls}>CEP de Origem (Saída dos Envios)</label>
-                            <input
-                                type="text"
-                                placeholder="Ex: 75225-000"
-                                value={config.origin_cep || ''}
-                                onChange={e => setConfig(prev => ({ ...prev, origin_cep: e.target.value }))}
-                                className={inputCls}
-                            />
-                        </div>
-                    </div>
-                </div>
-
-                {/* 3. Pagamento & Gateway */}
-                <div className="bg-white p-5 rounded-2xl border border-[#EEEEEE] space-y-4">
-                    <h3 className="text-xs font-black text-[#7A3E4A] uppercase tracking-wider flex items-center gap-2">
-                        💳 Gateway de Pagamento (InfinitePay / Checkout)
-                    </h3>
-                    <div>
-                        <label className={labelCls}>Handle / Tag do InfinitePay</label>
-                        <input
-                            type="text"
-                            placeholder="Ex: merakimodafeminina"
-                            value={config.infinitepay_handle || ''}
-                            onChange={e => setConfig(prev => ({ ...prev, infinitepay_handle: e.target.value }))}
-                            className={inputCls}
-                        />
-                        <p className="text-[9px] text-gray-400 mt-1">Nome da sua conta do InfinitePay para onde o checkout envia os pagamentos de PIX e Cartão.</p>
-                    </div>
-                </div>
-
-                <div className="flex justify-end">
-                    <button
-                        type="submit"
-                        className="px-8 py-3.5 bg-gradient-to-r from-[#7A3E4A] to-[#9A5060] text-white text-xs font-black uppercase tracking-widest rounded-xl hover:shadow-lg hover:shadow-[#7A3E4A]/30 transition-all cursor-pointer"
-                    >
-                        Salvar Configurações de Produção
                     </button>
                 </div>
             </form>
