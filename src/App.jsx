@@ -10,6 +10,7 @@ import ProductPage from './pages/ProductPage.jsx'
 import InfoPage from './pages/InfoPage.jsx'
 import ProfilePage from './pages/ProfilePage.jsx'
 import CartDrawer from './components/CartDrawer.jsx'
+import TrackingManager from './components/TrackingManager.jsx'
 import { isInitialSyncComplete } from './services/database.js'
 
 function ScrollToTopReset() {
@@ -117,6 +118,7 @@ export default function App() {
     return (
         <HashRouter>
             <ScrollToTopReset />
+            <TrackingManager />
             <CartDrawer />
             <Routes>
                 <Route path="/" element={<HomePage />} />

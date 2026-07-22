@@ -47,6 +47,7 @@ export function useCart() {
     }
 
     function addToCart(product, size, color = '', customText = '', customPrice = 0) {
+        trackAddToCart(product)
         const currentCart = loadFromStorage()
         const existingIndex = currentCart.findIndex(
             item => item.id === product.id && 

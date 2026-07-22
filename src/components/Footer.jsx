@@ -5,7 +5,8 @@ export default function Footer() {
     const [config, setConfig] = useState({
         sac_phone: '(11) 2388-0403',
         address: 'Avenida Alfredo Nasser, Qd. 14, Lt. 05 - Centro, Bonfinópolis - GO, CEP: 75225-000',
-        cnpj: '57.484.768/0064-89'
+        cnpj: '57.484.768/0064-89',
+        razao_social: 'Meraki Comércio de Vestuário Ltda'
     })
 
     useEffect(() => {
@@ -16,7 +17,8 @@ export default function Footer() {
                     setConfig({
                         sac_phone: stored.sac_phone || '(11) 2388-0403',
                         address: stored.address || 'Avenida Alfredo Nasser, Qd. 14, Lt. 05 - Centro, Bonfinópolis - GO, CEP: 75225-000',
-                        cnpj: stored.cnpj || '57.484.768/0064-89'
+                        cnpj: stored.cnpj || '57.484.768/0064-89',
+                        razao_social: stored.razao_social || 'Meraki Comércio de Vestuário Ltda'
                     })
                 }
             } catch (e) {
@@ -225,7 +227,7 @@ export default function Footer() {
                 {/* Footer Legal & Copyright */}
                 <div className="text-center md:text-left flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] text-gray-400 font-light">
                     <p className="leading-relaxed max-w-2xl">
-                        Horário de Atendimento: De segunda à sexta-feira, das 8h30 às 17h30, exceto feriados | {config.address} | Meraki Comércio de Vestuário Ltda - CNPJ: {config.cnpj}
+                        Horário de Atendimento: De segunda à sexta-feira, das 8h30 às 17h30, exceto feriados | {config.address} | {config.razao_social || 'Meraki Comércio de Vestuário Ltda'} - CNPJ: {config.cnpj}
                     </p>
                     <p className="shrink-0">
                         © Meraki 2026 - Todos os direitos reservados

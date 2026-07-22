@@ -1822,3 +1822,162 @@ export function SettingsSection({ saving, setSaving }) {
         </div>
     )
 }
+
+// ─── SECTION: PRODUCTION & MARKETING CONFIG ───────────────────────────────────
+export function ProductionSettingsSection({ updateStoreConfig }) {
+    const [config, setConfig] = useState(() => {
+        try {
+            return JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+        } catch { return {} }
+    })
+    const [savedMsg, setSavedMsg] = useState(false)
+
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+        localStorage.setItem('meraki_store_config', JSON.stringify(config))
+        window.dispatchEvent(new Event('storeConfigUpdated'))
+        if (updateStoreConfig) {
+            await updateStoreConfig(config)
+        }
+        setSavedMsg(true)
+        setTimeout(() => setSavedMsg(false), 3000)
+    }
+
+    const inputCls = "w-full px-4 py-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl text-sm outline-none focus:border-[#7A3E4A] focus:ring-2 focus:ring-[#7A3E4A]/10 transition-all font-medium"
+    const labelCls = "block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider"
+
+    return (
+        <div className="space-y-6">
+            <div>
+                <h2 className="text-sm font-black text-gray-900">Configurações de Produção & Marketing</h2>
+                <p className="text-[10px] text-gray-400 font-medium">Gerencie pixels de anúncios, dados jurídicos do rodapé e integrações de pagamento/frete.</p>
+            </div>
+
+            {savedMsg && (
+                <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold rounded-xl animate-[fadeIn_200ms_ease-out]">
+                    ✓ Configurações salvas com sucesso! As alterações já estão ativas na loja.
+                </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+                {/* 1. Marketing & Pixels */}
+                <div className="bg-white p-5 rounded-2xl border border-[#EEEEEE] space-y-4">
+                    <h3 className="text-xs font-black text-[#7A3E4A] uppercase tracking-wider flex items-center gap-2">
+                        📊 Rastreamento & Marketing (Pixels)
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className={labelCls}>ID do Meta Pixel (Facebook / Instagram)</label>
+                            <input
+                                type="text"
+                                placeholder="Ex: 123456789012345"
+                                value={config.meta_pixel_id || ''}
+                                onChange={e => setConfig(prev => ({ ...prev, meta_pixel_id: e.target.value }))}
+                                className={inputCls}
+                            />
+                            <p className="text-[9px] text-gray-400 mt-1">Rastreia automaticamente PageView, AddToCart, InitiateCheckout e Purchase.</p>
+                        </div>
+                        <div>
+                            <label className={labelCls}>ID do Google Analytics 4 (GA4)</label>
+                            <input
+                                type="text"
+                                placeholder="Ex: G-XXXXXXXXXX"
+                                value={config.ga_tracking_id || ''}
+                                onChange={e => setConfig(prev => ({ ...prev, ga_tracking_id: e.target.value }))}
+                                className={inputCls}
+                            />
+                            <p className="text-[9px] text-gray-400 mt-1">Tag de medição do Google Analytics para e-commerce.</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* 2. Dados Legais da Empresa */}
+                <div className="bg-white p-5 rounded-2xl border border-[#EEEEEE] space-y-4">
+                    <h3 className="text-xs font-black text-[#7A3E4A] uppercase tracking-wider flex items-center gap-2">
+                        🏛️ Dados Jurídicos do Rodapé (Lei do E-commerce)
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className={labelCls}>CNPJ da Empresa</label>
+                            <input
+                                type="text"
+                                placeholder="Ex: 57.484.768/0064-89"
+                                value={config.cnpj || ''}
+                                onChange={e => setConfig(prev => ({ ...prev, cnpj: e.target.value }))}
+                                className={inputCls}
+                            />
+                        </div>
+                        <div>
+                            <label className={labelCls}>Razão Social</label>
+                            <input
+                                type="text"
+                                placeholder="Ex: Meraki Comércio de Vestuário Ltda"
+                                value={config.razao_social || ''}
+                                onChange={e => setConfig(prev => ({ ...prev, razao_social: e.target.value }))}
+                                className={inputCls}
+                            />
+                        </div>
+                        <div className="md:col-span-2">
+                            <label className={labelCls}>Endereço Físico Completo</label>
+                            <input
+                                type="text"
+                                placeholder="Ex: Avenida Alfredo Nasser, Qd. 14, Lt. 05 - Centro, Bonfinópolis - GO"
+                                value={config.address || ''}
+                                onChange={e => setConfig(prev => ({ ...prev, address: e.target.value }))}
+                                className={inputCls}
+                            />
+                        </div>
+                        <div>
+                            <label className={labelCls}>Telefone SAC / Suporte</label>
+                            <input
+                                type="text"
+                                placeholder="Ex: (11) 2388-0403"
+                                value={config.sac_phone || ''}
+                                onChange={e => setConfig(prev => ({ ...prev, sac_phone: e.target.value }))}
+                                className={inputCls}
+                            />
+                        </div>
+                        <div>
+                            <label className={labelCls}>CEP de Origem (Saída dos Envios)</label>
+                            <input
+                                type="text"
+                                placeholder="Ex: 75225-000"
+                                value={config.origin_cep || ''}
+                                onChange={e => setConfig(prev => ({ ...prev, origin_cep: e.target.value }))}
+                                className={inputCls}
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* 3. Pagamento & Gateway */}
+                <div className="bg-white p-5 rounded-2xl border border-[#EEEEEE] space-y-4">
+                    <h3 className="text-xs font-black text-[#7A3E4A] uppercase tracking-wider flex items-center gap-2">
+                        💳 Gateway de Pagamento (InfinitePay / Checkout)
+                    </h3>
+                    <div>
+                        <label className={labelCls}>Handle / Tag do InfinitePay</label>
+                        <input
+                            type="text"
+                            placeholder="Ex: merakimodafeminina"
+                            value={config.infinitepay_handle || ''}
+                            onChange={e => setConfig(prev => ({ ...prev, infinitepay_handle: e.target.value }))}
+                            className={inputCls}
+                        />
+                        <p className="text-[9px] text-gray-400 mt-1">Nome da sua conta do InfinitePay para onde o checkout envia os pagamentos de PIX e Cartão.</p>
+                    </div>
+                </div>
+
+                <div className="flex justify-end">
+                    <button
+                        type="submit"
+                        className="px-8 py-3.5 bg-gradient-to-r from-[#7A3E4A] to-[#9A5060] text-white text-xs font-black uppercase tracking-widest rounded-xl hover:shadow-lg hover:shadow-[#7A3E4A]/30 transition-all cursor-pointer"
+                    >
+                        Salvar Configurações de Produção
+                    </button>
+                </div>
+            </form>
+        </div>
+    )
+}
+

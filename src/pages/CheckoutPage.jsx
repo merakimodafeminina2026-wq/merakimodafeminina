@@ -9,6 +9,8 @@ import WhatsAppButton from '../components/WhatsAppButton.jsx'
 import Notification from '../components/Notification.jsx'
 import { getAssetUrl } from '../utils/assets.js'
 import { createPaymentSession } from '../services/payment.js'
+import { fetchAddressByCep, calculateShippingOptions } from '../services/shipping.js'
+import { trackInitiateCheckout, trackPurchase } from '../components/TrackingManager.jsx'
 
 export default function CheckoutPage() {
     const { cart, clearCart, cartCount, subtotal: rawSubtotal, comboDiscount } = useCart()
@@ -204,6 +206,12 @@ export default function CheckoutPage() {
             .slice(0, 9)
     }
 
+    useEffect(() => {
+        if (cart.length > 0) {
+            trackInitiateCheckout(cart, rawSubtotal - comboDiscount)
+        }
+    }, [])
+
     const handleCepChange = async (e) => {
         const masked = maskCep(e.target.value)
         setCep(masked)
@@ -211,19 +219,17 @@ export default function CheckoutPage() {
         const cleanVal = masked.replace(/\D/g, '')
         if (cleanVal.length === 8) {
             try {
-                const response = await fetch(`https://viacep.com.br/ws/${cleanVal}/json/`)
-                const data = await response.json()
-                if (!data.erro) {
-                    setStreet(data.logradouro || '')
-                    setNeighborhood(data.bairro || '')
-                    setCity(data.localidade || '')
-                    setState(data.uf || '')
-                    showNotification('CEP preenchido automaticamente!')
-                } else {
-                    showNotification('CEP não encontrado.')
-                }
+                const addr = await fetchAddressByCep(cleanVal)
+                setStreet(addr.street)
+                setNeighborhood(addr.neighborhood)
+                setCity(addr.city)
+                setState(addr.state)
+                
+                const options = calculateShippingOptions(addr.state, subtotal)
+                setAvailableShipping(options)
+                showNotification('CEP preenchido e frete calculado com sucesso!')
             } catch (err) {
-                console.error(err)
+                showNotification(err.message || 'CEP não encontrado.')
             }
         }
     }
