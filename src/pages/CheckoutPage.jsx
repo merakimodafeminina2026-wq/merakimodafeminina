@@ -304,13 +304,13 @@ export default function CheckoutPage() {
             created_at: new Date().toISOString()
         }
 
-        // Save new address to profile
-        // Save new address to profile
-        if (user) {
+        // Save new address to profile and user addresses list
+        if (user && user.email) {
+            const cleanEmail = user.email.trim().toLowerCase()
             updateUserProfile(user.id, {
                 phone,
                 cpf,
-                address: street, // map street state to address column
+                address: street,
                 cep,
                 number,
                 complement,
@@ -318,6 +318,24 @@ export default function CheckoutPage() {
                 city,
                 state
             }).catch(console.error)
+
+            const existingAddrs = JSON.parse(localStorage.getItem(`meraki_user_addresses_${cleanEmail}`) || '[]')
+            const exists = existingAddrs.some(a => a.cep === cep && a.number === number)
+            if (!exists) {
+                const newAddrObj = {
+                    id: 'addr-' + Date.now(),
+                    label: 'Entrega Recente',
+                    cep,
+                    street,
+                    number,
+                    complement,
+                    neighborhood,
+                    city,
+                    state
+                }
+                const updatedAddrs = [newAddrObj, ...existingAddrs]
+                localStorage.setItem(`meraki_user_addresses_${cleanEmail}`, JSON.stringify(updatedAddrs))
+            }
         }
 
         // Save order to localStorage
