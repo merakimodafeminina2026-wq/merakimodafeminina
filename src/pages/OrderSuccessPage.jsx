@@ -120,13 +120,17 @@ export default function OrderSuccessPage() {
     }, [])
 
     const storePixKey = useMemo(() => {
-        if (dbPixKey) return dbPixKey
-        try {
-            const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
-            return config.pix_key || config.pixkey || '57328371000114'
-        } catch {
+        let key = dbPixKey
+        if (!key) {
+            try {
+                const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+                key = config.pix_key || config.pixkey
+            } catch {}
+        }
+        if (!key || key.includes('merakifemme') || key.includes('merakimodafeminina')) {
             return '57328371000114'
         }
+        return key.trim()
     }, [dbPixKey])
 
     const pixPayload = useMemo(() => {

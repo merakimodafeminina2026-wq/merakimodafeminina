@@ -1772,7 +1772,10 @@ export function SettingsSection({ saving, setSaving, updateStoreConfig }) {
         const fetchDbConfig = async () => {
             try {
                 const storedConfig = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
-                const storedKey = storedConfig.pix_key || storedConfig.pixKey
+                let storedKey = storedConfig.pix_key || storedConfig.pixKey
+                if (storedKey && (storedKey.includes('merakifemme') || storedKey.includes('merakimodafeminina'))) {
+                    storedKey = '57328371000114'
+                }
                 if (storedKey && storedKey.trim()) {
                     setPixKey(storedKey.trim())
                 }
@@ -1789,7 +1792,7 @@ export function SettingsSection({ saving, setSaving, updateStoreConfig }) {
                     if (data.ga_tracking_id) setGaTrackingId(data.ga_tracking_id)
                     if (data.infinitepay_handle) setInfinitepayHandle(data.infinitepay_handle)
                     const dbKey = data.pix_key || data.pixkey
-                    if (dbKey && String(dbKey).trim() && !storedKey) {
+                    if (dbKey && String(dbKey).trim() && !dbKey.includes('merakifemme') && !dbKey.includes('merakimodafeminina')) {
                         setPixKey(String(dbKey).trim())
                     }
                 }
