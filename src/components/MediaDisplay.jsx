@@ -2,8 +2,8 @@ import React from 'react'
 import { getAssetUrl, isMediaVideo } from '../utils/assets.js'
 
 export default function MediaDisplay({ src, alt = '', className = '', style = {}, ...props }) {
-    if (!src) {
-        return <img src={getAssetUrl('/assets/placeholder.jpg')} alt={alt} className={className} style={style} {...props} />
+    if (!src || typeof src !== 'string' || !src.trim()) {
+        return <img src={getAssetUrl('/placeholder.jpg')} alt={alt} className={className} style={style} {...props} />
     }
 
     if (isMediaVideo(src)) {
@@ -27,7 +27,10 @@ export default function MediaDisplay({ src, alt = '', className = '', style = {}
             alt={alt}
             className={className}
             style={style}
-            onError={(e) => { e.target.src = getAssetUrl('/assets/placeholder.jpg') }}
+            onError={(e) => {
+                e.target.onerror = null
+                e.target.src = getAssetUrl('/placeholder.jpg')
+            }}
             {...props}
         />
     )

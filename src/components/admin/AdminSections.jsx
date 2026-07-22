@@ -513,8 +513,12 @@ export function BannersSection({
                             {/* Desktop preview (2/3 width) */}
                             <div className="col-span-2 space-y-1">
                                 <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wider">Desktop (Foto/Vídeo/GIF)</span>
-                                <div className="aspect-[16/7] bg-gray-50 rounded-xl overflow-hidden border border-gray-100 flex items-center justify-center">
-                                    <MediaDisplay src={bn.image} alt={bn.alt} className="w-full h-full object-cover" />
+                                <div className="aspect-[16/7] bg-gray-50 rounded-xl overflow-hidden border border-gray-100 flex items-center justify-center relative">
+                                    {bn.image ? (
+                                        <MediaDisplay src={bn.image} alt={bn.alt} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="text-center p-2 text-[8px] text-gray-300 font-bold">Sem mídia desktop</div>
+                                    )}
                                 </div>
                             </div>
                             {/* Mobile preview (1/3 width) */}
