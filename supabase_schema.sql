@@ -219,6 +219,7 @@ ALTER TABLE public.store_config ADD COLUMN IF NOT EXISTS available_badges JSONB 
 ALTER TABLE public.store_config ADD COLUMN IF NOT EXISTS installment_text TEXT;
 ALTER TABLE public.store_config ADD COLUMN IF NOT EXISTS banner_transition TEXT DEFAULT 'shatter';
 ALTER TABLE public.store_config ADD COLUMN IF NOT EXISTS reward_bar JSONB DEFAULT '{"enabled": true, "target_type": "value", "target_value": 299.99, "reward_type": "frete_gratis", "reward_title": "Frete Grátis", "success_message": "Parabéns! Você ganhou Frete Grátis!"}'::jsonb;
+ALTER TABLE public.store_config ADD COLUMN IF NOT EXISTS category_styles JSONB DEFAULT '{}'::jsonb;
 ALTER TABLE public.store_config ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
 
 -- ====================================================================

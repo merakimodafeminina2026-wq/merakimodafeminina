@@ -20,7 +20,7 @@ const TABLE_COLUMNS = {
     store_config: [
         'id', 'whatsapp', 'sac_phone', 'address', 'cnpj', 'razao_social', 'origin_cep', 'meta_pixel_id', 'ga_tracking_id', 'infinitepay_handle',
         'topbarmessages', 'topbarstyle', 'promocombo', 'editorial', 'available_colors', 'available_emojis', 'shipping_message',
-        'available_badges', 'installment_text', 'banner_transition', 'reward_bar'
+        'available_badges', 'installment_text', 'banner_transition', 'reward_bar', 'category_styles'
     ],
     reviews: ['id', 'product_id', 'name', 'rating', 'comment', 'verified', 'created_at']
 }
