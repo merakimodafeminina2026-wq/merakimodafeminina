@@ -7,6 +7,18 @@ import { applyTransparentButterflyFavicon } from './utils/favicon.js'
 // Automatically apply transparent Meraki butterfly favicon in browser tab
 applyTransparentButterflyFavicon()
 
+// Auto-recover from stale Vercel asset 404s after new deployments
+window.addEventListener('error', (event) => {
+    const src = event?.target?.src || event?.filename || ''
+    if (src.includes('/assets/') || event?.message?.includes('chunk') || event?.message?.includes('Importing a module')) {
+        const reloaded = sessionStorage.getItem('meraki_asset_reload')
+        if (!reloaded) {
+            sessionStorage.setItem('meraki_asset_reload', 'true')
+            window.location.reload()
+        }
+    }
+}, true)
+
 createRoot(document.getElementById('root')).render(
     <StrictMode>
         <App />
