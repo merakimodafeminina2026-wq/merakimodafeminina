@@ -320,18 +320,74 @@ export default function AdminPage() {
 
 
     useEffect(() => {
-        let loadedOrders = JSON.parse(localStorage.getItem('meraki_orders') || '[]')
         let loadedCoupons = JSON.parse(localStorage.getItem('meraki_coupons') || '[]')
         let loadedBanners = JSON.parse(localStorage.getItem('meraki_banners') || '[]')
-        getProfiles().then(({ data }) => {
-            if (data) {
-                setCustomers(data)
+
+        // Fetch Orders directly from Supabase Database
+        supabase.from('orders').select('*').order('created_at', { ascending: false }).then(({ data, error }) => {
+            if (!error && data) {
+                setOrders(data.map(o => ({
+                    id: o.id,
+                    customerName: o.customername,
+                    customerEmail: o.customeremail,
+                    customerPhone: o.customerphone,
+                    customerCpf: o.customercpf,
+                    shippingAddress: o.shippingaddress,
+                    paymentMethod: o.paymentmethod,
+                    subtotal: Number(o.subtotal) || 0,
+                    shipping: Number(o.shipping) || 0,
+                    discount: Number(o.discount) || 0,
+                    total: Number(o.total) || 0,
+                    coupon: o.coupon,
+                    status: o.status,
+                    items: o.items || [],
+                    created_at: o.created_at
+                })))
+            } else {
+                setOrders(JSON.parse(localStorage.getItem('meraki_orders') || '[]'))
             }
+        }).catch(() => {
+            setOrders(JSON.parse(localStorage.getItem('meraki_orders') || '[]'))
+        })
+
+        // Fetch Customers/Profiles directly from Supabase Database
+        getProfiles().then(({ data }) => {
+            if (data) setCustomers(data)
         }).catch(console.error)
 
-        setOrders(loadedOrders)
         setCoupons(loadedCoupons)
         setBanners(loadedBanners)
+
+        // Fetch Returns directly from Supabase Database
+        supabase.from('returns').select('*').order('created_at', { ascending: false }).then(({ data, error }) => {
+            if (!error && data) {
+                setReturns(data.map(r => ({
+                    id: r.id,
+                    orderId: r.orderid,
+                    itemId: r.itemid,
+                    customerEmail: r.customeremail,
+                    type: r.type,
+                    postageCode: r.postagecode,
+                    status: r.status,
+                    created_at: r.created_at
+                })))
+            } else {
+                const loadedReturns = []
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i)
+                    if (key && key.startsWith('meraki_returns_')) {
+                        const email = key.replace('meraki_returns_', '')
+                        try {
+                            const userReturns = JSON.parse(localStorage.getItem(key) || '[]')
+                            userReturns.forEach(ret => { loadedReturns.push({ ...ret, customerEmail: email }) })
+                        } catch (e) { console.error(e) }
+                    }
+                }
+                setReturns(loadedReturns.sort((a, b) => new Date(b.created_at || b.date) - new Date(a.created_at || a.date)))
+            }
+        }).catch(() => {
+            setReturns([])
+        })
 
         const storedTopbar = localStorage.getItem('meraki_topbar_messages')
         const loadedTopbar = storedTopbar ? JSON.parse(storedTopbar) : [
@@ -377,19 +433,6 @@ export default function AdminPage() {
                 setColorHexMap(map)
             }
         } catch (e) { console.error(e) }
-
-        const loadedReturns = []
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i)
-            if (key && key.startsWith('meraki_returns_')) {
-                const email = key.replace('meraki_returns_', '')
-                try {
-                    const userReturns = JSON.parse(localStorage.getItem(key) || '[]')
-                    userReturns.forEach(ret => { loadedReturns.push({ ...ret, customerEmail: email }) })
-                } catch (e) { console.error(e) }
-            }
-        }
-        setReturns(loadedReturns.sort((a, b) => new Date(b.date) - new Date(a.date)))
     }, [activeSection])
 
     useEffect(() => {

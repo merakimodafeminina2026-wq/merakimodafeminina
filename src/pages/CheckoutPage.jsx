@@ -12,6 +12,8 @@ import { createPaymentSession } from '../services/payment.js'
 import { fetchAddressByCep, calculateShippingOptions } from '../services/shipping.js'
 import { trackInitiateCheckout, trackPurchase } from '../components/TrackingManager.jsx'
 
+import { createOrderInDb } from '../services/database.js'
+
 export default function CheckoutPage() {
     const { cart, clearCart, cartCount, subtotal: rawSubtotal, comboDiscount } = useCart()
     const { user } = useAuth()
@@ -338,10 +340,8 @@ export default function CheckoutPage() {
             }
         }
 
-        // Save order to localStorage
-        const savedOrders = JSON.parse(localStorage.getItem('meraki_orders') || '[]')
-        savedOrders.unshift(newOrder)
-        localStorage.setItem('meraki_orders', JSON.stringify(savedOrders))
+        // Save order directly into Supabase Database and local cache
+        await createOrderInDb(newOrder)
 
         // Clear cart
         clearCart()

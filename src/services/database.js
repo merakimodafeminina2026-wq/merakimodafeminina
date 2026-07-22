@@ -685,3 +685,125 @@ export async function createProductReview({ product_id, name, rating, comment })
 
     return { data: payload, error: null }
 }
+
+// ─── ORDERS / PEDIDOS NO SUPABASE ──────────────────────────────────────────────
+
+export async function createOrderInDb(order) {
+    const payload = filterPayloadForTable('orders', {
+        id: order.id,
+        customername: order.customerName,
+        customeremail: order.customerEmail,
+        customerphone: order.customerPhone || '',
+        customercpf: order.customerCpf || '',
+        shippingaddress: order.shippingAddress || {},
+        paymentmethod: order.paymentMethod || 'pix',
+        subtotal: Number(order.subtotal) || 0,
+        shipping: Number(order.shipping) || 0,
+        discount: Number(order.discount) || 0,
+        total: Number(order.total) || 0,
+        coupon: order.coupon || null,
+        status: order.status || 'Pendente',
+        items: order.items || [],
+        created_at: order.created_at || new Date().toISOString()
+    })
+
+    // Save to local cache immediately for instant UI responsiveness
+    const savedOrders = JSON.parse(localStorage.getItem('meraki_orders') || '[]')
+    const filtered = savedOrders.filter(o => o.id !== order.id)
+    filtered.unshift(order)
+    originalSetItem('meraki_orders', JSON.stringify(filtered))
+
+    try {
+        const { data, error } = await supabase.from('orders').insert([payload]).select().single()
+        if (!error && data) {
+            const mapped = mapDbToFrontend('orders', data)
+            const current = JSON.parse(localStorage.getItem('meraki_orders') || '[]')
+            const idx = current.findIndex(o => o.id === mapped.id)
+            if (idx !== -1) current[idx] = mapped
+            else current.unshift(mapped)
+            originalSetItem('meraki_orders', JSON.stringify(current))
+            return { data: mapped, error: null }
+        }
+    } catch (e) {
+        console.warn('Erro ao inserir pedido no Supabase, mantido em cache local:', e)
+    }
+
+    return { data: order, error: null }
+}
+
+export async function updateOrderStatusInDb(orderId, status) {
+    const savedOrders = JSON.parse(localStorage.getItem('meraki_orders') || '[]')
+    const idx = savedOrders.findIndex(o => o.id === orderId)
+    if (idx !== -1) {
+        savedOrders[idx].status = status
+        originalSetItem('meraki_orders', JSON.stringify(savedOrders))
+    }
+
+    try {
+        const { data, error } = await supabase
+            .from('orders')
+            .update({ status })
+            .eq('id', orderId)
+            .select()
+            .single()
+
+        if (!error && data) {
+            const mapped = mapDbToFrontend('orders', data)
+            return { data: mapped, error: null }
+        }
+    } catch (e) {
+        console.warn('Erro ao atualizar status do pedido no Supabase:', e)
+    }
+
+    return { data: savedOrders[idx] || null, error: null }
+}
+
+// ─── RETURNS / TROCAS E DEVOLUÇÕES NO SUPABASE ──────────────────────────────────
+
+export async function createReturnInDb(ret) {
+    const payload = filterPayloadForTable('returns', {
+        id: ret.id || 'ret-' + Date.now(),
+        orderid: ret.orderId || ret.orderid,
+        itemid: ret.itemId || ret.itemid || '',
+        customeremail: ret.customerEmail || ret.customeremail,
+        type: ret.type || 'Troca por Tamanho',
+        postagecode: ret.postageCode || ret.postagecode || '',
+        status: ret.status || 'Pendente',
+        created_at: ret.created_at || new Date().toISOString()
+    })
+
+    try {
+        const { data, error } = await supabase.from('returns').insert([payload]).select().single()
+        if (!error && data) {
+            const mapped = mapDbToFrontend('returns', data)
+            return { data: mapped, error: null }
+        }
+    } catch (e) {
+        console.warn('Erro ao inserir troca no Supabase:', e)
+    }
+
+    return { data: ret, error: null }
+}
+
+export async function updateReturnStatusInDb(returnId, status, postageCode = '') {
+    try {
+        const updates = { status }
+        if (postageCode) updates.postagecode = postageCode
+
+        const { data, error } = await supabase
+            .from('returns')
+            .update(updates)
+            .eq('id', returnId)
+            .select()
+            .single()
+
+        if (!error && data) {
+            const mapped = mapDbToFrontend('returns', data)
+            return { data: mapped, error: null }
+        }
+    } catch (e) {
+        console.warn('Erro ao atualizar status da troca no Supabase:', e)
+    }
+
+    return { data: null, error: null }
+}
