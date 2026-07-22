@@ -178,7 +178,7 @@ export default function OrderSuccessPage() {
                     </div>
                 )}
                 
-                {/* Pix / Boleto Payment Banner when Payment is Pending */}
+                {/* Pix Payment Banner with InfinitePay Direct Checkout */}
                 {order.paymentMethod === 'pix' && order.status === 'Pendente' && (
                     <div className="bg-gradient-to-br from-[#FFF9F6] via-white to-[#FDF4EC] border border-[#E8E0D8] rounded-3xl p-6 sm:p-10 space-y-6 text-center shadow-xl relative overflow-hidden">
                         {/* Elegant accent border */}
@@ -186,45 +186,39 @@ export default function OrderSuccessPage() {
 
                         <div className="flex flex-col items-center gap-2 pt-2">
                             <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#7A3E4A]/10 border border-[#7A3E4A]/20 text-[#7A3E4A] text-[10px] font-black uppercase tracking-[0.2em]">
-                                ⚡ Pagamento Instantâneo
+                                ⚡ Pagamento Instantâneo InfinitePay
                             </span>
                             <h3 className="font-sans text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
-                                Aguardando Pagamento via PIX
+                                Pagar via PIX com a InfinitePay
                             </h3>
-                        </div>
-                        
-                        {/* QR Code Container */}
-                        <div className="relative w-56 h-56 bg-white border-2 border-[#C6A76A]/30 rounded-2xl p-3 mx-auto shadow-md flex items-center justify-center group transition-all hover:border-[#7A3E4A]/50">
-                            {qrCodeUrl ? (
-                                <img src={qrCodeUrl} alt="QR Code PIX" className="w-full h-full object-contain rounded-xl" />
-                            ) : (
-                                <div className="w-8 h-8 border-2 border-[#7A3E4A] border-t-transparent rounded-full animate-spin" />
-                            )}
                         </div>
 
                         <div className="bg-[#7A3E4A]/10 border border-[#7A3E4A]/20 rounded-2xl px-5 py-3 inline-block mx-auto">
                             <span className="text-xs text-gray-500 font-medium block">Valor Total a Pagar</span>
-                            <span className="text-xl font-black text-[#7A3E4A]">
+                            <span className="text-2xl font-black text-[#7A3E4A]">
                                 {(order.total || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                             </span>
                         </div>
 
                         <p className="text-xs sm:text-sm text-gray-600 font-medium max-w-md mx-auto leading-relaxed">
-                            Escaneie o QR Code acima pelo app do seu banco ou utilize a chave <strong>Pix copia-e-cola</strong> abaixo.
+                            Para gerar o <strong>QR Code oficial com confirmação automática</strong> e sem erros no aplicativo do seu banco, abra a tela da <strong>InfinitePay</strong>:
                         </p>
 
-                        <div className="max-w-lg mx-auto flex items-center border border-[#E8E0D8] rounded-2xl overflow-hidden bg-white shadow-sm ring-1 ring-black/5">
-                            <input
-                                type="text"
-                                readOnly
-                                value={pixPayload}
-                                className="flex-1 px-4 py-4 text-xs font-mono text-gray-600 outline-none bg-transparent select-all"
-                            />
-                            <button
-                                onClick={handleCopyPix}
-                                className="px-7 py-4 bg-gradient-to-r from-[#7A3E4A] to-[#603039] hover:from-[#603039] hover:to-[#4A2027] text-white text-xs font-extrabold uppercase tracking-widest transition-all cursor-pointer shadow-sm flex items-center gap-1.5 shrink-0"
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                            <a
+                                href={`https://pay.infinitepay.io/${infinitePayHandle}/${Math.round((order.total || 0) * 100)}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-[#7A3E4A] to-[#603039] hover:from-[#603039] hover:to-[#4A2027] text-white text-xs font-black uppercase tracking-widest rounded-2xl transition-all cursor-pointer shadow-lg hover:shadow-[#7A3E4A]/30 flex items-center justify-center gap-2"
                             >
-                                {copied ? '✅ Copiado!' : 'Copiar Chave'}
+                                ⚡ Gerar PIX Oficial no InfinitePay
+                            </a>
+                            <button
+                                type="button"
+                                onClick={() => setInfinitePayModalOpen(true)}
+                                className="w-full sm:w-auto px-6 py-4 bg-white hover:bg-gray-50 text-[#7A3E4A] border border-[#7A3E4A]/30 text-xs font-bold uppercase tracking-widest rounded-2xl transition-all cursor-pointer shadow-xs"
+                            >
+                                🖼️ Abrir nesta Tela
                             </button>
                         </div>
                     </div>
