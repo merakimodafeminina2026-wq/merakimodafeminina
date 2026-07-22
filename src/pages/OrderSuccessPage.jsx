@@ -8,8 +8,8 @@ import OrderTracker from '../components/OrderTracker.jsx'
 import FireworksEffect from '../components/FireworksEffect.jsx'
 import { supabase } from '../services/supabase.js'
 
-function generatePixPayload({ pixKey = 'merakimodafeminina@gmail.com', receiverName = 'MERAKI FEMME', receiverCity = 'BONFINOPOLIS', amount = 0, txid = '' }) {
-    const cleanKey = (pixKey || 'merakimodafeminina@gmail.com').trim()
+function generatePixPayload({ pixKey = '57328371000114', receiverName = 'MERAKI FEMME', receiverCity = 'BONFINOPOLIS', amount = 0, txid = '' }) {
+    const cleanKey = (pixKey || '57328371000114').trim()
     const cleanName = (receiverName || 'MERAKI FEMME').normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9 ]/g, "").slice(0, 25).toUpperCase()
     const cleanCity = (receiverCity || 'BONFINOPOLIS').normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9 ]/g, "").slice(0, 15).toUpperCase()
     const formattedAmount = Number(amount || 0).toFixed(2)
@@ -123,9 +123,9 @@ export default function OrderSuccessPage() {
         if (dbPixKey) return dbPixKey
         try {
             const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
-            return config.pix_key || config.pixkey || 'merakifemme.lingerie@gmail.com'
+            return config.pix_key || config.pixkey || '57328371000114'
         } catch {
-            return 'merakifemme.lingerie@gmail.com'
+            return '57328371000114'
         }
     }, [dbPixKey])
 
@@ -225,27 +225,6 @@ export default function OrderSuccessPage() {
                                     className="px-7 py-4 bg-gradient-to-r from-[#7A3E4A] to-[#603039] hover:from-[#603039] text-white text-xs font-extrabold uppercase tracking-widest transition-all cursor-pointer shadow-sm shrink-0 flex items-center gap-1.5"
                                 >
                                     {copied ? '✅ Copiado!' : '📋 Copiar Código'}
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Direct PIX Key box */}
-                        <div className="pt-4 border-t border-[#E8E0D8] max-w-lg mx-auto space-y-2">
-                            <span className="text-[10px] font-bold text-[#7A3E4A] uppercase tracking-widest block">Ou pague usando a Chave Pix Direta da Conta:</span>
-                            <div className="p-3.5 bg-white border border-[#C6A76A]/40 rounded-2xl flex items-center justify-between shadow-2xs">
-                                <div className="text-left">
-                                    <span className="text-[10px] font-bold text-gray-400 block uppercase">Chave Pix (E-mail):</span>
-                                    <span className="text-xs font-mono font-bold text-gray-900">{storePixKey}</span>
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        navigator.clipboard.writeText(storePixKey)
-                                        showNotification('Chave Pix da conta copiada!')
-                                    }}
-                                    className="px-4 py-2 bg-[#7A3E4A]/10 hover:bg-[#7A3E4A]/20 text-[#7A3E4A] text-[10px] font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer"
-                                >
-                                    Copiar Chave
                                 </button>
                             </div>
                         </div>
