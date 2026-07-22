@@ -15,16 +15,38 @@ export default function OrderSuccessPage() {
     const [showFireworks, setShowFireworks] = useState(false)
 
     useEffect(() => {
-        const savedOrders = JSON.parse(localStorage.getItem('meraki_orders') || '[]')
-        const targetOrder = savedOrders.find(o => o.id === orderId)
-        if (targetOrder) {
-            setOrder(targetOrder)
-            const s = (targetOrder.status || '').toLowerCase()
-            if (s === 'pago' || s === 'aprovado' || s === 'entregue' || s === 'enviado' || targetOrder.paymentMethod === 'card') {
+        const checkOrder = () => {
+            const savedOrders = JSON.parse(localStorage.getItem('meraki_orders') || '[]')
+            const targetOrder = savedOrders.find(o => o.id === orderId)
+            if (targetOrder) {
+                setOrder(prev => {
+                    const prevStatus = (prev?.status || '').toLowerCase()
+                    const newStatus = (targetOrder.status || '').toLowerCase()
+                    if (prevStatus === 'pendente' && (newStatus === 'pago' || newStatus === 'aprovado' || newStatus === 'enviado')) {
+                        setShowFireworks(true)
+                        setNotification({ message: '🎉 Pagamento autorizado com sucesso!', visible: true })
+                    }
+                    return targetOrder
+                })
+
+                const s = (targetOrder.status || '').toLowerCase()
+                if (s === 'pago' || s === 'aprovado' || s === 'entregue' || s === 'enviado' || targetOrder.paymentMethod === 'card') {
+                    setShowFireworks(true)
+                }
+            } else {
                 setShowFireworks(true)
             }
-        } else {
-            setShowFireworks(true)
+        }
+
+        checkOrder()
+        const interval = setInterval(checkOrder, 3000)
+        window.addEventListener('storage', checkOrder)
+        window.addEventListener('ordersUpdated', checkOrder)
+
+        return () => {
+            clearInterval(interval)
+            window.removeEventListener('storage', checkOrder)
+            window.removeEventListener('ordersUpdated', checkOrder)
         }
     }, [orderId])
 
@@ -142,6 +164,21 @@ export default function OrderSuccessPage() {
                                 Copiar Código
                             </button>
                         </div>
+                    </div>
+                )}
+
+                {/* Banner de Pagamento Aprovado com Sucesso */}
+                {(order.status === 'Pago' || order.status === 'Aprovado' || order.status === 'Enviado' || order.status === 'Entregue') && (
+                    <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 border border-emerald-500 rounded-3xl p-6 sm:p-8 text-white text-center shadow-2xl space-y-3 relative overflow-hidden animate-[fadeInUp_400ms_ease-out]">
+                        <div className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mx-auto text-2xl shadow-inner border border-white/30 animate-bounce">
+                            🎉
+                        </div>
+                        <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+                            Pagamento Concluído com Sucesso!
+                        </h2>
+                        <p className="text-xs sm:text-sm text-emerald-100 font-medium max-w-lg mx-auto leading-relaxed">
+                            Identificamos a autorização do seu PIX com sucesso! Seu pedido foi confirmado e já está sendo preparado pela nossa equipe com todo carinho.
+                        </p>
                     </div>
                 )}
 

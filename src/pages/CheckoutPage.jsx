@@ -328,7 +328,18 @@ export default function CheckoutPage() {
         // Clear cart
         clearCart()
 
-        // Create InfinitePay payment session and redirect
+        // Check if customer is from Bonfinópolis (CEP 75225... or city Bonfinópolis)
+        const cleanCep = (cep || '').replace(/\D/g, '')
+        const normCity = (city || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        const isBonfinopolis = cleanCep.startsWith('75225') || normCity.includes('bonfinopolis')
+
+        // If PIX payment and Bonfinópolis customer, redirect directly to Order Tracker
+        if (paymentMethod === 'pix' && isBonfinopolis) {
+            navigate(`/order-success/${orderId}`)
+            return
+        }
+
+        // Create InfinitePay payment session and redirect for other cases
         const { paymentUrl } = await createPaymentSession(newOrder)
         if (paymentUrl) {
             window.location.href = paymentUrl
