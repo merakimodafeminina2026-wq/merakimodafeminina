@@ -102,47 +102,51 @@ export default function OrderSuccessPage() {
         }
     }, [orderId])
 
-    const [dbPixKey, setDbPixKey] = useState('')
-
-    useEffect(() => {
-        const fetchPixKeyFromDb = async () => {
-            try {
-                const { data } = await supabase.from('store_config').select('*').eq('id', 'default').maybeSingle()
-                if (data) {
-                    const key = data.pix_key || data.pixkey
-                    if (key) setDbPixKey(key)
-                }
-            } catch (e) {
-                console.warn('Erro ao buscar pix_key do banco:', e)
-            }
-        }
-        fetchPixKeyFromDb()
-    }, [])
-
-    const storePixKey = useMemo(() => {
-        let key = dbPixKey
-        if (!key) {
-            try {
-                const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
-                key = config.pix_key || config.pixkey
-            } catch {}
-        }
-        if (!key || key.includes('merakifemme') || key.includes('merakimodafeminina')) {
+    const [dynamicPixKey, setDynamicPixKey] = useState(() => {
+        try {
+            const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+            return config.pix_key || config.pixKey || '57328371000114'
+        } catch {
             return '57328371000114'
         }
-        return key.trim()
-    }, [dbPixKey])
+    })
+
+    useEffect(() => {
+        const syncPixKey = async () => {
+            try {
+                const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+                if (config.pix_key || config.pixKey) {
+                    setDynamicPixKey(config.pix_key || config.pixKey)
+                }
+
+                const { data } = await supabase.from('store_config').select('*').eq('id', 'default').maybeSingle()
+                if (data && (data.pix_key || data.pixkey)) {
+                    setDynamicPixKey(data.pix_key || data.pixkey)
+                }
+            } catch (e) {
+                console.warn('Erro ao sincronizar pix_key:', e)
+            }
+        }
+
+        syncPixKey()
+        window.addEventListener('storeConfigUpdated', syncPixKey)
+        window.addEventListener('storage', syncPixKey)
+        return () => {
+            window.removeEventListener('storeConfigUpdated', syncPixKey)
+            window.removeEventListener('storage', syncPixKey)
+        }
+    }, [])
 
     const pixPayload = useMemo(() => {
         if (!order) return ''
         return generatePixPayload({
-            pixKey: storePixKey,
+            pixKey: dynamicPixKey,
             receiverName: 'MERAKI FEMME',
             receiverCity: 'BONFINOPOLIS',
             amount: order.total || 0,
             txid: order.id
         })
-    }, [order, storePixKey])
+    }, [order, dynamicPixKey])
 
     const qrCodeUrl = useMemo(() => {
         if (!pixPayload) return ''
