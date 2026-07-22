@@ -93,17 +93,38 @@ export default function Header({ cartCount = 0, wishlistCount = 0, onSearchOpen 
         }
         window.addEventListener('storage', updateCats)
         window.addEventListener('categoriesUpdated', updateCats)
+        window.addEventListener('storeConfigUpdated', updateCats)
         return () => {
             window.removeEventListener('storage', updateCats)
             window.removeEventListener('categoriesUpdated', updateCats)
+            window.removeEventListener('storeConfigUpdated', updateCats)
         }
     }, [])
 
+    const getGroupForCategory = (cat) => {
+        const group = cat.group
+        if (group === 'Lingerie' || group === 'Noite & Especiais' || group === 'Destaques' || group === 'Sensual') {
+            return group
+        }
+        // Fallback for "Geral" or unassigned groups so no category is ever hidden in Mega Menu
+        const name = (cat.name || '').toLowerCase()
+        if (name.includes('noite') || name.includes('camisola') || name.includes('pijama') || name.includes('baby')) {
+            return 'Noite & Especiais'
+        }
+        if (name.includes('sensual') || name.includes('sexy') || name.includes('fantasia') || name.includes('tanga')) {
+            return 'Sensual'
+        }
+        if (name.includes('chá') || name.includes('plus') || name.includes('acessór') || name.includes('personaliz')) {
+            return 'Destaques'
+        }
+        return 'Lingerie'
+    }
+
     const groupedCategories = {
-        'Lingerie': categories.filter(c => c.group === 'Lingerie'),
-        'Noite & Especiais': categories.filter(c => c.group === 'Noite & Especiais'),
-        'Destaques': categories.filter(c => c.group === 'Destaques'),
-        'Sensual': categories.filter(c => c.group === 'Sensual')
+        'Lingerie': categories.filter(c => getGroupForCategory(c) === 'Lingerie'),
+        'Noite & Especiais': categories.filter(c => getGroupForCategory(c) === 'Noite & Especiais'),
+        'Destaques': categories.filter(c => getGroupForCategory(c) === 'Destaques'),
+        'Sensual': categories.filter(c => getGroupForCategory(c) === 'Sensual')
     }
 
     useEffect(() => {
