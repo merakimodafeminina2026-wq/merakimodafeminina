@@ -9,6 +9,7 @@ import QuickViewModal from '../components/QuickViewModal.jsx'
 import ScrollToTop from '../components/ScrollToTop.jsx'
 import WhatsAppButton from '../components/WhatsAppButton.jsx'
 import Notification from '../components/Notification.jsx'
+import MediaDisplay from '../components/MediaDisplay.jsx'
 import { useProducts } from '../hooks/useProducts.js'
 import { useCart } from '../hooks/useCart.js'
 import { useWishlist } from '../hooks/useWishlist.js'
@@ -331,6 +332,41 @@ export default function CategoryPage() {
     const carouselRef = useRef(null)
     const [selectedSubcategory, setSelectedSubcategory] = useState('all')
 
+    const [categoryStylesMap, setCategoryStylesMap] = useState(() => {
+        try {
+            const stored = localStorage.getItem('meraki_category_styles')
+            if (stored) return JSON.parse(stored)
+        } catch {}
+        return {}
+    })
+
+    useEffect(() => {
+        const updateStyles = () => {
+            try {
+                const stored = localStorage.getItem('meraki_category_styles')
+                if (stored) setCategoryStylesMap(JSON.parse(stored))
+            } catch {}
+        }
+        window.addEventListener('categoryStylesUpdated', updateStyles)
+        window.addEventListener('storeConfigUpdated', updateStyles)
+        return () => {
+            window.removeEventListener('categoryStylesUpdated', updateStyles)
+            window.removeEventListener('storeConfigUpdated', updateStyles)
+        }
+    }, [])
+
+    const categorySubcategoriesList = useMemo(() => {
+        if (!slug) return []
+        const cleanSlug = slugifyCategory(slug)
+        if (categoryStylesMap && categoryStylesMap[cleanSlug]) {
+            return categoryStylesMap[cleanSlug]
+        }
+        if (categoryStylesMap && categoryStylesMap[slug]) {
+            return categoryStylesMap[slug]
+        }
+        return CATEGORY_SUBCATEGORIES[slug] || CATEGORY_SUBCATEGORIES[cleanSlug] || []
+    }, [categoryStylesMap, slug])
+
     // Reset subcategory filter when changing categories
     useEffect(() => {
         setSelectedSubcategory('all')
@@ -440,7 +476,16 @@ export default function CategoryPage() {
 
         // 2. Filter by subcategory (if active)
         if (selectedSubcategory !== 'all') {
-            result = result.filter(p => getProductSubcategory(p) === selectedSubcategory)
+            const selNorm = selectedSubcategory.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            result = result.filter(p => {
+                const subNorm = (p.subcategory || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                const nameNorm = (p.name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                const descNorm = (p.description || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                const catNorm = (p.category || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                const calculatedSub = getProductSubcategory(p).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                
+                return subNorm === selNorm || subNorm.includes(selNorm) || calculatedSub === selNorm || nameNorm.includes(selNorm) || descNorm.includes(selNorm) || catNorm.includes(selNorm)
+            })
         }
 
         // 3. Filter by size
@@ -510,7 +555,7 @@ export default function CategoryPage() {
             </section>
 
             {/* Subcategory Slider/Carousel (only for categories with defined styles) */}
-            {CATEGORY_SUBCATEGORIES[slug] && CATEGORY_SUBCATEGORIES[slug].length > 0 && (
+            {categorySubcategoriesList && categorySubcategoriesList.length > 0 && (
                 <section className="bg-white border-b border-[#EEEEEE] py-10 relative overflow-hidden">
                     <div className="max-w-7xl mx-auto px-4 relative">
                         {/* Title */}
@@ -521,7 +566,7 @@ export default function CategoryPage() {
                         {/* Navigation Arrows */}
                         <button 
                             onClick={() => scrollCarousel('left')}
-                            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white border border-gray-100 rounded-full flex items-center justify-center shadow-md hover:bg-gray-50 transition-all text-gray-600 focus:outline-none"
+                            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white border border-gray-100 rounded-full flex items-center justify-center shadow-md hover:bg-gray-50 transition-all text-gray-600 focus:outline-none cursor-pointer"
                             aria-label="Anterior"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -531,7 +576,7 @@ export default function CategoryPage() {
 
                         <button 
                             onClick={() => scrollCarousel('right')}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white border border-gray-100 rounded-full flex items-center justify-center shadow-md hover:bg-gray-50 transition-all text-gray-600 focus:outline-none"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white border border-gray-100 rounded-full flex items-center justify-center shadow-md hover:bg-gray-50 transition-all text-gray-600 focus:outline-none cursor-pointer"
                             aria-label="Próximo"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -548,7 +593,7 @@ export default function CategoryPage() {
                             {/* "All" reset item */}
                             <button
                                 onClick={() => setSelectedSubcategory('all')}
-                                className="flex flex-col items-center gap-2 group focus:outline-none shrink-0"
+                                className="flex flex-col items-center gap-2 group focus:outline-none shrink-0 cursor-pointer"
                             >
                                 <div className={`w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 ${selectedSubcategory === 'all' ? 'bg-[#7A3E4A]/10 ring-2 ring-[#7A3E4A]' : 'bg-[#FDF8F6] hover:bg-[#FDF3F2] hover:shadow-inner'}`}>
                                     <svg viewBox="0 0 100 60" className="w-10 h-6 text-[#7A3E4A] fill-none stroke-current stroke-[1.5] transition-all duration-300 group-hover:scale-110">
@@ -563,14 +608,20 @@ export default function CategoryPage() {
                             </button>
 
                             {/* Subcategories list */}
-                            {CATEGORY_SUBCATEGORIES[slug].map((sub) => (
+                            {categorySubcategoriesList.map((sub) => (
                                 <button
-                                    key={sub.id}
+                                    key={sub.id || sub.name}
                                     onClick={() => setSelectedSubcategory(selectedSubcategory === sub.name ? 'all' : sub.name)}
-                                    className="flex flex-col items-center gap-2 group focus:outline-none shrink-0"
+                                    className="flex flex-col items-center gap-2 group focus:outline-none shrink-0 cursor-pointer"
                                 >
-                                    <div className={`w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 ${selectedSubcategory === sub.name ? 'bg-[#7A3E4A]/10 ring-2 ring-[#7A3E4A]' : 'bg-[#FDF8F6] hover:bg-[#FDF3F2] hover:shadow-inner'}`}>
-                                        {sub.svg}
+                                    <div className={`w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 overflow-hidden ${selectedSubcategory === sub.name ? 'bg-[#7A3E4A]/10 ring-2 ring-[#7A3E4A]' : 'bg-[#FDF8F6] hover:bg-[#FDF3F2] hover:shadow-inner'}`}>
+                                        {sub.image ? (
+                                            <MediaDisplay src={sub.image} alt={sub.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                                        ) : sub.svg ? (
+                                            sub.svg
+                                        ) : (
+                                            <span className="text-xs font-black text-[#7A3E4A]">{sub.name.substring(0, 2).toUpperCase()}</span>
+                                        )}
                                     </div>
                                     <span className={`text-[10px] uppercase font-bold tracking-wider transition-colors duration-300 ${selectedSubcategory === sub.name ? 'text-[#7A3E4A] font-extrabold' : 'text-gray-500 group-hover:text-gray-900'}`}>
                                         {sub.name}

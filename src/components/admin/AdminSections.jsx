@@ -902,6 +902,69 @@ export function CategoriesSection({
         setCatDescription('')
     }
 
+    // Subcategory style filters state
+    const slugifyCat = (name) => (name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s-]/g, '').trim().replace(/[\s-]+/g, '-')
+
+    const [categoryStylesMap, setCategoryStylesMap] = useState(() => {
+        try {
+            const stored = localStorage.getItem('meraki_category_styles')
+            if (stored) return JSON.parse(stored)
+        } catch {}
+        return {
+            'linha-sexy': [
+                { id: 'bodys', name: 'Bodys', image: '/assets/categories/cat-sexy.jpg' },
+                { id: 'corsets', name: 'Corsets', image: '/assets/categories/cat-noite.jpg' },
+                { id: 'conjuntos-sexy', name: 'Conjuntos Sexy', image: '/assets/categories/cat-conjuntos.jpg' },
+                { id: 'acessorios', name: 'Acessórios', image: '/assets/categories/cat-plus.jpg' }
+            ],
+            'conjuntos': [
+                { id: 'cobertura-total', name: 'Cobertura Total', image: '/assets/categories/cat-conjuntos.jpg' },
+                { id: 'meia-taca', name: 'Meia Taça', image: '/assets/categories/cat-noite.jpg' },
+                { id: 'triangulo', name: 'Triângulo', image: '/assets/categories/cat-sexy.jpg' },
+                { id: 'sem-alca', name: 'Sem Alça', image: '/assets/categories/cat-plus.jpg' },
+                { id: 'top', name: 'Top', image: '/assets/categories/cat-conjuntos.jpg' },
+                { id: 'balconet', name: 'Balconet', image: '/assets/categories/cat-noite.jpg' }
+            ],
+            'camisolas-babydolls': [
+                { id: 'robes', name: 'Robes', image: '/assets/categories/cat-noite.jpg' },
+                { id: 'pijamas', name: 'Pijamas', image: '/assets/categories/cat-conjuntos.jpg' },
+                { id: 'camisolas', name: 'Camisolas', image: '/assets/categories/cat-sexy.jpg' },
+                { id: 'baby-dolls', name: 'Baby Dolls', image: '/assets/categories/cat-plus.jpg' }
+            ],
+            'plus-size': [
+                { id: 'sustentacao', name: 'Sustentação', image: '/assets/categories/cat-plus.jpg' },
+                { id: 'modeladores', name: 'Modeladores', image: '/assets/categories/cat-conjuntos.jpg' },
+                { id: 'camisolas-plus', name: 'Camisolas Plus', image: '/assets/categories/cat-noite.jpg' },
+                { id: 'rendas', name: 'Rendas', image: '/assets/categories/cat-sexy.jpg' }
+            ]
+        }
+    })
+
+    const [activeCatForStyles, setActiveCatForStyles] = useState(null)
+    const [editingStyleIndex, setEditingStyleIndex] = useState(null)
+    const [styleName, setStyleName] = useState('')
+    const [styleImage, setStyleImage] = useState('')
+
+    const saveCategoryStylesMap = (updatedMap) => {
+        setCategoryStylesMap(updatedMap)
+        localStorage.setItem('meraki_category_styles', JSON.stringify(updatedMap))
+        try {
+            const storedConfig = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+            const newConfig = { ...storedConfig, id: 'default', category_styles: updatedMap }
+            localStorage.setItem('meraki_store_config', JSON.stringify(newConfig))
+        } catch (err) {
+            console.error(err)
+        }
+        window.dispatchEvent(new Event('categoryStylesUpdated'))
+        window.dispatchEvent(new Event('storeConfigUpdated'))
+    }
+
+    const currentCategoryStyles = useMemo(() => {
+        if (!activeCatForStyles) return []
+        const slugKey = slugifyCat(activeCatForStyles)
+        return categoryStylesMap[slugKey] || categoryStylesMap[activeCatForStyles] || []
+    }, [activeCatForStyles, categoryStylesMap])
+
     return (
         <div className="space-y-5">
             <div>
@@ -1085,6 +1148,8 @@ export function CategoriesSection({
                     const cDesc = typeof cat === 'object' ? cat.description : 'Coleção Meraki'
                     const cImage = typeof cat === 'object' ? cat.image : '/placeholder.jpg'
                     const cGroup = typeof cat === 'object' ? cat.group : 'Lingerie'
+                    const slugKey = slugifyCat(cName)
+                    const stylesCount = (categoryStylesMap[slugKey] || categoryStylesMap[cName] || []).length
 
                     return (
                         <div key={idx} className="bg-white rounded-2xl border border-[#EEEEEE] overflow-hidden hover:border-[#7A3E4A]/20 hover:shadow-lg transition-all group flex flex-col justify-between">
@@ -1098,36 +1163,233 @@ export function CategoriesSection({
                                     <p className="text-[10px] text-gray-400 leading-relaxed line-clamp-2">{cDesc}</p>
                                 </div>
                             </div>
-                            <div className="px-4 py-2 border-t border-[#F8F8F8] flex justify-end gap-2">
-                                <button 
+                            <div className="px-4 py-2.5 border-t border-[#F8F8F8] flex items-center justify-between gap-2 bg-[#FAF9F5]">
+                                <button
+                                    type="button"
                                     onClick={() => {
-                                        setEditingIndex(idx)
-                                        setCatName(cName)
-                                        setCatGroup(cGroup)
-                                        setCatDescription(cDesc)
-                                        window.scrollTo({ top: 0, behavior: 'smooth' })
+                                        setActiveCatForStyles(cName)
+                                        setEditingStyleIndex(null)
+                                        setStyleName('')
+                                        setStyleImage('')
                                     }}
-                                    className="text-[9px] font-bold text-[#C6A76A] hover:text-[#b09054] uppercase tracking-widest cursor-pointer px-2 py-1 rounded-lg hover:bg-[#C6A76A]/10 transition-all"
+                                    className="text-[9px] font-bold text-[#7A3E4A] hover:bg-[#7A3E4A]/10 uppercase tracking-wider cursor-pointer px-2.5 py-1 rounded-lg transition-all flex items-center gap-1.5"
                                 >
-                                    Editar
+                                    <span>🎨</span> Estilos ({stylesCount})
                                 </button>
-                                <button 
-                                    onClick={() => {
-                                        const updated = categories.filter((_, i) => i !== idx)
-                                        setCategories(updated)
-                                        localStorage.setItem('meraki_categories', JSON.stringify(updated))
-                                        window.dispatchEvent(new Event('categoriesUpdated'))
-                                        if (editingIndex === idx) resetForm()
-                                    }}
-                                    className="text-[9px] font-bold text-red-400 hover:text-red-600 uppercase tracking-widest cursor-pointer px-2 py-1 rounded-lg hover:bg-red-50 transition-all"
-                                >
-                                    Excluir
-                                </button>
+                                <div className="flex gap-1">
+                                    <button 
+                                        onClick={() => {
+                                            setEditingIndex(idx)
+                                            setCatName(cName)
+                                            setCatGroup(cGroup)
+                                            setCatDescription(cDesc)
+                                            window.scrollTo({ top: 0, behavior: 'smooth' })
+                                        }}
+                                        className="text-[9px] font-bold text-[#C6A76A] hover:text-[#b09054] uppercase tracking-widest cursor-pointer px-2 py-1 rounded-lg hover:bg-[#C6A76A]/10 transition-all"
+                                    >
+                                        Editar
+                                    </button>
+                                    <button 
+                                        onClick={() => {
+                                            const updated = categories.filter((_, i) => i !== idx)
+                                            setCategories(updated)
+                                            localStorage.setItem('meraki_categories', JSON.stringify(updated))
+                                            window.dispatchEvent(new Event('categoriesUpdated'))
+                                            if (editingIndex === idx) resetForm()
+                                        }}
+                                        className="text-[9px] font-bold text-red-400 hover:text-red-600 uppercase tracking-widest cursor-pointer px-2 py-1 rounded-lg hover:bg-red-50 transition-all"
+                                    >
+                                        Excluir
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     )
                 })}
             </div>
+
+            {/* Modal de Gerenciamento dos Estilos de Filtragem */}
+            {activeCatForStyles && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white w-full max-w-2xl rounded-3xl p-6 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto relative animate-[fadeIn_200ms_ease-out]">
+                        <div className="flex items-center justify-between border-b border-[#F5F5F5] pb-4">
+                            <div>
+                                <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider flex items-center gap-2">
+                                    <span>🎨</span> Estilos de Filtragem ("Filtre por Estilo")
+                                </h3>
+                                <p className="text-xs text-[#7A3E4A] font-bold mt-0.5">
+                                    Categoria: {activeCatForStyles}
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => {
+                                    setActiveCatForStyles(null)
+                                    setEditingStyleIndex(null)
+                                    setStyleName('')
+                                    setStyleImage('')
+                                }}
+                                className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-all font-bold text-xs cursor-pointer"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        {/* Lista de Estilos Atuais */}
+                        <div className="space-y-3">
+                            <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider">Estilos Cadastrados para esta Categoria ({currentCategoryStyles.length})</h4>
+                            {currentCategoryStyles.length === 0 ? (
+                                <div className="p-4 bg-gray-50 rounded-2xl text-center text-xs text-gray-400 font-medium">
+                                    Nenhum estilo de filtragem cadastrado para esta categoria. Adicione um novo estilo no formulário abaixo!
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {currentCategoryStyles.map((st, sIdx) => (
+                                        <div key={sIdx} className="flex items-center justify-between p-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-2xl gap-3">
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                <div className="w-10 h-10 rounded-full border border-[#EEEEEE] overflow-hidden bg-white shrink-0 flex items-center justify-center">
+                                                    <MediaDisplay src={st.image || '/placeholder.jpg'} alt="" className="w-full h-full object-cover" />
+                                                </div>
+                                                <span className="text-xs font-bold text-gray-800 truncate">{st.name}</span>
+                                            </div>
+                                            <div className="flex items-center gap-1 shrink-0">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setEditingStyleIndex(sIdx)
+                                                        setStyleName(st.name)
+                                                        setStyleImage(st.image || '')
+                                                    }}
+                                                    className="text-[9px] font-bold text-[#C6A76A] hover:text-[#b09054] uppercase tracking-widest px-2 py-1 rounded-lg hover:bg-[#C6A76A]/10 cursor-pointer"
+                                                >
+                                                    Editar
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const updatedList = currentCategoryStyles.filter((_, i) => i !== sIdx)
+                                                        const catSlugKey = slugifyCat(activeCatForStyles)
+                                                        const newMap = { ...categoryStylesMap, [catSlugKey]: updatedList, [activeCatForStyles]: updatedList }
+                                                        saveCategoryStylesMap(newMap)
+                                                        if (editingStyleIndex === sIdx) {
+                                                            setEditingStyleIndex(null)
+                                                            setStyleName('')
+                                                            setStyleImage('')
+                                                        }
+                                                    }}
+                                                    className="text-[9px] font-bold text-red-400 hover:text-red-600 uppercase tracking-widest px-2 py-1 rounded-lg hover:bg-red-50 cursor-pointer"
+                                                >
+                                                    Remover
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Formulário para Adicionar/Editar Estilo */}
+                        <form
+                            onSubmit={async (e) => {
+                                e.preventDefault()
+                                if (!styleName.trim()) return
+                                setSaving(true)
+                                
+                                let finalImg = styleImage || '/placeholder.jpg'
+                                const fileInput = e.target.styleImageFile
+                                if (fileInput?.files?.[0]) {
+                                    try {
+                                        const compressed = await compressImage(fileInput.files[0], 800)
+                                        const { urls } = await uploadMultipleImages([compressed])
+                                        if (urls?.[0]) finalImg = urls[0]
+                                    } catch (err) {
+                                        console.error(err)
+                                    }
+                                }
+
+                                const newStyleObj = {
+                                    id: slugifyCat(styleName),
+                                    name: styleName.trim(),
+                                    image: finalImg
+                                }
+
+                                const catSlugKey = slugifyCat(activeCatForStyles)
+                                let currentList = categoryStylesMap[catSlugKey] || categoryStylesMap[activeCatForStyles] || []
+                                
+                                let updatedList
+                                if (editingStyleIndex !== null) {
+                                    updatedList = currentList.map((st, i) => i === editingStyleIndex ? newStyleObj : st)
+                                } else {
+                                    updatedList = [...currentList, newStyleObj]
+                                }
+
+                                const newMap = { ...categoryStylesMap, [catSlugKey]: updatedList, [activeCatForStyles]: updatedList }
+                                saveCategoryStylesMap(newMap)
+
+                                setStyleName('')
+                                setStyleImage('')
+                                setEditingStyleIndex(null)
+                                if (fileInput) fileInput.value = ''
+                                setSaving(false)
+                            }}
+                            className="bg-gray-50 p-5 rounded-2xl border border-[#EEEEEE] space-y-4"
+                        >
+                            <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                {editingStyleIndex !== null ? 'Editar Estilo de Filtragem' : 'Adicionar Novo Estilo de Filtragem'}
+                            </h4>
+                            
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-[10px] font-bold text-gray-700 mb-1.5 uppercase tracking-wider">Nome do Estilo / Filtro</label>
+                                    <input
+                                        type="text"
+                                        value={styleName}
+                                        onChange={(e) => setStyleName(e.target.value)}
+                                        placeholder="Ex: Bodys, Corsets, Renda, Croppeds..."
+                                        className="w-full px-4 py-2.5 bg-white border border-[#EEEEEE] rounded-xl text-xs outline-none focus:border-[#7A3E4A]"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-[10px] font-bold text-gray-700 mb-1.5 uppercase tracking-wider">Imagem / Ícone Circular</label>
+                                    <input
+                                        type="file"
+                                        name="styleImageFile"
+                                        accept="image/*,video/*,.gif,.mp4,.webm,.mov"
+                                        className="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#7A3E4A]/10 file:text-[#7A3E4A] hover:file:bg-[#7A3E4A]/20 cursor-pointer"
+                                    />
+                                    {editingStyleIndex !== null && (
+                                        <p className="text-[9px] text-gray-400 mt-1">Deixe em branco para manter a imagem atual</p>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="flex justify-end gap-2 pt-2">
+                                {editingStyleIndex !== null && (
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setEditingStyleIndex(null)
+                                            setStyleName('')
+                                            setStyleImage('')
+                                        }}
+                                        className="px-4 py-2.5 bg-gray-200 text-gray-700 text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-gray-300 transition-all cursor-pointer"
+                                    >
+                                        Cancelar Edição
+                                    </button>
+                                )}
+                                <button
+                                    type="submit"
+                                    disabled={saving}
+                                    className="px-6 py-2.5 bg-[#7A3E4A] text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-[#603039] transition-all cursor-pointer disabled:opacity-50"
+                                >
+                                    {saving ? 'Salvando...' : (editingStyleIndex !== null ? 'Atualizar Estilo' : 'Adicionar Estilo')}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
 
             {/* Divisor */}
             <div className="h-px bg-[#EEEEEE] my-10" />
