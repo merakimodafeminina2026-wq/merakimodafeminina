@@ -2395,91 +2395,236 @@ export function InstitutionalSection({ saving, setSaving, updateStoreConfig }) {
                             <div className="space-y-2">
                                 <label className={labelCls}>Barra de Ferramentas de Formatação (Clique para inserir)</label>
                                 
-                                {/* Rich Text Formatting Toolbar */}
-                                <div className="flex flex-wrap items-center gap-1.5 p-2.5 bg-[#FAF9F5] border border-[#EEEEEE] rounded-xl">
-                                    <button
-                                        type="button"
-                                        onClick={() => insertTag('<strong>', '</strong>')}
-                                        className="px-3 py-1.5 bg-white hover:bg-gray-100 border border-gray-200 rounded-lg text-xs font-black text-gray-900 transition-all cursor-pointer shadow-2xs"
-                                        title="Negrito"
-                                    >
-                                        B
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => insertTag('<em>', '</em>')}
-                                        className="px-3 py-1.5 bg-white hover:bg-gray-100 border border-gray-200 rounded-lg text-xs font-serif italic text-gray-900 transition-all cursor-pointer shadow-2xs"
-                                        title="Itálico"
-                                    >
-                                        I
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => insertTag('<u>', '</u>')}
-                                        className="px-3 py-1.5 bg-white hover:bg-gray-100 border border-gray-200 rounded-lg text-xs underline font-bold text-gray-900 transition-all cursor-pointer shadow-2xs"
-                                        title="Sublinhado"
-                                    >
-                                        U
-                                    </button>
-                                    <div className="w-px h-6 bg-gray-200 mx-1" />
+                                {/* Complete Rich Text Formatting Toolbar */}
+                                <div className="p-3 bg-[#FAF9F5] border border-[#EEEEEE] rounded-2xl space-y-2 font-sans">
+                                    {/* Row 1: Basic Formatting, Colors, Highlights */}
+                                    <div className="flex flex-wrap items-center gap-1.5 pb-2 border-b border-gray-200/60">
+                                        {/* Text styles */}
+                                        <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-gray-200 shadow-2xs">
+                                            <button
+                                                type="button"
+                                                onClick={() => insertTag('<strong>', '</strong>')}
+                                                className="w-7 h-7 flex items-center justify-center hover:bg-gray-100 rounded-lg text-xs font-black text-gray-900 cursor-pointer"
+                                                title="Negrito (Strong)"
+                                            >
+                                                B
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => insertTag('<em>', '</em>')}
+                                                className="w-7 h-7 flex items-center justify-center hover:bg-gray-100 rounded-lg text-xs font-serif italic text-gray-900 cursor-pointer"
+                                                title="Itálico (Emphasize)"
+                                            >
+                                                I
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => insertTag('<u>', '</u>')}
+                                                className="w-7 h-7 flex items-center justify-center hover:bg-gray-100 rounded-lg text-xs underline font-bold text-gray-900 cursor-pointer"
+                                                title="Sublinhado"
+                                            >
+                                                U
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => insertTag('<s>', '</s>')}
+                                                className="w-7 h-7 flex items-center justify-center hover:bg-gray-100 rounded-lg text-xs line-through font-bold text-gray-900 cursor-pointer"
+                                                title="Tachado / Riscado"
+                                            >
+                                                S
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => insertTag('<sup>', '</sup>')}
+                                                className="w-7 h-7 flex items-center justify-center hover:bg-gray-100 rounded-lg text-[10px] font-bold text-gray-900 cursor-pointer"
+                                                title="Sobrescrito (x²)"
+                                            >
+                                                x²
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => insertTag('<sub>', '</sub>')}
+                                                className="w-7 h-7 flex items-center justify-center hover:bg-gray-100 rounded-lg text-[10px] font-bold text-gray-900 cursor-pointer"
+                                                title="Subscrito (x₂)"
+                                            >
+                                                x₂
+                                            </button>
+                                        </div>
 
-                                    <button
-                                        type="button"
-                                        onClick={() => insertTag('<h3 className="text-sm font-bold text-[#7A3E4A] uppercase tracking-wider mt-4 mb-2">', '</h3>')}
-                                        className="px-3 py-1.5 bg-white hover:bg-gray-100 border border-gray-200 rounded-lg text-xs font-bold text-[#7A3E4A] transition-all cursor-pointer shadow-2xs"
-                                    >
-                                        Subtítulo
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => insertTag('<span className="text-[#7A3E4A] font-bold">', '</span>')}
-                                        className="px-3 py-1.5 bg-white hover:bg-gray-100 border border-gray-200 rounded-lg text-xs font-bold text-[#7A3E4A] transition-all cursor-pointer shadow-2xs"
-                                    >
-                                        Destaque Vinho
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => insertTag('<span className="text-[#C6A76A] font-bold">', '</span>')}
-                                        className="px-3 py-1.5 bg-white hover:bg-gray-100 border border-gray-200 rounded-lg text-xs font-bold text-[#C6A76A] transition-all cursor-pointer shadow-2xs"
-                                    >
-                                        Destaque Dourado
-                                    </button>
+                                        <div className="w-px h-6 bg-gray-200" />
 
-                                    <div className="w-px h-6 bg-gray-200 mx-1" />
+                                        {/* Custom Text Color Picker */}
+                                        <div className="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-xl border border-gray-200 shadow-2xs">
+                                            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Cor Texto:</span>
+                                            <input
+                                                type="color"
+                                                defaultValue="#7A3E4A"
+                                                onChange={(e) => insertTag(`<span style="color: ${e.target.value}; font-weight: bold;">`, '</span>')}
+                                                className="w-6 h-6 rounded-md cursor-pointer border-none bg-transparent"
+                                                title="Escolher Cor do Texto Personalizada"
+                                            />
+                                            {/* Preset Colors */}
+                                            <button type="button" onClick={() => insertTag('<span style="color: #7A3E4A; font-weight: bold;">', '</span>')} className="w-4 h-4 rounded-full bg-[#7A3E4A] hover:scale-110 transition-all cursor-pointer" title="Vinho Meraki" />
+                                            <button type="button" onClick={() => insertTag('<span style="color: #C6A76A; font-weight: bold;">', '</span>')} className="w-4 h-4 rounded-full bg-[#C6A76A] hover:scale-110 transition-all cursor-pointer" title="Dourado Luxo" />
+                                            <button type="button" onClick={() => insertTag('<span style="color: #D4A373; font-weight: bold;">', '</span>')} className="w-4 h-4 rounded-full bg-[#D4A373] hover:scale-110 transition-all cursor-pointer" title="Rosa Nude" />
+                                            <button type="button" onClick={() => insertTag('<span style="color: #111827; font-weight: bold;">', '</span>')} className="w-4 h-4 rounded-full bg-[#111827] hover:scale-110 transition-all cursor-pointer" title="Preto Puro" />
+                                            <button type="button" onClick={() => insertTag('<span style="color: #059669; font-weight: bold;">', '</span>')} className="w-4 h-4 rounded-full bg-[#059669] hover:scale-110 transition-all cursor-pointer" title="Verde Esmeralda" />
+                                            <button type="button" onClick={() => insertTag('<span style="color: #2563EB; font-weight: bold;">', '</span>')} className="w-4 h-4 rounded-full bg-[#2563EB] hover:scale-110 transition-all cursor-pointer" title="Azul Real" />
+                                            <button type="button" onClick={() => insertTag('<span style="color: #DC2626; font-weight: bold;">', '</span>')} className="w-4 h-4 rounded-full bg-[#DC2626] hover:scale-110 transition-all cursor-pointer" title="Vermelho Destaque" />
+                                        </div>
 
-                                    <button
-                                        type="button"
-                                        onClick={() => insertTag('<div className="bg-[#FAF9F5] p-5 rounded-2xl border border-[#EEEEEE] my-4 shadow-2xs">\n  <h4 className="font-bold text-[#7A3E4A] text-xs uppercase tracking-wider mb-2">', '</h4>\n  <p className="text-xs text-gray-600 leading-relaxed">Descrição do Cartão...</p>\n</div>')}
-                                        className="px-3 py-1.5 bg-white hover:bg-gray-100 border border-gray-200 rounded-lg text-xs font-bold text-gray-800 transition-all cursor-pointer shadow-2xs flex items-center gap-1"
-                                    >
-                                        📦 Inserir Cartão (Card)
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => insertTag('<blockquote className="border-l-4 border-[#7A3E4A] pl-4 italic text-sm text-gray-500 my-4 bg-gray-50 py-3 rounded-r-md">', '</blockquote>')}
-                                        className="px-3 py-1.5 bg-white hover:bg-gray-100 border border-gray-200 rounded-lg text-xs font-bold text-gray-800 transition-all cursor-pointer shadow-2xs flex items-center gap-1"
-                                    >
-                                        💬 Caixa de Citação
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => insertTag('<ul className="list-disc pl-5 text-xs text-gray-600 space-y-1.5 my-3">\n  <li>', '</li>\n</ul>')}
-                                        className="px-3 py-1.5 bg-white hover:bg-gray-100 border border-gray-200 rounded-lg text-xs font-bold text-gray-800 transition-all cursor-pointer shadow-2xs flex items-center gap-1"
-                                    >
-                                        • Tópicos
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => insertTag('<span className="bg-[#7A3E4A] text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full inline-block">', '</span>')}
-                                        className="px-3 py-1.5 bg-[#7A3E4A] text-white rounded-lg text-xs font-bold transition-all cursor-pointer shadow-2xs"
-                                    >
-                                        🏷️ Etiqueta
-                                    </button>
+                                        {/* Highlight Background Color Picker */}
+                                        <div className="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-xl border border-gray-200 shadow-2xs">
+                                            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Marca-Texto:</span>
+                                            <input
+                                                type="color"
+                                                defaultValue="#FEF08A"
+                                                onChange={(e) => insertTag(`<span style="background-color: ${e.target.value}; padding: 2px 6px; border-radius: 4px; font-weight: 500;">`, '</span>')}
+                                                className="w-6 h-6 rounded-md cursor-pointer border-none bg-transparent"
+                                                title="Escolher Cor de Marca-Texto"
+                                            />
+                                            <button type="button" onClick={() => insertTag('<span style="background-color: #FEF08A; padding: 2px 6px; border-radius: 4px; color: #854D0E;">', '</span>')} className="w-4 h-4 rounded-full bg-[#FEF08A] hover:scale-110 transition-all cursor-pointer" title="Amarelo Marca-Texto" />
+                                            <button type="button" onClick={() => insertTag('<span style="background-color: #FCE7F3; padding: 2px 6px; border-radius: 4px; color: #831843;">', '</span>')} className="w-4 h-4 rounded-full bg-[#FCE7F3] hover:scale-110 transition-all cursor-pointer" title="Rosa Marca-Texto" />
+                                            <button type="button" onClick={() => insertTag('<span style="background-color: #FEF3C7; padding: 2px 6px; border-radius: 4px; color: #92400E;">', '</span>')} className="w-4 h-4 rounded-full bg-[#FEF3C7] hover:scale-110 transition-all cursor-pointer" title="Dourado Marca-Texto" />
+                                            <button type="button" onClick={() => insertTag('<span style="background-color: #D1FAE5; padding: 2px 6px; border-radius: 4px; color: #065F46;">', '</span>')} className="w-4 h-4 rounded-full bg-[#D1FAE5] hover:scale-110 transition-all cursor-pointer" title="Verde Marca-Texto" />
+                                        </div>
+                                    </div>
+
+                                    {/* Row 2: Typography, Size, Alignments */}
+                                    <div className="flex flex-wrap items-center gap-2 pb-2 border-b border-gray-200/60">
+                                        {/* Font Size Select */}
+                                        <div className="flex items-center gap-1 bg-white px-2 py-1 rounded-xl border border-gray-200 shadow-2xs">
+                                            <span className="text-[10px] font-bold text-gray-400 uppercase">Tamanho:</span>
+                                            <select
+                                                onChange={(e) => {
+                                                    if (e.target.value) insertTag(`<span style="font-size: ${e.target.value}; font-weight: 500;">`, '</span>')
+                                                }}
+                                                className="text-xs font-bold text-gray-800 bg-transparent outline-none cursor-pointer"
+                                            >
+                                                <option value="">Selecione...</option>
+                                                <option value="12px">Pequeno (12px)</option>
+                                                <option value="14px">Normal (14px)</option>
+                                                <option value="16px">Médio (16px)</option>
+                                                <option value="18px">Grande (18px)</option>
+                                                <option value="22px">Subtítulo (22px)</option>
+                                                <option value="28px">Título (28px)</option>
+                                                <option value="36px">Mega Título (36px)</option>
+                                            </select>
+                                        </div>
+
+                                        {/* Font Family Select */}
+                                        <div className="flex items-center gap-1 bg-white px-2 py-1 rounded-xl border border-gray-200 shadow-2xs">
+                                            <span className="text-[10px] font-bold text-gray-400 uppercase">Fonte:</span>
+                                            <select
+                                                onChange={(e) => {
+                                                    if (e.target.value) insertTag(`<span style="font-family: ${e.target.value};">`, '</span>')
+                                                }}
+                                                className="text-xs font-bold text-gray-800 bg-transparent outline-none cursor-pointer"
+                                            >
+                                                <option value="">Selecione...</option>
+                                                <option value="sans-serif">Sans-Serif Moderno</option>
+                                                <option value="serif">Serif Elegante</option>
+                                                <option value="monospace">Código / Monospace</option>
+                                                <option value="cursive">Manuscrita / Script</option>
+                                            </select>
+                                        </div>
+
+                                        <div className="w-px h-6 bg-gray-200" />
+
+                                        {/* Text Alignment */}
+                                        <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-gray-200 shadow-2xs">
+                                            <button type="button" onClick={() => insertTag('<div style="text-align: left; margin-bottom: 8px;">', '</div>')} className="px-2 py-1 hover:bg-gray-100 rounded text-xs font-bold text-gray-700" title="Alinhar à Esquerda">⬅️ Esquerda</button>
+                                            <button type="button" onClick={() => insertTag('<div style="text-align: center; margin-bottom: 8px;">', '</div>')} className="px-2 py-1 hover:bg-gray-100 rounded text-xs font-bold text-gray-700" title="Centralizar">↔️ Centro</button>
+                                            <button type="button" onClick={() => insertTag('<div style="text-align: right; margin-bottom: 8px;">', '</div>')} className="px-2 py-1 hover:bg-gray-100 rounded text-xs font-bold text-gray-700" title="Alinhar à Direita">➡️ Direita</button>
+                                            <button type="button" onClick={() => insertTag('<div style="text-align: justify; margin-bottom: 8px;">', '</div>')} className="px-2 py-1 hover:bg-gray-100 rounded text-xs font-bold text-gray-700" title="Justificado">↕️ Justificado</button>
+                                        </div>
+                                    </div>
+
+                                    {/* Row 3: Cards, Alerts, Media & Components */}
+                                    <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                                        <button
+                                            type="button"
+                                            onClick={() => insertTag('<div className="bg-[#FAF9F5] p-5 rounded-2xl border border-[#EEEEEE] my-4 shadow-2xs">\n  <h4 className="font-bold text-[#7A3E4A] text-xs uppercase tracking-wider mb-2">Título do Cartão</h4>\n  <p className="text-xs text-gray-600 leading-relaxed">', '</p>\n</div>')}
+                                            className="px-3 py-1.5 bg-white hover:bg-gray-100 border border-gray-200 rounded-xl text-xs font-bold text-gray-800 cursor-pointer shadow-2xs flex items-center gap-1"
+                                        >
+                                            📦 Cartão Luxo
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => insertTag('<div className="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-r-xl my-4 text-xs font-medium text-emerald-900">\n  <strong>Destaque de Sucesso:</strong> ', '\n</div>')}
+                                            className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl text-xs font-bold text-emerald-800 cursor-pointer shadow-2xs flex items-center gap-1"
+                                        >
+                                            ✅ Alerta Verde
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => insertTag('<div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-xl my-4 text-xs font-medium text-amber-900">\n  <strong>Aviso Importante:</strong> ', '\n</div>')}
+                                            className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl text-xs font-bold text-amber-800 cursor-pointer shadow-2xs flex items-center gap-1"
+                                        >
+                                            💡 Alerta Amarelo
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => insertTag('<blockquote className="border-l-4 border-[#7A3E4A] pl-4 italic text-sm text-gray-500 my-4 bg-gray-50 py-3 rounded-r-md">', '</blockquote>')}
+                                            className="px-3 py-1.5 bg-white hover:bg-gray-100 border border-gray-200 rounded-xl text-xs font-bold text-gray-800 cursor-pointer shadow-2xs flex items-center gap-1"
+                                        >
+                                            💬 Citação
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => insertTag('<a href="https://exemplo.com.br" target="_blank" rel="noreferrer" className="text-[#7A3E4A] font-bold underline hover:opacity-80">', '</a>')}
+                                            className="px-3 py-1.5 bg-white hover:bg-gray-100 border border-gray-200 rounded-xl text-xs font-bold text-[#7A3E4A] cursor-pointer shadow-2xs flex items-center gap-1"
+                                        >
+                                            🔗 Link
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => insertTag('<img src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800" alt="Imagem Meraki" className="w-full max-w-md rounded-2xl border border-gray-200 my-4 shadow-sm" />')}
+                                            className="px-3 py-1.5 bg-white hover:bg-gray-100 border border-gray-200 rounded-xl text-xs font-bold text-gray-800 cursor-pointer shadow-2xs flex items-center gap-1"
+                                        >
+                                            🖼️ Imagem
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => insertTag('<table className="w-full border-collapse border border-gray-200 text-xs my-4 font-sans">\n  <thead>\n    <tr className="bg-gray-100 text-gray-800 font-bold">\n      <th className="border border-gray-200 p-2">Item</th>\n      <th className="border border-gray-200 p-2">Detalhe</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td className="border border-gray-200 p-2">Exemplo 1</td>\n      <td className="border border-gray-200 p-2">Informação 1</td>\n    </tr>\n  </tbody>\n</table>')}
+                                            className="px-3 py-1.5 bg-white hover:bg-gray-100 border border-gray-200 rounded-xl text-xs font-bold text-gray-800 cursor-pointer shadow-2xs flex items-center gap-1"
+                                        >
+                                            📊 Tabela
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => insertTag('<hr className="my-6 border-t border-gray-200" />')}
+                                            className="px-3 py-1.5 bg-white hover:bg-gray-100 border border-gray-200 rounded-xl text-xs font-bold text-gray-800 cursor-pointer shadow-2xs"
+                                        >
+                                            ➖ Linha (HR)
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => insertTag('<ul className="list-disc pl-5 text-xs text-gray-600 space-y-1.5 my-3">\n  <li>', '</li>\n</ul>')}
+                                            className="px-3 py-1.5 bg-white hover:bg-gray-100 border border-gray-200 rounded-xl text-xs font-bold text-gray-800 cursor-pointer shadow-2xs"
+                                        >
+                                            • Bullets
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => insertTag('<ol className="list-decimal pl-5 text-xs text-gray-600 space-y-1.5 my-3">\n  <li>', '</li>\n</ol>')}
+                                            className="px-3 py-1.5 bg-white hover:bg-gray-100 border border-gray-200 rounded-xl text-xs font-bold text-gray-800 cursor-pointer shadow-2xs"
+                                        >
+                                            1. Números
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => insertTag('<span className="bg-[#7A3E4A] text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full inline-block">', '</span>')}
+                                            className="px-3 py-1.5 bg-[#7A3E4A] text-white rounded-xl text-xs font-bold cursor-pointer shadow-2xs"
+                                        >
+                                            🏷️ Badge
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <textarea
                                     ref={textareaRef}
-                                    rows="14"
+                                    rows="16"
                                     value={pageContent}
                                     onChange={(e) => setPageContent(e.target.value)}
                                     className={`${inputCls} resize-y leading-relaxed font-mono text-xs`}
