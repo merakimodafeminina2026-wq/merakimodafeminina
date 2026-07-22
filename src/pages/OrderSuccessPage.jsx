@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import Header from '../components/Header.jsx'
 import Footer from '../components/Footer.jsx'
@@ -6,6 +6,48 @@ import WhatsAppButton from '../components/WhatsAppButton.jsx'
 import Notification from '../components/Notification.jsx'
 import OrderTracker from '../components/OrderTracker.jsx'
 import FireworksEffect from '../components/FireworksEffect.jsx'
+
+function generatePixPayload({ pixKey = 'merakimodafeminina@gmail.com', receiverName = 'MERAKI FEMME', receiverCity = 'BONFINOPOLIS', amount = 0, txid = '' }) {
+    const cleanKey = (pixKey || 'merakimodafeminina@gmail.com').trim()
+    const cleanName = (receiverName || 'MERAKI FEMME').normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9 ]/g, "").slice(0, 25).toUpperCase()
+    const cleanCity = (receiverCity || 'BONFINOPOLIS').normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9 ]/g, "").slice(0, 15).toUpperCase()
+    const formattedAmount = Number(amount || 0).toFixed(2)
+    const cleanTxid = (txid || 'MERAKI' + Date.now()).replace(/[^a-zA-Z0-9]/g, '').slice(0, 25)
+
+    function formatField(id, value) {
+        const len = value.length.toString().padStart(2, '0')
+        return `${id}${len}${value}`
+    }
+
+    const merchantAccountInfo = formatField('00', 'br.gov.bcb.pix') + formatField('01', cleanKey)
+    const additionalDataField = formatField('05', cleanTxid)
+
+    let payload = 
+        formatField('00', '01') +
+        formatField('26', merchantAccountInfo) +
+        formatField('52', '0000') +
+        formatField('53', '986') +
+        formatField('54', formattedAmount) +
+        formatField('58', 'BR') +
+        formatField('59', cleanName) +
+        formatField('60', cleanCity) +
+        formatField('62', additionalDataField) +
+        '6304'
+
+    let crc = 0xFFFF
+    for (let i = 0; i < payload.length; i++) {
+        crc ^= (payload.charCodeAt(i) << 8)
+        for (let j = 0; j < 8; j++) {
+            if ((crc & 0x8000) !== 0) {
+                crc = ((crc << 1) ^ 0x1021) & 0xFFFF
+            } else {
+                crc = (crc << 1) & 0xFFFF
+            }
+        }
+    }
+    const crcHex = (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0')
+    return payload + crcHex
+}
 
 export default function OrderSuccessPage() {
     const { orderId } = useParams()
@@ -59,12 +101,31 @@ export default function OrderSuccessPage() {
         }
     }, [orderId])
 
+    const pixPayload = useMemo(() => {
+        if (!order) return ''
+        const config = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+        const pixKey = config.infinitepay_handle || config.pix_key || 'merakimodafeminina@gmail.com'
+        return generatePixPayload({
+            pixKey: pixKey,
+            receiverName: 'MERAKI FEMME',
+            receiverCity: 'BONFINOPOLIS',
+            amount: order.total || 0,
+            txid: order.id
+        })
+    }, [order])
+
+    const qrCodeUrl = useMemo(() => {
+        if (!pixPayload) return ''
+        return `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(pixPayload)}`
+    }, [pixPayload])
+
     const showNotification = (message) => {
         setNotification({ message, visible: true })
     }
 
     const handleCopyPix = () => {
-        navigator.clipboard.writeText("00020126580014BR.GOV.BCB.PIX0136e4f387b9-1d4e-4f38-a78a-f38b0029e71f5204000053039865406200.005802BR5912MerakiStore6009Sao Paulo62070503***6304E8A9")
+        if (!pixPayload) return
+        navigator.clipboard.writeText(pixPayload)
         setCopied(true)
         showNotification('Chave Pix copiada com sucesso! 🚀')
         setTimeout(() => setCopied(false), 3000)
@@ -133,16 +194,19 @@ export default function OrderSuccessPage() {
                         </div>
                         
                         {/* QR Code Container */}
-                        <div className="relative w-48 h-48 bg-white border-2 border-[#C6A76A]/30 rounded-2xl p-4 mx-auto shadow-md flex items-center justify-center group transition-all hover:border-[#7A3E4A]/50">
-                            <svg className="w-full h-full text-[#1A1A1A]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
-                                <rect x="2" y="2" width="6" height="6" />
-                                <rect x="16" y="2" width="6" height="6" />
-                                <rect x="2" y="16" width="6" height="6" />
-                                <rect x="5" y="5" width="0.01" height="0.01" strokeWidth="2" />
-                                <rect x="19" y="5" width="0.01" height="0.01" strokeWidth="2" />
-                                <rect x="5" y="19" width="0.01" height="0.01" strokeWidth="2" />
-                                <path d="M10 2h4M10 6h2M10 10h4M2 10h4M16 10h6M10 14h4M14 16h4M10 20h2M14 20h4M20 14v4M10 17h2M18 19h2" />
-                            </svg>
+                        <div className="relative w-56 h-56 bg-white border-2 border-[#C6A76A]/30 rounded-2xl p-3 mx-auto shadow-md flex items-center justify-center group transition-all hover:border-[#7A3E4A]/50">
+                            {qrCodeUrl ? (
+                                <img src={qrCodeUrl} alt="QR Code PIX" className="w-full h-full object-contain rounded-xl" />
+                            ) : (
+                                <div className="w-8 h-8 border-2 border-[#7A3E4A] border-t-transparent rounded-full animate-spin" />
+                            )}
+                        </div>
+
+                        <div className="bg-[#7A3E4A]/10 border border-[#7A3E4A]/20 rounded-2xl px-5 py-3 inline-block mx-auto">
+                            <span className="text-xs text-gray-500 font-medium block">Valor Total a Pagar</span>
+                            <span className="text-xl font-black text-[#7A3E4A]">
+                                {(order.total || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                            </span>
                         </div>
 
                         <p className="text-xs sm:text-sm text-gray-600 font-medium max-w-md mx-auto leading-relaxed">
@@ -153,7 +217,7 @@ export default function OrderSuccessPage() {
                             <input
                                 type="text"
                                 readOnly
-                                value="00020126580014BR.GOV.BCB.PIX0136e4f387b..."
+                                value={pixPayload}
                                 className="flex-1 px-4 py-4 text-xs font-mono text-gray-600 outline-none bg-transparent select-all"
                             />
                             <button

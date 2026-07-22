@@ -4,6 +4,8 @@ import { useCart } from '../hooks/useCart.js'
 import { useAuth } from '../hooks/useAuth.js'
 import { getAssetUrl } from '../utils/assets.js'
 
+import { getUserProfile } from '../services/auth.js'
+
 export default function CartDrawer() {
     const [isOpen, setIsOpen] = useState(false)
     const { cart, removeFromCart, updateQuantity, cartCount, subtotal, comboDiscount, total } = useCart()
@@ -26,26 +28,50 @@ export default function CartDrawer() {
         return () => window.removeEventListener('toggle-cart', handleToggle)
     }, [isOpen])
 
-    // Load user's saved addresses when logged in
+    // Load user's saved addresses dynamically from Supabase Database & localStorage
     useEffect(() => {
-        if (!user || !user.email) {
-            setSavedAddresses([])
-            return
-        }
-        try {
+        const fetchAddresses = async () => {
+            if (!user || !user.email) {
+                setSavedAddresses([])
+                return
+            }
             const cleanEmail = user.email.trim().toLowerCase()
-            const specificAddrs = localStorage.getItem(`meraki_user_addresses_${cleanEmail}`)
-            if (specificAddrs) {
-                const parsed = JSON.parse(specificAddrs)
-                if (Array.isArray(parsed) && parsed.length > 0) {
-                    setSavedAddresses(parsed)
-                    return
+            let loadedAddrs = []
+
+            // 1. Fetch fresh profile from Supabase Database
+            try {
+                const { profile: freshProfile } = await getUserProfile(user.id)
+                if (freshProfile && Array.isArray(freshProfile.addresses) && freshProfile.addresses.length > 0) {
+                    loadedAddrs = freshProfile.addresses
+                }
+            } catch (e) {
+                console.error(e)
+            }
+
+            // 2. Fallback: Check local storage
+            if (loadedAddrs.length === 0) {
+                try {
+                    const specificAddrs = localStorage.getItem(`meraki_user_addresses_${cleanEmail}`)
+                    if (specificAddrs) {
+                        const parsed = JSON.parse(specificAddrs)
+                        if (Array.isArray(parsed)) loadedAddrs = parsed
+                    }
+                } catch (e) {
+                    console.error(e)
                 }
             }
-        } catch (e) {
-            console.error(e)
+
+            setSavedAddresses(loadedAddrs)
         }
-    }, [user])
+
+        fetchAddresses()
+        window.addEventListener('storage', fetchAddresses)
+        window.addEventListener('toggle-cart', fetchAddresses)
+        return () => {
+            window.removeEventListener('storage', fetchAddresses)
+            window.removeEventListener('toggle-cart', fetchAddresses)
+        }
+    }, [user, isOpen])
 
     const formatCurrency = (val) => {
         return (val || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
