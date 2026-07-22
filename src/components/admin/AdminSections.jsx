@@ -1758,7 +1758,14 @@ export function SettingsSection({ saving, setSaving, updateStoreConfig }) {
     const [metaPixelId, setMetaPixelId] = useState(config.meta_pixel_id || '')
     const [gaTrackingId, setGaTrackingId] = useState(config.ga_tracking_id || '')
     const [infinitepayHandle, setInfinitepayHandle] = useState(config.infinitepay_handle || 'nicolly_gomes')
-    const [pixKey, setPixKey] = useState(config.pix_key || config.pixkey || 'merakifemme.lingerie@gmail.com')
+    const [pixKey, setPixKey] = useState(() => {
+        try {
+            const stored = JSON.parse(localStorage.getItem('meraki_store_config') || '{}')
+            return stored.pix_key || stored.pixKey || '57328371000114'
+        } catch {
+            return '57328371000114'
+        }
+    })
 
     // Sync with Supabase on mount
     useEffect(() => {
@@ -1775,7 +1782,8 @@ export function SettingsSection({ saving, setSaving, updateStoreConfig }) {
                     if (data.meta_pixel_id) setMetaPixelId(data.meta_pixel_id)
                     if (data.ga_tracking_id) setGaTrackingId(data.ga_tracking_id)
                     if (data.infinitepay_handle) setInfinitepayHandle(data.infinitepay_handle)
-                    if (data.pix_key || data.pixkey) setPixKey(data.pix_key || data.pixkey)
+                    const dbKey = data.pix_key || data.pixkey
+                    if (dbKey && String(dbKey).trim()) setPixKey(String(dbKey).trim())
                 }
             } catch (err) {
                 console.warn('Erro ao carregar configuracoes do Supabase:', err)

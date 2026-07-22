@@ -612,8 +612,11 @@ export async function updateStoreConfig(config) {
 
         if (!updateError && updateData) {
             const mapped = mapDbToFrontend('store_config', updateData)
-            originalSetItem('meraki_store_config', JSON.stringify(mapped))
-            return { data: mapped, error: null }
+            const merged = { ...config, ...mapped }
+            if (config.pix_key) merged.pix_key = config.pix_key
+            if (config.pixKey) merged.pixKey = config.pixKey
+            originalSetItem('meraki_store_config', JSON.stringify(merged))
+            return { data: merged, error: null }
         }
 
         // 2. If update didn't match any row, try INSERT
@@ -625,16 +628,22 @@ export async function updateStoreConfig(config) {
 
         if (!insertError && insertData) {
             const mapped = mapDbToFrontend('store_config', insertData)
-            originalSetItem('meraki_store_config', JSON.stringify(mapped))
-            return { data: mapped, error: null }
+            const merged = { ...config, ...mapped }
+            if (config.pix_key) merged.pix_key = config.pix_key
+            if (config.pixKey) merged.pixKey = config.pixKey
+            originalSetItem('meraki_store_config', JSON.stringify(merged))
+            return { data: merged, error: null }
         }
     } catch (e) {
         console.warn('Erro ao atualizar store_config no Supabase:', e)
     }
 
     const mapped = mapDbToFrontend('store_config', config)
-    originalSetItem('meraki_store_config', JSON.stringify(mapped))
-    return { data: mapped, error: null }
+    const merged = { ...config, ...mapped }
+    if (config.pix_key) merged.pix_key = config.pix_key
+    if (config.pixKey) merged.pixKey = config.pixKey
+    originalSetItem('meraki_store_config', JSON.stringify(merged))
+    return { data: merged, error: null }
 }
 
 export async function clearProductBadges(badgeList) {
