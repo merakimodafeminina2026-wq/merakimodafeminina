@@ -1441,52 +1441,73 @@ export default function AdminPage() {
                                     {(() => {
                                         const storedStyles = JSON.parse(localStorage.getItem('meraki_category_styles') || '{}')
                                         const slugifyCatName = (n) => (n || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s-]/g, '').trim().replace(/[\s-]+/g, '-')
-                                        const catStyles = storedStyles[slugifyCatName(selectedModalCategory)] || storedStyles[selectedModalCategory] || []
+                                        const catKey = slugifyCatName(selectedModalCategory)
 
-                                        if (catStyles.length > 0) {
-                                            return (
+                                        const DEFAULT_STYLES_MAP = {
+                                            'linha-sexy': [{ name: 'Bodys' }, { name: 'Corsets' }, { name: 'Conjuntos Sexy' }, { name: 'Acessórios' }],
+                                            'conjuntos': [{ name: 'Cobertura Total' }, { name: 'Meia Taça' }, { name: 'Triângulo' }, { name: 'Sem Alça' }, { name: 'Top' }, { name: 'Balconet' }],
+                                            'conjuntos-sem-bojo': [{ name: 'Cobertura Total' }, { name: 'Meia Taça' }, { name: 'Triângulo' }, { name: 'Sem Alça' }, { name: 'Top' }],
+                                            'conjuntos-com-bojo': [{ name: 'Cobertura Total' }, { name: 'Meia Taça' }, { name: 'Balconet' }, { name: 'Sem Alça' }],
+                                            'camisolas-babydolls': [{ name: 'Robes' }, { name: 'Camisolas' }, { name: 'Baby Dolls' }],
+                                            'baby-doll': [{ name: 'Robes' }, { name: 'Camisolas' }, { name: 'Baby Dolls' }],
+                                            'camisolas': [{ name: 'Robes' }, { name: 'Camisolas' }, { name: 'Baby Dolls' }],
+                                            'plus-size': [{ name: 'Sutiãs' }, { name: 'Calcinhas' }, { name: 'Bodys' }, { name: 'Conjuntos' }],
+                                            'body': [{ name: 'Renda' }, { name: 'Tule' }, { name: 'Sem Bojo' }, { name: 'Com Bojo' }],
+                                            'fantasias': [{ name: 'Completa' }, { name: 'Com Acessórios' }, { name: 'Sensual' }],
+                                            'tangas': [{ name: 'Fio Dental' }, { name: 'Renda' }, { name: 'Comfy' }, { name: 'Regulável' }],
+                                            'calcinhas-comfy': [{ name: 'Algodão' }, { name: 'Renda' }, { name: 'Cintura Alta' }, { name: 'Fio' }]
+                                        }
+
+                                        let catStyles = storedStyles[catKey] || storedStyles[selectedModalCategory]
+                                        if (!catStyles || catStyles.length === 0) {
+                                            catStyles = DEFAULT_STYLES_MAP[catKey] || []
+                                        }
+
+                                        return (
+                                            <div className="space-y-2">
                                                 <div className="flex flex-wrap gap-1.5 bg-[#FAF9F5] p-3 rounded-xl border border-[#EEEEEE]">
                                                     <button
                                                         type="button"
                                                         onClick={() => setSelectedModalSubcategory('')}
                                                         className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all cursor-pointer ${
                                                             !selectedModalSubcategory
-                                                                ? 'bg-[#7A3E4A] text-white border-[#7A3E4A]'
+                                                                ? 'bg-[#7A3E4A] text-white border-[#7A3E4A] shadow-xs font-extrabold'
                                                                 : 'bg-white text-gray-500 border-[#EEEEEE] hover:bg-gray-150'
                                                         }`}
                                                     >
                                                         Sem Estilo Específico
                                                     </button>
-                                                    {catStyles.map(st => (
-                                                        <button
-                                                            key={st.name}
-                                                            type="button"
-                                                            onClick={() => setSelectedModalSubcategory(st.name)}
-                                                            className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 ${
-                                                                selectedModalSubcategory === st.name
-                                                                    ? 'bg-[#7A3E4A] text-white border-[#7A3E4A] shadow-xs font-extrabold'
-                                                                    : 'bg-white text-gray-500 border-[#EEEEEE] hover:bg-gray-150'
-                                                            }`}
-                                                        >
-                                                            <span>✨</span> {st.name}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            )
-                                        }
 
-                                        return (
-                                            <input
-                                                type="text"
-                                                value={selectedModalSubcategory}
-                                                onChange={(e) => setSelectedModalSubcategory(e.target.value)}
-                                                placeholder="Ex: Bodys, Corsets, Meia Taça..."
-                                                className={inputCls}
-                                            />
+                                                    {catStyles.map(st => {
+                                                        const stName = typeof st === 'string' ? st : st.name
+                                                        const isSelected = selectedModalSubcategory?.toLowerCase() === stName?.toLowerCase()
+                                                        return (
+                                                            <button
+                                                                key={stName}
+                                                                type="button"
+                                                                onClick={() => setSelectedModalSubcategory(stName)}
+                                                                className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 ${
+                                                                    isSelected
+                                                                        ? 'bg-[#7A3E4A] text-white border-[#7A3E4A] shadow-xs font-extrabold scale-105 ring-2 ring-[#7A3E4A]/30'
+                                                                        : 'bg-white text-gray-500 border-[#EEEEEE] hover:bg-gray-150'
+                                                                }`}
+                                                            >
+                                                                <span>✨</span> {stName}
+                                                            </button>
+                                                        )
+                                                    })}
+                                                </div>
+
+                                                {catStyles.length === 0 && (
+                                                    <p className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 p-2.5 rounded-xl font-medium">
+                                                        ℹ️ Esta categoria ainda não tem estilos cadastrados. Você pode cadastrar os estilos dessa categoria no painel em <strong>Categorias da Loja ➔ 🎨 Estilos</strong>.
+                                                    </p>
+                                                )}
+                                            </div>
                                         )
                                     })()}
                                     <p className="text-[9px] text-gray-400 font-semibold mt-1">
-                                        Ao selecionar o estilo, este produto será filtrado quando o cliente clicar no círculo correspondente na página da categoria.
+                                        Clique no estilo acima para selecionar. O produto será filtrado quando a cliente clicar no círculo correspondente no site.
                                     </p>
                                 </div>
 
