@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { trackAddToCart } from '../components/TrackingManager.jsx'
 
 const CART_KEY = 'meraki_cart'
 
